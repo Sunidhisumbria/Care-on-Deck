@@ -1,0 +1,66 @@
+@import 'tailwindcss';
+
+/**
+ * Design tokens, taken from the approved Figma.
+ *
+ * Everything references these rather than raw hex, so a colour change lands in
+ * one place. `--color-*` names become Tailwind utilities automatically:
+ * `--color-brand-600` gives `bg-brand-600`, `text-brand-600` and so on.
+ */
+@theme {
+  /* The magenta the brand runs on. 600 is the button and link colour. */
+  --color-brand-50: #fdf2f8;
+  --color-brand-100: #fce7f1;
+  --color-brand-200: #fbcfe4;
+  --color-brand-300: #f8a8cd;
+  --color-brand-400: #f172ae;
+  --color-brand-500: #d93f8b;
+  --color-brand-600: #a51e69;
+  --color-brand-700: #8a1858;
+  --color-brand-800: #6f1246;
+  --color-brand-900: #4d0c31;
+
+  /* Warm neutrals -- the page ground is faintly pink, not grey. */
+  --color-ink-900: #1c1119;
+  --color-ink-700: #4a3b44;
+  --color-ink-500: #7a6b74;
+  --color-ink-300: #b7a9b1;
+  --color-line: #ecdfe6;
+  --color-canvas: #fdf8fa;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-field: 0.75rem;
+  --radius-card: 1.25rem;
+}
+
+/* The marketing panel that runs down the left of the auth screens. */
+@utility brand-panel {
+  background-image: linear-gradient(150deg, #c02e84 0%, #a51e69 45%, #6f1246 100%);
+}
+
+html,
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink-900);
+}
+
+/* Keyboard focus must stay visible; this is the only styling of it. */
+:focus-visible {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: 2px;
+}
+
+/*
+ * ...except inside a form field, where the outline would be drawn *within*
+ * the field's own border -- a rectangle inside a rectangle. The shell shows
+ * focus instead, with the border and ring in `field-shell`, so the indicator
+ * is still there; it is just drawn in the right place.
+ */
+.field-shell :focus-visible {
+  outline: none;
+}
+
+/* Keep the shared wordmark proportions consistent across every screen. */
+.brand-logo { display: inline-block; width: 140px; flex-shrink: 0; vertical-align: middle; line-height: 0; }
+.brand-logo > svg { display: block; width: 100%; height: auto; overflow: visible; }

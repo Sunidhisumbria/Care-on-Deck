@@ -1,0 +1,1079 @@
+﻿/* Public landing-only sections; the home screen retains its existing layout. */
+.lp-public-auth {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+/* Not the solid button -- turning its white label magenta on hover would
+   leave it unreadable against the magenta fill. */
+.lp-public-auth > a:first-child:not(.lp-primary):hover {
+  color: var(--lp-brand);
+}
+.lp-public-auth > .lp-primary {
+  padding: 10px 27px;
+  font-size: 13px;
+}
+.landing-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 96px;
+  padding: 22px 0;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 14px 25px #442c3a0c;
+}
+.landing-shortcuts button {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 65px;
+  padding: 9px 28px;
+  text-align: left;
+  border-right: 1px solid #eee9ed;
+}
+.landing-shortcuts button:last-child {
+  border: 0;
+}
+.landing-shortcuts button > .lp-icon {
+  color: #c3579f;
+  width: 33px;
+  height: 33px;
+}
+.landing-shortcuts button strong {
+  font-size: 18px;
+  font-weight: 600;
+  display: block;
+  line-height: 1.25;
+}
+.landing-shortcuts button small {
+  font-size: 12px;
+  color: #9b959c;
+  display: block;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+.landing-shortcuts button:hover strong {
+  color: var(--lp-brand);
+}
+.lp-section.landing-categories {
+  margin-top: 92px;
+}
+.landing-categories h2 {
+  font-size: 33px;
+  letter-spacing: -1.1px;
+}
+.landing-category-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 29px;
+}
+.landing-category-grid button {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  border: 1px solid #eae2e7;
+  border-radius: 12px;
+  min-height: 137px;
+  padding: 15px 10px;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+.landing-category-grid button:hover {
+  background: white;
+  transform: translateY(-3px);
+}
+.landing-care-art {
+  width: 61px;
+  height: 61px;
+  flex-shrink: 0;
+}
+.landing-category-grid strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.lp-landing .lp-insurance-section {
+  margin-top: 97px;
+}
+.lp-landing .lp-providers-section {
+  margin-top: 96px;
+}
+.landing-dental > h2 {
+  text-align: center;
+}
+.landing-treatment-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 27px 24px;
+  margin-top: 45px;
+}
+.landing-treatment-grid > button {
+  min-height: 199px;
+  padding: 19px 18px;
+  border-radius: 15px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+}
+.landing-treatment-card {
+  background: #fff;
+  border: 1px solid #eae4e8;
+  justify-content: space-between;
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
+}
+.landing-treatment-card:hover {
+  border-color: #c3579f;
+  transform: translateY(-3px);
+}
+.landing-treatment-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.landing-treatment-top > .landing-care-art {
+  width: 41px;
+  height: 41px;
+  margin-left: -4px;
+}
+.landing-treatment-top strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.landing-treatment-top small {
+  display: block;
+  color: #929095;
+  font-size: 12px;
+  line-height: 1.4;
+  margin-top: 5px;
+}
+.landing-treatment-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 15px;
+}
+.landing-treatment-tags > span {
+  padding: 4px 7px;
+  font-size: 9px;
+  line-height: 1.1;
+  font-weight: 600;
+  background: #fbeaf3;
+  color: #b44b8a;
+  border-radius: 2px;
+}
+.landing-treatment-tags > small {
+  font-size: 10px;
+  color: #a39ca3;
+}
+.landing-treatment-summary,
+.landing-treatment-cta {
+  color: white;
+  background: linear-gradient(110deg, #a02b73, #df4290);
+  border: 0;
+}
+.landing-treatment-summary > strong {
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  line-height: 1.2;
+}
+.landing-treatment-summary > span {
+  font-size: 15px;
+  margin-top: 4px;
+}
+.landing-treatment-summary .landing-treatment-tags {
+  margin-top: auto;
+}
+.landing-treatment-summary .landing-treatment-tags > span {
+  color: #fff;
+  background: #ffffff25;
+  font-size: 9px;
+}
+.landing-treatment-summary .landing-treatment-tags > small {
+  color: #f8dcea;
+}
+.landing-treatment-grid > .landing-treatment-cta {
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  gap: 21px;
+}
+.landing-treatment-cta > strong {
+  font-size: 23px;
+  line-height: 1.15;
+  font-weight: 650;
+}
+.landing-treatment-cta > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 16px;
+  border-radius: 24px;
+  background: #fff;
+  color: #b2397b;
+  font-size: 12px;
+  font-weight: 600;
+  width: 100%;
+}
+.landing-treatment-cta .lp-icon {
+  width: 14px;
+  height: 14px;
+}
+.lp-landing .lp-content {
+  padding-bottom: 96px;
+}
+.landing-benefits {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: linear-gradient(115deg, #fae1eb, #fff6f5 46%, #f7c5d4);
+  padding: 56px 0 45px;
+}
+.landing-benefits::before,
+.landing-benefits::after {
+  content: "";
+  position: absolute;
+  border: 90px solid #e875a515;
+  width: 130%;
+  height: 170%;
+  border-radius: 50%;
+  z-index: -1;
+  left: -20%;
+  top: -90%;
+  transform: rotate(-23deg);
+}
+.landing-benefits::after {
+  border-color: #f2a8c329;
+  width: 140%;
+  height: 210%;
+  top: -60%;
+  left: -10%;
+  transform: rotate(24deg);
+}
+.landing-benefits-lines {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.55;
+  background:
+    repeating-linear-gradient(
+      67deg,
+      transparent 0 138px,
+      #ffffff70 139px 141px,
+      transparent 142px 230px
+    ),
+    repeating-linear-gradient(
+      119deg,
+      transparent 0 135px,
+      #ffffff55 136px 138px,
+      transparent 139px 235px
+    );
+}
+.landing-benefits-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 100px;
+  align-items: center;
+}
+.landing-benefits-art h2 {
+  font-size: 48px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -1.7px;
+  margin: 0 0 15px;
+}
+.landing-benefits-art h2 > span {
+  color: var(--lp-brand);
+}
+.landing-benefits-art > img {
+  width: 100%;
+  height: 360px;
+  object-fit: contain;
+  object-position: left center;
+}
+.landing-benefits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.landing-benefits-list article {
+  background: white;
+  border-radius: 15px;
+  padding: 23px 21px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 104px;
+  position: relative;
+}
+.landing-benefits-list article::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 21px;
+  bottom: 21px;
+  width: 3px;
+  background: #bf54a0;
+}
+.landing-benefit-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 55px;
+  height: 55px;
+  flex-shrink: 0;
+  color: #b64c91;
+  background: #f3e5ef;
+  border-radius: 50%;
+}
+.landing-benefit-icon .lp-icon {
+  width: 28px;
+  height: 28px;
+}
+.landing-benefits-list h3 {
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.2;
+}
+.landing-benefits-list p {
+  font-size: 13px;
+  color: #858086;
+  line-height: 1.4;
+  margin-top: 5px;
+}
+.landing-benefit-number {
+  margin-left: auto;
+  color: #be55a0;
+  font-size: 15px;
+  font-weight: 700;
+  padding-left: 4px;
+}
+.landing-steps > h2 {
+  text-align: center;
+  font-size: 31px;
+}
+.landing-steps ol {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 84px;
+  list-style: none;
+  margin: 52px 0 0;
+  padding: 0;
+}
+.landing-steps li > button {
+  position: relative;
+  width: 100%;
+  text-align: center;
+}
+.landing-step-number {
+  position: absolute;
+  top: -14px;
+  left: -25px;
+  width: 47px;
+  height: 47px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  background: #a72d77;
+  z-index: 1;
+  border: 1px solid #ffffff90;
+}
+.landing-step-mockup {
+  width: 100%;
+  height: 288px;
+  border: 1px solid #e3dce3;
+  border-radius: 21px;
+  background: #fbf3f8;
+  padding: 28px 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: left;
+  transition: border-color 0.2s;
+}
+.landing-steps li > button:hover .landing-step-mockup {
+  border-color: #be55a0;
+}
+.landing-step-2 {
+  background: #fcf7f9;
+}
+.landing-step-caption {
+  display: block;
+  font-size: 22px;
+  line-height: 1.3;
+  margin: 22px -12px 0;
+}
+.landing-mini-search {
+  width: 100%;
+}
+.landing-mini-searchbar {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  background: #fff;
+  color: #adb0c0;
+  font-size: 8px;
+  border-radius: 7px;
+  margin-bottom: 7px;
+  padding: 5px 7px;
+  height: 29px;
+}
+.landing-mini-searchbar > .lp-icon {
+  width: 12px;
+  height: 12px;
+  color: #c15099;
+}
+.landing-mini-searchbar > span:last-child {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: #fff;
+  background: #af297b;
+}
+.landing-mini-searchbar > span:last-child > .lp-icon {
+  width: 13px;
+  height: 13px;
+}
+.landing-mini-result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #f0e6ee;
+  background: #fff;
+  border-radius: 12px;
+  padding: 6px;
+  margin-top: 4px;
+}
+.landing-mini-result .lp-avatar {
+  width: 43px;
+  height: 47px;
+}
+.landing-mini-result > span:nth-child(2) {
+  flex: 1;
+}
+.landing-mini-result strong {
+  font-size: 9px;
+  display: block;
+}
+.landing-mini-result small {
+  display: block;
+  font-size: 8px;
+  color: #9da0ad;
+  line-height: 1.3;
+}
+.landing-mini-result small b {
+  color: #444351;
+}
+.landing-mini-star {
+  color: #e1ac32;
+}
+.landing-mini-result > .lp-icon {
+  width: 12px;
+  height: 12px;
+  color: #bb448e;
+}
+.landing-mini-profile {
+  width: 100%;
+  padding: 16px;
+  border-radius: 16px;
+  background: #fff;
+}
+.landing-mini-profile > div {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+.landing-mini-profile .lp-avatar {
+  width: 65px;
+  height: 67px;
+}
+.landing-mini-profile .lp-avatar-badge {
+  width: 19px;
+  height: 19px;
+  right: 9px;
+}
+.landing-mini-profile .lp-avatar-badge .lp-icon {
+  width: 11px;
+  height: 11px;
+}
+.landing-mini-profile strong {
+  font-size: 10px;
+  display: block;
+}
+.landing-mini-profile small {
+  display: block;
+  font-size: 8px;
+  color: #8b8796;
+  margin-top: 3px;
+}
+.landing-mini-profile p {
+  text-align: center;
+  color: #8b8796;
+  font-size: 8px;
+  margin-top: 5px;
+}
+.landing-mini-profile p .lp-icon {
+  width: 15px;
+  height: 15px;
+  color: #c565aa;
+  margin-right: 4px;
+}
+.landing-mini-profile-button {
+  display: block;
+  text-align: center;
+  padding: 8px;
+  color: white;
+  background: var(--lp-brand);
+  border-radius: 4px;
+  font-size: 9px;
+  margin-top: 7px;
+}
+.landing-mini-calendar {
+  width: 100%;
+  padding: 15px;
+  background: white;
+  border-radius: 12px;
+}
+.landing-mini-calendar > strong {
+  font-size: 12px;
+}
+.landing-mini-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-top: 10px;
+}
+.landing-mini-week > span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+.landing-mini-week small {
+  color: #9d99aa;
+  font-size: 8px;
+}
+.landing-mini-week b {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  font-size: 9px;
+  border-radius: 50%;
+}
+.landing-mini-times {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 15px;
+  font-size: 10px;
+  text-align: center;
+}
+.landing-mini-times > span {
+  padding: 9px 2px;
+  background: #f4f0fd;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.landing-mini-week .is-selected,
+.landing-mini-times .is-selected {
+  color: white;
+  background: #a92b78;
+}
+.landing-featured > h2 {
+  font-size: 31px;
+}
+.landing-featured-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 30px;
+}
+.landing-featured-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 362px;
+  border-radius: 24px;
+  color: #fff;
+  text-align: left;
+}
+.landing-featured-card > img {
+  object-fit: cover;
+  transition: transform 0.4s;
+}
+.landing-featured-card:hover > img {
+  transform: scale(1.035);
+}
+.landing-featured-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(#0002, #0002 25%, #120c08bd);
+  z-index: 1;
+}
+.landing-featured-badge {
+  position: absolute;
+  top: 30px;
+  left: 29px;
+  z-index: 2;
+  font-size: 12px;
+  font-weight: 600;
+  background: #a92670;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+.landing-featured-caption {
+  position: absolute;
+  z-index: 2;
+  bottom: 29px;
+  left: 29px;
+  right: 29px;
+  display: flex;
+  flex-direction: column;
+}
+.landing-featured-caption > strong {
+  font-size: 28px;
+  font-weight: 650;
+}
+.landing-featured-caption > span {
+  font-size: 15px;
+  line-height: 1.35;
+  margin-top: 6px;
+  max-width: 400px;
+  color: #eee;
+}
+.landing-featured-caption > small {
+  font-size: 14px;
+  margin-top: 9px;
+}
+.landing-featured-caption .lp-icon {
+  width: 13px;
+  height: 13px;
+}
+.lp-public-bottom {
+  padding-bottom: 96px;
+}
+@media (max-width: 1200px) {
+  .landing-shortcuts button {
+    padding-inline: 20px;
+    gap: 12px;
+  }
+  .landing-shortcuts button strong {
+    font-size: 16px;
+  }
+  .landing-shortcuts button small {
+    font-size: 11px;
+  }
+  .landing-treatment-grid {
+    gap: 22px;
+  }
+  .landing-treatment-grid > button {
+    padding: 18px 15px;
+  }
+  .landing-treatment-top strong {
+    font-size: 14px;
+  }
+  .landing-treatment-tags > span {
+    font-size: 8px;
+  }
+  .landing-treatment-cta > strong {
+    font-size: 21px;
+  }
+  .landing-benefits-grid {
+    gap: 65px;
+  }
+  .landing-benefits-art h2 {
+    font-size: 44px;
+  }
+  .landing-steps ol {
+    gap: 60px;
+  }
+  .landing-step-caption {
+    font-size: 19px;
+  }
+}
+@media (max-width: 1000px) {
+  .lp-public-auth {
+    gap: 18px;
+    font-size: 12px;
+  }
+  .lp-public-auth > .lp-primary {
+    font-size: 12px;
+    padding: 9px 19px;
+  }
+  .landing-shortcuts {
+    margin-top: 76px;
+  }
+  .landing-shortcuts button {
+    padding: 7px 15px;
+    gap: 9px;
+  }
+  .landing-shortcuts button strong {
+    font-size: 14px;
+  }
+  .landing-shortcuts button small {
+    font-size: 10px;
+  }
+  .landing-shortcuts button > .lp-icon {
+    width: 27px;
+    height: 27px;
+  }
+  .lp-section.landing-categories,
+  .lp-landing .lp-insurance-section,
+  .lp-landing .lp-providers-section {
+    margin-top: 76px;
+  }
+  .landing-categories h2 {
+    font-size: 26px;
+  }
+  .landing-category-grid {
+    gap: 12px;
+  }
+  .landing-category-grid strong {
+    font-size: 12px;
+  }
+  .landing-treatment-grid {
+    gap: 17px;
+  }
+  .landing-treatment-grid > button {
+    min-height: 192px;
+    padding: 14px 12px;
+  }
+  .landing-treatment-top {
+    gap: 3px;
+  }
+  .landing-treatment-top > .landing-care-art {
+    width: 30px;
+    height: 33px;
+  }
+  .landing-treatment-top strong {
+    font-size: 12px;
+  }
+  .landing-treatment-top small {
+    font-size: 10px;
+  }
+  .landing-treatment-cta > strong {
+    font-size: 19px;
+  }
+  .landing-treatment-cta > span {
+    padding: 10px 6px;
+    font-size: 10px;
+  }
+  .landing-benefits-grid {
+    gap: 38px;
+  }
+  .landing-benefits-art h2 {
+    font-size: 37px;
+  }
+  .landing-benefits-art > img {
+    height: 300px;
+  }
+  .landing-benefits-list article {
+    padding: 18px 15px;
+    gap: 12px;
+  }
+  .landing-benefit-icon {
+    width: 43px;
+    height: 43px;
+  }
+  .landing-benefits-list h3 {
+    font-size: 15px;
+  }
+  .landing-benefits-list p {
+    font-size: 11px;
+  }
+  .landing-steps ol {
+    gap: 38px;
+    padding-inline: 10px;
+  }
+  .landing-step-mockup {
+    height: 240px;
+    padding: 15px 10px;
+  }
+  .landing-step-number {
+    left: -18px;
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+  }
+  .landing-step-caption {
+    font-size: 17px;
+  }
+  .landing-mini-profile {
+    padding: 10px;
+  }
+  .landing-mini-profile .lp-avatar {
+    width: 46px;
+    height: 50px;
+  }
+  .landing-mini-profile strong {
+    font-size: 8px;
+  }
+  .landing-mini-calendar {
+    padding: 10px;
+  }
+  .landing-mini-week {
+    gap: 2px;
+  }
+  .landing-mini-week b {
+    width: 19px;
+    height: 19px;
+  }
+  .landing-featured-card {
+    min-height: 310px;
+  }
+  .landing-featured-caption > strong {
+    font-size: 24px;
+  }
+}
+@media (max-width: 760px) {
+  .landing-shortcuts {
+    margin-top: 45px;
+    grid-template-columns: 1fr;
+    padding: 7px 20px;
+    border-radius: 16px;
+  }
+  .landing-shortcuts button {
+    padding: 17px 4px;
+    border-right: 0;
+    border-bottom: 1px solid #eee9ed;
+    gap: 17px;
+    min-height: 80px;
+  }
+  .landing-shortcuts button strong {
+    font-size: 16px;
+  }
+  .landing-shortcuts button small {
+    font-size: 12px;
+  }
+  .lp-section.landing-categories,
+  .lp-landing .lp-insurance-section,
+  .lp-landing .lp-providers-section {
+    margin-top: 60px;
+  }
+  .landing-categories h2 {
+    font-size: 25px;
+    line-height: 1.3;
+  }
+  .landing-category-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 25px;
+  }
+  .landing-category-grid button {
+    min-height: 120px;
+    gap: 9px;
+  }
+  .landing-care-art {
+    width: 52px;
+    height: 52px;
+  }
+  .landing-category-grid strong {
+    font-size: 11px;
+  }
+  .landing-treatment-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 30px;
+  }
+  .landing-treatment-grid > button {
+    min-height: 200px;
+  }
+  .landing-treatment-top strong {
+    font-size: 14px;
+  }
+  .landing-treatment-top small {
+    font-size: 11px;
+  }
+  .landing-treatment-cta > strong {
+    font-size: 21px;
+  }
+  .landing-benefits {
+    padding: 42px 0;
+  }
+  .landing-benefits-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .landing-benefits-art h2 {
+    font-size: 38px;
+    text-align: center;
+  }
+  .landing-benefits-art > img {
+    width: 100%;
+    height: auto;
+    max-height: 345px;
+    object-position: center;
+    margin-top: 20px;
+  }
+  .landing-benefits-list article {
+    min-height: 94px;
+    padding: 17px 20px;
+  }
+  .landing-benefits-list h3 {
+    font-size: 16px;
+  }
+  .landing-benefits-list p {
+    font-size: 12px;
+  }
+  .landing-steps > h2 {
+    font-size: 25px;
+    line-height: 1.3;
+  }
+  .landing-steps ol {
+    grid-template-columns: 1fr;
+    max-width: 350px;
+    margin: 40px auto 0;
+    gap: 43px;
+    padding-inline: 16px;
+  }
+  .landing-step-mockup {
+    height: 255px;
+    padding-inline: 30px;
+  }
+  .landing-step-caption {
+    font-size: 18px;
+    margin-top: 17px;
+  }
+  .landing-mini-profile .lp-avatar {
+    width: 62px;
+    height: 66px;
+  }
+  .landing-mini-profile strong {
+    font-size: 10px;
+  }
+  .landing-mini-profile {
+    padding: 15px;
+  }
+  .landing-mini-searchbar {
+    font-size: 9px;
+  }
+  .landing-mini-result strong {
+    font-size: 10px;
+  }
+  .landing-mini-calendar {
+    padding: 18px;
+  }
+  .landing-mini-calendar > strong {
+    font-size: 14px;
+  }
+  .landing-mini-week b {
+    width: 25px;
+    height: 25px;
+  }
+  .landing-featured-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-top: 24px;
+  }
+  .landing-featured-card {
+    min-height: 285px;
+    border-radius: 18px;
+  }
+  .landing-featured-caption {
+    left: 22px;
+    right: 22px;
+    bottom: 23px;
+  }
+  .landing-featured-caption > strong {
+    font-size: 24px;
+  }
+  .landing-featured-caption > span {
+    font-size: 14px;
+  }
+  .landing-featured-badge {
+    left: 22px;
+    top: 22px;
+  }
+  .lp-public-bottom,
+  .lp-landing .lp-content {
+    padding-bottom: 60px;
+  }
+}
+@media (max-width: 380px) {
+  .lp-public-auth {
+    gap: 13px;
+    font-size: 11px;
+  }
+  .lp-public-auth > .lp-primary {
+    padding: 8px 16px;
+    font-size: 11px;
+  }
+  .landing-treatment-top {
+    flex-direction: column;
+    gap: 5px;
+  }
+  .landing-treatment-grid > button {
+    min-height: 220px;
+  }
+  .landing-treatment-tags {
+    gap: 4px;
+  }
+  .landing-treatment-tags > span {
+    font-size: 7px;
+    padding-inline: 4px;
+  }
+  .landing-treatment-cta > strong {
+    font-size: 19px;
+  }
+  .landing-benefits-art h2 {
+    font-size: 34px;
+  }
+}
+/* Keep intrinsic logo and mini-calendar widths from stretching narrow grids. */
+@media (max-width: 760px) {
+  .lp-insurance-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lp-insurance-card { min-width: 0; }
+  .landing-steps ol { grid-template-columns: minmax(0, 1fr); }
+  .landing-steps li, .landing-step-mockup, .landing-mini-profile, .landing-mini-calendar { min-width: 0; }
+}
+@media (max-width: 350px) {
+  .lp-insurer-humana { font-size: 21px; }
+  .lp-insurer-cigna { font-size: 19px; }
+  .lp-insurer-cigna svg { width: 24px; }
+  .lp-insurer-united { font-size: 10px; }
+  .lp-insurer-united svg { width: 18px; }
+  .lp-insurer-aetna { font-size: 25px; }
+  .lp-insurer-aetna > span { font-size: 22px; }
+  .lp-insurer-delta { font-size: 14px; }
+  .lp-insurer-delta svg { width: 17px; }
+  .landing-step-mockup { padding-inline: 15px; }
+  .landing-mini-week { gap: 1px; }
+  .landing-mini-week b { width: 21px; height: 21px; }
+}
+/* Keep the established interface chooser in the public landing header. */
+.lp-role-trigger { display: flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; }
+.lp-role-signin { padding: 10px 0; font-size: 14px; }
+.lp-role-signin:hover { color: var(--lp-brand); }
+.lp-role-signup { padding: 10px 27px; font-size: 13px; }
+.lp-role-trigger > svg { width: 14px; height: 14px; }
+@media (max-width: 1000px) {
+  .lp-role-signin { font-size: 12px; }
+  .lp-role-signup { padding: 9px 19px; font-size: 12px; }
+}
+@media (max-width: 380px) {
+  .lp-role-signin { font-size: 11px; }
+  .lp-role-signup { padding: 8px 16px; font-size: 11px; }
+  .lp-role-trigger { gap: 5px; }
+  .lp-role-trigger > svg { width: 12px; height: 12px; }
+}
+.lp-public-auth > div:first-child [role="menu"] { left: 0; right: auto; }

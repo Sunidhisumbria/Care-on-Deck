@@ -1,0 +1,2104 @@
+﻿/* Reference landing page. Styles are scoped so account and auth screens retain their design. */
+.lp {
+  --lp-brand: #9e2c74;
+  --lp-pink: #c2599c;
+  --lp-ink: #282829;
+  --lp-muted: #777579;
+  --lp-ground: #fbf8f8;
+  background: var(--lp-ground);
+  color: var(--lp-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.lp *,
+.lp *::before,
+.lp *::after {
+  box-sizing: border-box;
+}
+.lp :where(button, input, select) {
+  font: inherit;
+}
+.lp button,
+.lp summary {
+  cursor: pointer;
+}
+.lp button {
+  -webkit-tap-highlight-color: transparent;
+}
+.lp button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+.lp a {
+  text-decoration: none;
+}
+.lp .lp-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+.lp-container {
+  width: calc(100% - 80px);
+  max-width: 1120px;
+  margin-inline: auto;
+}
+.lp-skip-link {
+  position: fixed;
+  left: 20px;
+  top: -60px;
+  padding: 12px 20px;
+  background: white;
+  color: var(--lp-brand);
+  z-index: 100;
+  border-radius: 8px;
+}
+.lp-skip-link:focus {
+  top: 12px;
+}
+.lp-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: radial-gradient(
+    ellipse at 43% 18%,
+    #fcf9f9 0%,
+    #fbf5f7 33%,
+    #f6e6ee 64%,
+    #edc9db 100%
+  );
+}
+.lp-hero-ribbons {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+}
+.lp-hero-ribbons i {
+  position: absolute;
+  display: block;
+  width: 114%;
+  height: 220%;
+  left: -7%;
+  bottom: -10%;
+  border-radius: 50%;
+  border: 70px solid #b7448010;
+  transform: rotate(-19deg);
+}
+.lp-hero-ribbons i:nth-child(2) {
+  width: 94%;
+  height: 199%;
+  left: 7%;
+  bottom: -15%;
+  border-width: 65px;
+  border-color: #ffffff30;
+  transform: rotate(24deg);
+}
+.lp-hero-ribbons i:nth-child(3) {
+  width: 149%;
+  height: 189%;
+  left: -26%;
+  bottom: -13%;
+  border-width: 105px;
+  border-color: #ffffff2c;
+  transform: rotate(18deg);
+}
+.lp-hero-ribbons i:nth-child(4) {
+  width: 117%;
+  height: 169%;
+  left: -9%;
+  bottom: -9%;
+  border-width: 75px;
+  border-color: #cc7ba512;
+  transform: rotate(-31deg);
+}
+.lp-header {
+  height: 82px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  position: relative;
+  z-index: 3;
+}
+.lp-wordmark { display: inline-flex; flex: 0 0 auto; width: 172px; line-height: 0; }
+.lp-wordmark .brand-logo { width: 100%; }
+.lp-main-nav {
+  display: flex;
+  align-items: center;
+  gap: 42px;
+  padding-left: 50px;
+  font-size: 14px;
+}
+.lp-main-nav button,
+.lp-main-nav a {
+  white-space: nowrap;
+  padding: 12px 0;
+}
+.lp-main-nav .is-active,
+.lp-main-nav button:hover,
+.lp-main-nav a:hover {
+  color: var(--lp-brand);
+}
+.lp-main-nav .is-active {
+  font-weight: 600;
+}
+.lp-account-area {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.lp-notification {
+  width: 28px;
+  height: 34px;
+  position: relative;
+}
+.lp-notification .lp-icon {
+  width: 24px;
+  height: 24px;
+}
+.lp-notification > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--lp-brand);
+  position: absolute;
+  right: 4px;
+  top: 5px;
+  border: 1px solid #fff;
+}
+.lp-account-menu {
+  position: relative;
+}
+.lp-account-menu summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #fff;
+  padding: 9px 14px;
+  border-radius: 5px;
+  color: #49434d;
+  font-size: 13px;
+  font-weight: 600;
+}
+.lp-account-menu summary::-webkit-details-marker {
+  display: none;
+}
+.lp-account-menu summary > .lp-icon {
+  width: 12px;
+  height: 12px;
+  transform: rotate(90deg);
+}
+.lp-account-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 210px;
+  display: grid;
+  background: white;
+  box-shadow: 0 8px 30px #46203820;
+  padding: 7px;
+  border: 1px solid #eee4eb;
+  border-radius: 10px;
+}
+.lp-account-dropdown a,
+.lp-account-dropdown button {
+  padding: 11px;
+  text-align: left;
+  border-radius: 5px;
+}
+.lp-account-dropdown a:hover,
+.lp-account-dropdown button:hover {
+  background: #f8eaf2;
+}
+.lp-hero-copy {
+  text-align: center;
+  padding-top: 20px;
+}
+.lp-hero-copy h1 {
+  font-size: clamp(40px, 4.5vw, 60px);
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -1.8px;
+  margin: 0;
+}
+.lp-hero-copy h1 span {
+  color: var(--lp-brand);
+}
+.lp-hero-copy p {
+  margin: 24px 0 0;
+  color: #626063;
+  font-size: 20px;
+}
+.lp-hero-copy p strong {
+  color: var(--lp-brand);
+  font-weight: 650;
+}
+.lp-search {
+  width: calc(100% - 80px);
+  max-width: 936px;
+  min-height: 72px;
+  margin: 50px auto 0;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 18px;
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 16px 25px #5031431b;
+}
+.lp-search label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.lp-search label > .lp-icon {
+  color: var(--lp-pink);
+  width: 22px;
+  height: 22px;
+}
+.lp-search input,
+.lp-search select {
+  border: 0;
+  min-width: 0;
+  width: 100%;
+  background: transparent;
+  color: #615c61;
+  padding: 8px 0;
+  font-size: 12px;
+}
+.lp-search input::placeholder {
+  color: #999699;
+  opacity: 1;
+}
+.lp-search-condition {
+  flex: 1.35;
+}
+.lp-search-location {
+  flex: 1;
+}
+.lp-search-insurance {
+  flex: 1.15;
+  position: relative;
+}
+.lp-search-insurance select {
+  appearance: none;
+  padding-right: 17px;
+  color: #999699;
+}
+.lp-search-insurance > .lp-icon:last-child {
+  width: 14px;
+  height: 14px;
+  color: #747177;
+  transform: rotate(90deg);
+  position: absolute;
+  right: 0;
+  pointer-events: none;
+}
+.lp-primary {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: var(--lp-brand);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  transition:
+    background 0.18s,
+    transform 0.18s;
+}
+.lp-primary:hover {
+  background: #84205e;
+}
+.lp-primary:active {
+  transform: translateY(1px);
+}
+.lp-search > .lp-primary {
+  flex-shrink: 0;
+  min-width: 138px;
+  height: 44px;
+  font-size: 13px;
+}
+.lp-trust-cards {
+  width: calc(100% - 80px);
+  max-width: 878px;
+  margin: 64px auto 0;
+  display: grid;
+  grid-template-columns: 216px 386px 216px;
+  justify-content: center;
+  gap: 28px;
+  align-items: end;
+}
+.lp-trust-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-self: stretch;
+  padding: 5px 0 19px;
+}
+.lp-proof-card {
+  background: #ffffffed;
+  border-radius: 17px;
+  display: flex;
+  align-items: center;
+  min-height: 88px;
+  padding: 14px 16px;
+  gap: 12px;
+  color: #34363f;
+}
+.lp-proof-card small {
+  font-size: 11px;
+  display: block;
+  font-weight: 600;
+  color: #606975;
+}
+.lp-proof-card strong {
+  display: block;
+  font-size: 25px;
+  font-weight: 750;
+  line-height: 1.15;
+}
+.lp-proof-card span:not(.lp-round-icon):not(.lp-review-avatars) {
+  font-size: 11px;
+  display: block;
+}
+.lp-round-icon {
+  width: 57px;
+  height: 57px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8e6f0;
+  color: #bd448e;
+  flex-shrink: 0;
+}
+.lp-round-icon > .lp-icon {
+  width: 36px;
+  height: 36px;
+}
+.lp-patients {
+  transform: rotate(-5deg);
+}
+.lp-happiness {
+  transform: rotate(4deg);
+  justify-content: space-between;
+  margin-top: 34px;
+}
+.lp-happiness strong {
+  margin-top: 6px;
+}
+.lp-happiness > svg {
+  width: 70px;
+  height: 62px;
+}
+.lp-care-card {
+  height: 238px;
+  border-radius: 17px 17px 8px 8px;
+  background: #fffffff0;
+  padding: 13px 16px 9px;
+  text-align: center;
+  box-shadow: 0 3px 7px #97577e04;
+}
+.lp-care-card h2 {
+  font-size: 18px;
+  line-height: 1.1;
+  font-weight: 700;
+  color: #35414e;
+}
+.lp-care-card > p {
+  font-size: 11px;
+  color: #78818a;
+  margin: 2px 0 9px;
+}
+.lp-care-list {
+  display: grid;
+  gap: 5px;
+}
+.lp-care-list button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 9px;
+  border-radius: 14px;
+  background: #fafbfc;
+  box-shadow: 0 2px 3px #444b5510;
+  text-align: left;
+  min-height: 51px;
+  transition: background 0.15s;
+}
+.lp-care-list button:hover {
+  background: #f8eaf2;
+}
+.lp-care-list .lp-round-icon {
+  width: 41px;
+  height: 41px;
+}
+.lp-care-list .lp-round-icon .lp-icon {
+  width: 27px;
+  height: 27px;
+}
+.lp-care-name {
+  flex: 1;
+}
+.lp-care-name strong {
+  font-size: 11px;
+  color: #33404c;
+  display: block;
+}
+.lp-care-name small {
+  font-size: 10px;
+  color: #68737e;
+}
+.lp-care-date small {
+  display: block;
+  color: #97a0a5;
+  font-size: 8px;
+}
+.lp-care-date strong {
+  display: block;
+  color: #3bb077;
+  font-size: 10px;
+}
+.lp-care-list button > .lp-icon {
+  width: 17px;
+  height: 17px;
+  color: #9da6b0;
+  margin-left: 8px;
+}
+.lp-trust-right {
+  padding-top: 17px;
+  padding-bottom: 24px;
+}
+.lp-reviews {
+  min-height: 74px;
+  padding: 12px;
+  gap: 9px;
+  transform: rotate(2deg);
+}
+.lp-review-avatars {
+  display: flex;
+  padding-left: 0;
+}
+.lp-review-avatars img {
+  width: 35px;
+  height: 39px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-left: -11px;
+}
+.lp-review-avatars img:first-child {
+  margin-left: 0;
+}
+.lp-reviews strong {
+  font-size: 21px;
+}
+.lp-reviews span:not(.lp-review-avatars) {
+  font-size: 10px !important;
+  white-space: nowrap;
+}
+.lp-reviews > .lp-icon {
+  width: 23px;
+  height: 23px;
+  color: white;
+  fill: var(--lp-brand);
+  stroke-width: 1.2;
+  margin-left: auto;
+}
+.lp-security {
+  transform: rotate(-5deg);
+  gap: 15px;
+}
+.lp-security > .lp-icon {
+  color: #b7428a;
+  width: 44px;
+  height: 44px;
+}
+.lp-content {
+  padding-bottom: 104px;
+}
+.lp-section {
+  margin-top: 96px;
+  scroll-margin-top: 32px;
+}
+.lp-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+.lp-section h2 {
+  font-size: 34px;
+  line-height: 1.25;
+  letter-spacing: -1.3px;
+  font-weight: 600;
+}
+.lp-text-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  color: var(--lp-pink);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: right;
+}
+.lp-text-link:hover {
+  color: var(--lp-brand);
+}
+.lp-text-link > .lp-icon {
+  width: 17px;
+  height: 17px;
+}
+.lp-insurance-section {
+  margin-top: 98px;
+}
+.lp-insurance-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 24px;
+}
+.lp-insurance-card {
+  height: 108px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 15px 22px #2b15210b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+.lp-insurance-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 26px #2b152115;
+}
+.lp-insurer-bcbs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-align: left;
+  line-height: 0.98;
+  color: #25262b;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: -0.5px;
+}
+.lp-insurer-bcbs > svg {
+  width: 53px;
+  height: 37px;
+  flex-shrink: 0;
+}
+.lp-insurer-bcbs small {
+  display: block;
+  font-size: 3.7px;
+  letter-spacing: -0.1px;
+  padding-top: 3px;
+}
+.lp-insurer-cigna {
+  display: flex;
+  align-items: center;
+  font-size: 25px;
+  font-weight: 600;
+  color: #4a94c0;
+  letter-spacing: -0.5px;
+}
+.lp-insurer-cigna svg {
+  width: 42px;
+  height: 48px;
+}
+.lp-insurer-united {
+  display: flex;
+  align-items: center;
+  color: #254f8c;
+  text-align: left;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.7px;
+  gap: 4px;
+}
+.lp-insurer-united svg {
+  width: 27px;
+  height: 42px;
+}
+.lp-insurer-aetna {
+  display: flex;
+  align-items: center;
+  font-size: 33px;
+  letter-spacing: -1.5px;
+  font-weight: 750;
+  color: #87459b;
+  gap: 3px;
+}
+.lp-insurer-aetna > span {
+  font-size: 29px;
+}
+.lp-insurer-delta {
+  display: flex;
+  align-items: flex-start;
+  font-size: 23px;
+  font-weight: 850;
+  color: #48b347;
+  letter-spacing: -1px;
+  line-height: 0.85;
+  text-align: left;
+}
+.lp-insurer-delta svg {
+  width: 25px;
+  height: 25px;
+  margin-right: -2px;
+}
+.lp-insurer-humana {
+  font-size: 35px;
+  font-weight: 600;
+  letter-spacing: -1.5px;
+  color: #609b23;
+}
+.lp-appointments-section .lp-section-heading {
+  margin-bottom: 44px;
+}
+.lp-carousel-wrap {
+  position: relative;
+}
+.lp-appointments-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.lp-appointment-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  background: white;
+  border: 1px solid #f0e9ed;
+  box-shadow: 0 5px 12px #3a1e2d08;
+  padding: 22px;
+  border-radius: 21px;
+  text-align: left;
+  min-width: 0;
+  min-height: 177px;
+}
+.lp-appointment-card:hover {
+  border-color: #dfbbd2;
+}
+.lp-date-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 113px;
+  height: 129px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  background: #f3e5ee;
+  padding: 16px 10px;
+}
+.lp-date-tile > span {
+  color: #b44d91;
+  font-size: 12px;
+  font-weight: 700;
+}
+.lp-date-tile strong {
+  font-size: 30px;
+  line-height: 1.2;
+}
+.lp-date-tile small {
+  font-size: 10px;
+  font-weight: 600;
+}
+.lp-appointment-details {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.lp-appointment-time {
+  font-size: 14px;
+  color: #bf4c94;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.lp-appointment-details > strong {
+  font-size: 17px;
+  margin-bottom: 7px;
+}
+.lp-appointment-type {
+  display: flex;
+  gap: 10px;
+  color: #818084;
+  font-size: 13px;
+}
+.lp-appointment-place {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #89888b;
+  font-size: 11px;
+  margin-top: 8px;
+  white-space: nowrap;
+}
+.lp-appointment-place .lp-icon {
+  width: 13px;
+  height: 13px;
+}
+.lp-duration {
+  position: absolute;
+  right: 21px;
+  top: 26px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  border-radius: 20px;
+  background: #f3e9ef;
+  padding: 3px 9px;
+  color: #635b62;
+}
+.lp-duration .lp-icon {
+  width: 12px;
+  height: 12px;
+}
+.lp-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 43px;
+  height: 43px;
+  border: 1px solid #efe8ed;
+  border-radius: 50%;
+  background: #fff;
+  color: #c962a4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.lp-carousel-arrow:hover {
+  background: #f8e6f0;
+}
+.lp-carousel-arrow .lp-icon {
+  width: 17px;
+  height: 17px;
+}
+.lp-arrow-left {
+  left: -21px;
+}
+.lp-arrow-right {
+  right: -21px;
+}
+.lp-arrow-left .lp-icon,
+.lp-video-prev .lp-icon {
+  transform: rotate(180deg);
+}
+.lp-providers-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+.lp-provider-card {
+  border: 1.5px solid #e8e6f7;
+  border-radius: 19px;
+  padding: 17px;
+  background: #fff;
+  min-width: 0;
+}
+.lp-provider-top {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.lp-avatar {
+  width: 77px;
+  height: 77px;
+  display: inline-block;
+  position: relative;
+  flex-shrink: 0;
+}
+.lp-avatar > svg {
+  width: 100%;
+  height: 100%;
+}
+.lp-avatar-badge {
+  position: absolute;
+  right: 17px;
+  bottom: -2px;
+  width: 27px;
+  height: 27px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid #f6eaf2;
+  background: #ae3183;
+  color: white;
+}
+.lp-avatar-badge .lp-icon {
+  width: 16px;
+  height: 16px;
+}
+.lp-provider-info {
+  min-width: 0;
+  flex: 1;
+}
+.lp-provider-info h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #393849;
+}
+.lp-provider-specialty {
+  font-size: 11px;
+  color: #99979c;
+  margin-top: 3px;
+}
+.lp-provider-rating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: #8b8b8f;
+  margin-top: 7px;
+  white-space: nowrap;
+}
+.lp-provider-rating .lp-icon {
+  width: 13px;
+  height: 13px;
+}
+.lp-provider-rating .lp-icon:first-child {
+  color: #e8a246;
+  fill: #e8a246;
+}
+.lp-provider-rating strong {
+  color: #5d5b61;
+  font-weight: 600;
+  font-size: 12px;
+}
+.lp-next-available {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 7px;
+  font-size: 10px;
+  color: #606065;
+}
+.lp-next-available .lp-icon {
+  width: 15px;
+  height: 15px;
+  color: #c06a9f;
+}
+.lp-time-slots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 19px 0 15px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0edf0;
+  white-space: nowrap;
+}
+.lp-time-slots > span {
+  color: #929095;
+  font-size: 9px;
+  margin-right: 4px;
+}
+.lp-time-slots button {
+  padding: 4px 5px;
+  color: #b13e85;
+  background: #f8e8f1;
+  font-size: 10px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  flex: 1;
+}
+.lp-time-slots button:hover,
+.lp-time-slots button.is-selected {
+  border-color: var(--lp-brand);
+  color: var(--lp-brand);
+  background: #efd3e3;
+}
+.lp-other-locations > strong {
+  font-size: 10px;
+  font-weight: 600;
+  color: #5d5c60;
+}
+.lp-other-locations p {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #939197;
+  font-size: 10px;
+  margin-top: 6px;
+}
+.lp-other-locations .lp-icon {
+  width: 16px;
+  height: 16px;
+  color: #bd72a2;
+}
+.lp-other-locations p > span {
+  padding-inline: 1px;
+}
+.lp-book-button {
+  width: 100%;
+  min-height: 45px;
+  margin-top: 19px;
+  font-size: 13px;
+}
+.lp-specialties-section > h2,
+.lp-talk-section > h2 {
+  text-align: center;
+}
+.lp-specialties-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  background: white;
+  border-radius: 23px;
+  box-shadow: 0 12px 30px #3115250c;
+  padding: 22px 0;
+  margin-top: 48px;
+}
+.lp-specialties-grid > button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 172px;
+  padding: 0 20px;
+  border-right: 1px solid #eee8ef;
+}
+.lp-specialties-grid > button:last-child {
+  border-right: 0;
+}
+.lp-specialties-grid > button:hover .lp-specialty-icon {
+  transform: translateY(-4px);
+}
+.lp-specialty-icon {
+  width: 100px;
+  height: 85px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: #bc5097;
+  transition: transform 0.2s;
+  margin-bottom: 13px;
+}
+.lp-specialty-icon::before {
+  content: "";
+  position: absolute;
+  width: 69px;
+  height: 69px;
+  background: #f4e8f0;
+  border-radius: 50%;
+  right: 0;
+  top: 9px;
+}
+.lp-specialty-icon > .lp-icon {
+  width: 75px;
+  height: 75px;
+  position: relative;
+  z-index: 1;
+  stroke-width: 1.2;
+}
+.lp-specialty-cross {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 23px;
+}
+.lp-specialties-grid strong {
+  font-size: 17px;
+  line-height: 1.35;
+  font-weight: 600;
+}
+.lp-talk-section {
+  margin-top: 98px;
+}
+.lp-talk-section > h2 {
+  color: #302b43;
+}
+.lp-videos-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 17px;
+  margin-top: 52px;
+}
+.lp-video-card {
+  display: block;
+  position: relative;
+  aspect-ratio: 270 / 390;
+  overflow: hidden;
+  border-radius: 14px;
+  text-align: left;
+  background: #e7dce2;
+  isolation: isolate;
+}
+.lp-video-card > img {
+  object-fit: cover;
+  transition: transform 0.4s;
+}
+.lp-video-card:hover > img {
+  transform: scale(1.035);
+}
+.lp-video-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 31%,
+    #9e2c741a 44%,
+    #9e2c74a1 72%,
+    #942568 100%
+  );
+  z-index: 1;
+}
+.lp-video-duration {
+  position: absolute;
+  right: 12px;
+  top: 13px;
+  padding: 1px 5px;
+  border-radius: 2px;
+  background: #202422ad;
+  color: white;
+  font-size: 11px;
+  z-index: 2;
+}
+.lp-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 54px;
+  height: 54px;
+  border: 3px solid #ffffffed;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  z-index: 2;
+}
+.lp-play .lp-icon {
+  width: 29px;
+  height: 29px;
+  margin-left: 1px;
+  stroke-width: 1.5;
+}
+.lp-video-caption {
+  position: absolute;
+  bottom: 20px;
+  left: 13px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 2;
+  color: white;
+}
+.lp-video-caption strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.lp-video-caption > span {
+  font-size: 12px;
+}
+.lp-video-caption small {
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.lp-video-caption small .lp-icon {
+  width: 11px;
+  height: 11px;
+  fill: #efd241;
+  color: #efd241;
+}
+.lp-video-prev {
+  left: -61px;
+}
+.lp-video-next {
+  right: -61px;
+}
+.lp-video-prev,
+.lp-video-next {
+  border: 2px solid #c966a3;
+  width: 38px;
+  height: 38px;
+}
+.lp-footer {
+  background: #19000e;
+  padding: 73px 0 20px;
+  color: #c0b0bb;
+}
+.lp-footer-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 0.96fr 1fr 0.9fr 0.8fr;
+  gap: 30px;
+}
+.lp-footer h2 {
+  color: #a64482;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 1.1px;
+  font-weight: 650;
+  margin-bottom: 15px;
+}
+.lp-footer ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.lp-footer li {
+  margin-bottom: 9px;
+  line-height: 1.35;
+}
+.lp-footer li button,
+.lp-footer li a {
+  font-size: 12px;
+  text-align: left;
+  color: #c0b0bb;
+}
+.lp-footer li button:hover,
+.lp-footer li a:hover {
+  color: #fff;
+}
+.lp-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(620px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  border: 1px solid #eadce5;
+  border-radius: 22px;
+  padding: 0;
+  box-shadow: 0 30px 100px #30102040;
+  background: #fff;
+  color: var(--lp-ink);
+  overflow: auto;
+}
+.lp-dialog::backdrop {
+  background: #24111f80;
+  backdrop-filter: blur(5px);
+}
+.lp-dialog-inner {
+  padding: 38px;
+}
+.lp-dialog-close {
+  position: absolute;
+  top: 13px;
+  right: 13px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  background: #f7edf3;
+  color: var(--lp-brand);
+  border-radius: 50%;
+}
+.lp-dialog-eyebrow {
+  color: var(--lp-brand);
+  text-transform: uppercase;
+  letter-spacing: 1.3px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.lp-dialog h2 {
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: -0.8px;
+  font-weight: 700;
+  margin: 12px 0 18px;
+}
+.lp-dialog p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #7b6e76;
+  margin: 12px 0;
+}
+.lp-dialog-cta {
+  min-height: 44px;
+  padding: 12px 22px;
+  margin-top: 12px;
+}
+.lp-dialog-insurers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+.lp-dialog-insurers > button {
+  border: 1px solid #eee3eb;
+  border-radius: 12px;
+  padding: 22px 12px 12px;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.lp-dialog-insurers > button:hover {
+  background: #fdf6fa;
+}
+.lp-dialog-insurers > button > span:last-child {
+  font-size: 11px;
+  color: var(--lp-brand);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lp-dialog-insurers > button > span:last-child .lp-icon {
+  width: 14px;
+  height: 14px;
+}
+.lp-booking-preview {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin: 24px 0;
+  padding: 18px;
+  background: #fbf5f8;
+  border-radius: 13px;
+}
+.lp-booking-preview p {
+  margin: 3px 0;
+  font-size: 12px;
+}
+.lp-booking-preview .lp-icon {
+  width: 15px;
+  height: 15px;
+  margin-right: 5px;
+}
+.lp-video-preview {
+  height: 340px;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f4e7ee;
+}
+.lp-video-preview > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+}
+.lp-video-preview > span {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 22px;
+  background: linear-gradient(transparent, #802159e8);
+  color: #fff;
+  font-weight: 600;
+}
+.lp-discovery-options {
+  display: grid;
+  gap: 8px;
+  margin-top: 20px;
+}
+.lp-discovery-options button {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px;
+  border: 1px solid #eddfe7;
+  border-radius: 10px;
+  text-align: left;
+}
+.lp-discovery-options button:hover {
+  background: #fbf0f6;
+}
+.lp-discovery-options .lp-icon {
+  color: var(--lp-brand);
+}
+.lp-discovery-options .lp-icon:last-child {
+  margin-left: auto;
+}
+
+@media (min-width: 1500px) {
+  .lp-hero-ribbons i {
+    border-width: 100px;
+  }
+}
+@media (max-width: 1200px) {
+  .lp-main-nav {
+    gap: 24px;
+    padding-left: 0;
+  }
+  .lp-provider-top {
+    gap: 8px;
+  }
+  .lp-avatar {
+    width: 60px;
+    height: 60px;
+  }
+  .lp-provider-card {
+    padding: 14px;
+  }
+  .lp-provider-rating {
+    gap: 3px;
+    font-size: 9px;
+  }
+  .lp-time-slots {
+    gap: 3px;
+  }
+  .lp-time-slots button {
+    padding-inline: 3px;
+    font-size: 9px;
+  }
+  .lp-insurance-grid {
+    gap: 18px;
+  }
+  .lp-insurance-card {
+    padding: 10px;
+  }
+  .lp-insurer-humana {
+    font-size: 29px;
+  }
+  .lp-insurer-delta {
+    font-size: 19px;
+  }
+  .lp-date-tile {
+    width: 95px;
+  }
+  .lp-appointment-card {
+    gap: 13px;
+    padding: 20px;
+  }
+  .lp-appointment-details > strong {
+    font-size: 15px;
+  }
+  .lp-video-prev {
+    left: -29px;
+  }
+  .lp-video-next {
+    right: -29px;
+  }
+}
+@media (max-width: 1000px) {
+  .lp-container {
+    width: calc(100% - 64px);
+  }
+  .lp-header {
+    gap: 20px;
+    height: 72px;
+  }
+  .lp-wordmark {
+    width: 148px;
+  }
+  .lp-main-nav {
+    font-size: 12px;
+    gap: 20px;
+  }
+  .lp-account-area {
+    gap: 12px;
+  }
+  .lp-hero-copy h1 {
+    font-size: 50px;
+  }
+  .lp-hero-copy p {
+    font-size: 17px;
+  }
+  .lp-search {
+    gap: 12px;
+    width: calc(100% - 96px);
+  }
+  .lp-search input,
+  .lp-search select {
+    font-size: 10px;
+  }
+  .lp-search label {
+    gap: 6px;
+  }
+  .lp-search > .lp-primary {
+    min-width: 110px;
+  }
+  .lp-trust-cards {
+    grid-template-columns: 190px 330px 190px;
+    gap: 20px;
+  }
+  .lp-proof-card {
+    padding: 12px;
+  }
+  .lp-reviews {
+    padding: 10px;
+    gap: 7px;
+  }
+  .lp-review-avatars img {
+    width: 30px;
+    height: 34px;
+  }
+  .lp-round-icon {
+    width: 48px;
+    height: 48px;
+  }
+  .lp-proof-card strong {
+    font-size: 23px;
+  }
+  .lp-reviews strong {
+    font-size: 18px;
+  }
+  .lp-section {
+    margin-top: 76px;
+  }
+  .lp-section h2 {
+    font-size: 28px;
+  }
+  .lp-insurance-grid {
+    gap: 15px;
+  }
+  .lp-insurance-card {
+    height: 93px;
+    border-radius: 15px;
+  }
+  .lp-insurer-bcbs {
+    font-size: 9px;
+  }
+  .lp-insurer-bcbs > svg {
+    width: 36px;
+  }
+  .lp-insurer-cigna {
+    font-size: 21px;
+  }
+  .lp-insurer-cigna svg {
+    width: 32px;
+  }
+  .lp-insurer-united {
+    font-size: 12px;
+  }
+  .lp-insurer-united svg {
+    width: 22px;
+  }
+  .lp-insurer-aetna {
+    font-size: 27px;
+  }
+  .lp-insurer-delta {
+    font-size: 16px;
+  }
+  .lp-insurer-delta svg {
+    width: 20px;
+  }
+  .lp-insurer-humana {
+    font-size: 25px;
+  }
+  .lp-appointment-card {
+    padding: 17px;
+    gap: 13px;
+    min-height: 155px;
+  }
+  .lp-date-tile {
+    width: 80px;
+    height: 119px;
+  }
+  .lp-appointment-time {
+    font-size: 12px;
+  }
+  .lp-appointment-details > strong {
+    font-size: 13px;
+  }
+  .lp-appointment-type {
+    font-size: 11px;
+  }
+  .lp-appointment-place {
+    font-size: 9px;
+    gap: 3px;
+  }
+  .lp-duration {
+    right: 16px;
+    top: 22px;
+    font-size: 9px;
+  }
+  .lp-providers-grid {
+    gap: 17px;
+  }
+  .lp-provider-info h3 {
+    font-size: 12px;
+  }
+  .lp-provider-rating {
+    flex-wrap: wrap;
+    row-gap: 2px;
+    white-space: normal;
+  }
+  .lp-provider-rating > span:last-child {
+    font-size: 8px;
+  }
+  .lp-next-available {
+    font-size: 8px;
+  }
+  .lp-provider-top {
+    align-items: flex-start;
+  }
+  .lp-avatar {
+    width: 53px;
+    height: 58px;
+  }
+  .lp-time-slots {
+    gap: 3px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+  .lp-time-slots > span {
+    width: 100%;
+  }
+  .lp-other-locations p {
+    font-size: 8px;
+    gap: 2px;
+  }
+  .lp-other-locations .lp-icon {
+    width: 12px;
+  }
+  .lp-specialties-grid strong {
+    font-size: 15px;
+  }
+  .lp-video-caption strong {
+    font-size: 12px;
+  }
+  .lp-video-caption > span {
+    font-size: 10px;
+  }
+  .lp-footer-grid {
+    gap: 18px;
+  }
+  .lp-footer h2 {
+    font-size: 9px;
+    letter-spacing: 0.6px;
+  }
+  .lp-footer li button,
+  .lp-footer li a {
+    font-size: 10px;
+  }
+}
+@media (max-width: 760px) {
+  .lp-container {
+    width: calc(100% - 40px);
+  }
+  .lp-header {
+    flex-wrap: wrap;
+    height: auto;
+    padding-top: 22px;
+    padding-bottom: 16px;
+    row-gap: 15px;
+  }
+  .lp-main-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 28px;
+  }
+  .lp-main-nav a,
+  .lp-main-nav button {
+    padding: 7px 0;
+    font-size: 12px;
+  }
+  .lp-hero-copy {
+    padding: 24px 16px 0;
+  }
+  .lp-hero-copy h1 {
+    font-size: clamp(32px, 6.2vw, 46px);
+    letter-spacing: -1.1px;
+  }
+  .lp-hero-copy p {
+    font-size: 15px;
+    margin-top: 18px;
+  }
+  .lp-search {
+    width: calc(100% - 40px);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: 32px;
+    padding: 16px;
+    gap: 10px 16px;
+    border-radius: 16px;
+  }
+  .lp-search input,
+  .lp-search select {
+    font-size: 12px;
+    min-height: 38px;
+  }
+  .lp-search-condition {
+    grid-column: 1 / -1;
+    border-bottom: 1px solid #f0e7ed;
+    padding-bottom: 4px;
+  }
+  .lp-search > .lp-primary {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .lp-trust-cards {
+    width: calc(100% - 40px);
+    grid-template-columns: 1fr 1.65fr 1fr;
+    gap: 12px;
+    margin-top: 42px;
+  }
+  .lp-proof-card {
+    border-radius: 11px;
+    padding: 10px 8px;
+    gap: 7px;
+    min-height: 68px;
+  }
+  .lp-proof-card small {
+    font-size: 8px;
+  }
+  .lp-proof-card strong {
+    font-size: 18px;
+  }
+  .lp-proof-card span:not(.lp-round-icon):not(.lp-review-avatars) {
+    font-size: 8px;
+  }
+  .lp-patients {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    gap: 4px;
+  }
+  .lp-round-icon {
+    width: 35px;
+    height: 35px;
+  }
+  .lp-round-icon > .lp-icon {
+    width: 26px;
+    height: 26px;
+  }
+  .lp-happiness {
+    margin-top: 20px;
+  }
+  .lp-happiness > svg {
+    width: 40px;
+    height: 40px;
+  }
+  .lp-care-card {
+    padding: 12px 8px 8px;
+    height: 227px;
+  }
+  .lp-care-card h2 {
+    font-size: 14px;
+  }
+  .lp-care-card > p {
+    font-size: 9px;
+  }
+  .lp-care-list button {
+    padding: 6px;
+    gap: 5px;
+  }
+  .lp-care-list .lp-round-icon {
+    width: 31px;
+    height: 31px;
+  }
+  .lp-care-list .lp-round-icon .lp-icon {
+    width: 22px;
+    height: 22px;
+  }
+  .lp-care-name strong {
+    font-size: 9px;
+  }
+  .lp-care-date small {
+    font-size: 6px;
+  }
+  .lp-care-date strong {
+    font-size: 8px;
+  }
+  .lp-care-list button > .lp-icon {
+    margin-left: 0;
+    width: 11px;
+  }
+  .lp-reviews {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+  .lp-reviews > .lp-icon {
+    width: 17px;
+    margin-left: 0;
+  }
+  .lp-reviews span:not(.lp-review-avatars) {
+    font-size: 8px !important;
+  }
+  .lp-review-avatars img {
+    width: 26px;
+    height: 29px;
+  }
+  .lp-security {
+    gap: 6px;
+  }
+  .lp-security > .lp-icon {
+    width: 28px;
+    height: 28px;
+  }
+  .lp-section {
+    margin-top: 60px;
+  }
+  .lp-section h2 {
+    font-size: 25px;
+    letter-spacing: -0.9px;
+  }
+  .lp-section-heading {
+    margin-bottom: 24px;
+    gap: 14px;
+  }
+  .lp-text-link {
+    font-size: 11px;
+    gap: 3px;
+  }
+  .lp-text-link .lp-icon {
+    width: 13px;
+  }
+  .lp-insurance-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+  .lp-insurance-card {
+    height: 90px;
+  }
+  .lp-insurer-bcbs {
+    font-size: 11px;
+  }
+  .lp-insurer-bcbs > svg {
+    width: 43px;
+  }
+  .lp-insurer-cigna {
+    font-size: 25px;
+  }
+  .lp-insurer-united {
+    font-size: 15px;
+  }
+  .lp-insurer-aetna {
+    font-size: 31px;
+  }
+  .lp-insurer-delta {
+    font-size: 21px;
+  }
+  .lp-insurer-humana {
+    font-size: 30px;
+  }
+  .lp-appointments-section .lp-section-heading {
+    margin-bottom: 28px;
+  }
+  .lp-appointments-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 16px;
+    padding: 3px 1px 12px;
+    scrollbar-width: none;
+  }
+  .lp-appointment-card {
+    flex: 0 0 85%;
+    scroll-snap-align: start;
+  }
+  .lp-date-tile {
+    width: 94px;
+  }
+  .lp-appointment-details > strong {
+    font-size: 16px;
+  }
+  .lp-appointment-place {
+    font-size: 11px;
+  }
+  .lp-arrow-left {
+    left: -13px;
+  }
+  .lp-arrow-right {
+    right: -13px;
+  }
+  .lp-carousel-arrow {
+    width: 30px;
+    height: 30px;
+  }
+  .lp-providers-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 0 1px 8px;
+    scrollbar-width: thin;
+    scrollbar-color: #e7c9db transparent;
+  }
+  .lp-provider-card {
+    flex: 0 0 320px;
+    scroll-snap-align: start;
+    padding: 16px;
+  }
+  .lp-provider-info h3 {
+    font-size: 14px;
+  }
+  .lp-provider-top {
+    align-items: center;
+    gap: 12px;
+  }
+  .lp-avatar {
+    width: 65px;
+    height: 65px;
+  }
+  .lp-provider-rating {
+    flex-wrap: nowrap;
+    font-size: 10px;
+  }
+  .lp-provider-rating > span:last-child {
+    font-size: 9px;
+  }
+  .lp-next-available {
+    font-size: 10px;
+  }
+  .lp-time-slots {
+    flex-wrap: nowrap;
+    margin-top: 20px;
+  }
+  .lp-time-slots > span {
+    width: auto;
+  }
+  .lp-time-slots button {
+    font-size: 9px;
+  }
+  .lp-other-locations p {
+    font-size: 10px;
+  }
+  .lp-specialties-grid {
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: 30px;
+    padding: 10px 16px;
+  }
+  .lp-specialties-grid > button {
+    padding: 20px 8px;
+    min-height: 185px;
+  }
+  .lp-specialties-grid > button:nth-child(2) {
+    border-right: 0;
+  }
+  .lp-specialties-grid > button:nth-child(-n + 2) {
+    border-bottom: 1px solid #eee8ef;
+  }
+  .lp-specialties-grid strong {
+    font-size: 14px;
+  }
+  .lp-specialty-icon {
+    height: 70px;
+  }
+  .lp-specialty-icon > .lp-icon {
+    width: 63px;
+    height: 63px;
+  }
+  .lp-specialty-icon::before {
+    width: 58px;
+    height: 58px;
+  }
+  .lp-videos-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    gap: 14px;
+    margin-top: 32px;
+  }
+  .lp-video-card {
+    flex: 0 0 42%;
+    scroll-snap-align: start;
+  }
+  .lp-video-caption strong {
+    font-size: 13px;
+  }
+  .lp-video-caption > span {
+    font-size: 11px;
+  }
+  .lp-video-prev {
+    left: -13px;
+  }
+  .lp-video-next {
+    right: -13px;
+  }
+  .lp-video-prev,
+  .lp-video-next {
+    width: 30px;
+    height: 30px;
+  }
+  .lp-content {
+    padding-bottom: 65px;
+  }
+  .lp-footer {
+    padding: 45px 0 30px;
+  }
+  .lp-footer-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px 24px;
+  }
+  .lp-footer h2 {
+    font-size: 10px;
+  }
+  .lp-footer li button,
+  .lp-footer li a {
+    font-size: 11px;
+  }
+}
+@media (max-width: 420px) {
+  .lp-main-nav {
+    gap: 17px;
+  }
+  .lp-main-nav a,
+  .lp-main-nav button {
+    font-size: 10px;
+  }
+  .lp-hero-copy h1 {
+    font-size: 33px;
+  }
+  .lp-hero-copy p {
+    font-size: 13px;
+  }
+  .lp-search {
+    padding: 13px;
+    gap: 8px;
+  }
+  .lp-search input,
+  .lp-search select {
+    font-size: 10px;
+  }
+  .lp-search label > .lp-icon {
+    width: 18px;
+  }
+  .lp-trust-cards {
+    grid-template-columns: 1fr 1.8fr 1fr;
+    width: calc(100% - 26px);
+    gap: 7px;
+  }
+  .lp-care-card {
+    padding-inline: 5px;
+  }
+  .lp-care-card h2 {
+    font-size: 12px;
+  }
+  .lp-care-card > p {
+    font-size: 8px;
+  }
+  .lp-care-list button {
+    padding: 6px 3px;
+    gap: 3px;
+  }
+  .lp-care-list .lp-round-icon {
+    width: 26px;
+    height: 29px;
+  }
+  .lp-care-name strong {
+    font-size: 8px;
+  }
+  .lp-care-date small {
+    font-size: 5px;
+  }
+  .lp-care-list button > .lp-icon {
+    width: 8px;
+  }
+  .lp-proof-card {
+    padding: 9px 6px;
+  }
+  .lp-happiness {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+  .lp-happiness > svg {
+    width: 38px;
+    height: 31px;
+  }
+  .lp-security {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+  .lp-review-avatars img {
+    width: 24px;
+    height: 26px;
+  }
+  .lp-reviews > .lp-icon {
+    display: none;
+  }
+  .lp-section h2 {
+    font-size: 22px;
+  }
+  .lp-text-link {
+    font-size: 10px;
+    max-width: 107px;
+  }
+  .lp-appointment-card {
+    flex-basis: 96%;
+    padding: 14px;
+    gap: 12px;
+  }
+  .lp-date-tile {
+    width: 76px;
+    height: 116px;
+  }
+  .lp-appointment-details > strong {
+    font-size: 13px;
+  }
+  .lp-appointment-place {
+    font-size: 9px;
+  }
+  .lp-duration {
+    top: 17px;
+    right: 12px;
+  }
+  .lp-provider-card {
+    flex-basis: 300px;
+  }
+  .lp-insurance-card {
+    height: 78px;
+    padding: 7px;
+    border-radius: 13px;
+  }
+  .lp-insurer-bcbs {
+    font-size: 8px;
+  }
+  .lp-insurer-bcbs > svg {
+    width: 30px;
+  }
+  .lp-insurer-cigna {
+    font-size: 21px;
+  }
+  .lp-insurer-cigna svg {
+    width: 29px;
+  }
+  .lp-insurer-united {
+    font-size: 12px;
+  }
+  .lp-insurer-united svg {
+    width: 21px;
+  }
+  .lp-insurer-delta {
+    font-size: 17px;
+  }
+  .lp-insurer-humana {
+    font-size: 25px;
+  }
+  .lp-video-card {
+    flex-basis: 66%;
+  }
+  .lp-footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .lp-dialog-inner {
+    padding: 32px 22px 24px;
+  }
+  .lp-dialog h2 {
+    font-size: 24px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lp *,
+  .lp *::before,
+  .lp *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
