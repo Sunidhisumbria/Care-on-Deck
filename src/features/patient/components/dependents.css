@@ -1,0 +1,79 @@
+﻿.patient-account:has(.dependents-screen) { background: #fff; font-family: var(--font-sans); color: #292729; }
+.patient-account:has(.dependents-screen) > header { background: #fcf5f8; border: 0; backdrop-filter: none; }
+.patient-account:has(.dependents-screen) > header > div { max-width: 1160px; padding: 22px 20px 12px; }
+.patient-account:has(.dependents-screen) > header .brand-logo { width: 166px; }
+.patient-account:has(.dependents-screen) > footer { background: #19000f; }
+.dependents-hero { position: relative; isolation: isolate; overflow: hidden; text-align: center; padding: 42px 20px 57px; background: radial-gradient(ellipse at 45% 0, #fffafa 5%, #fcf4f7 45%, #f0d4e2 100%); }
+.dependents-hero h1 { font-size: 34px; line-height: 1.2; font-weight: 700; letter-spacing: -1px; }
+.dependents-hero p { margin-top: 15px; color: #80787d; font-size: 16px; }
+.dependents-ribbons { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.dependents-ribbons i { position: absolute; width: 125%; height: 400%; border: 65px solid #d28bad15; border-radius: 50%; left: -13%; bottom: -6%; transform: rotate(-10deg); }
+.dependents-ribbons i:nth-child(2) { border-color: #ffffff50; border-width: 55px; width: 118%; left: -8%; height: 335%; bottom: -9%; transform: rotate(9deg); }
+.dependents-ribbons i:nth-child(3) { width: 155%; height: 320%; bottom: -14%; left: -27%; border-color: #e4b7cd30; transform: rotate(4deg); }
+.dependents-content { max-width: 1120px; margin: 0 auto; padding: 48px 20px 50px; min-height: 400px; }
+.dependent-list { display: grid; gap: 14px; list-style: none; padding: 0; }
+.dependent-card { display: flex; align-items: center; gap: 15px; min-height: 100px; border: 1px solid #eee8ed; box-shadow: 0 3px 9px #42162f04; border-radius: 14px; padding: 18px; background: white; }
+.dependent-avatar { width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; background: #be1281; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 600; text-transform: uppercase; }
+.dependent-summary { flex: 1; min-width: 0; }
+.dependent-summary h2 { font-size: 15px; font-weight: 700; overflow-wrap: anywhere; }
+.dependent-summary p { color: #928b91; font-size: 12px; margin-top: 3px; line-height: 1.5; }
+.dependent-coverage { display: inline-flex; gap: 6px; align-items: center; color: #a82b79; font-size: 11px; margin-top: 4px; }
+.dependent-coverage > span { color: #c39538; font-size: 16px; line-height: 1; }
+.dependent-view { border: 1px solid #cb76ad; color: #aa2d7c; border-radius: 7px; padding: 7px 22px; font-size: 12px; line-height: 1; flex-shrink: 0; min-height: 33px; }
+.dependent-view:hover { background: #fcf1f7; }
+.dependent-add { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; border: 1px dashed #e6dce3; border-radius: 13px; padding: 20px; margin-top: 32px; background: #fff; color: #b4478f; font-size: 13px; font-weight: 600; }
+.dependent-add > span { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 7px; background: #f7eaf2; font-size: 21px; }
+.dependent-add:hover { background: #fdf8fb; border-color: #bd6a9f; }
+.dependent-empty { text-align: center; border: 1px solid #eee8ed; border-radius: 14px; padding: 40px 20px; }
+.dependent-empty h2 { font-size: 18px; font-weight: 600; }
+.dependent-empty p { font-size: 14px; color: #8b7c85; margin-top: 8px; }
+.dependent-empty button { color: #9e2c74; margin-top: 18px; text-decoration: underline; }
+.dependent-empty-icon { display: inline-flex; padding: 18px; background: #f8eaf2; border-radius: 50%; margin-bottom: 18px; color: #a82d79; }
+.dependent-loading { display: grid; gap: 14px; }
+.dependent-loading > div { height: 100px; background: #fbf6f9; border-radius: 14px; animation: dependent-pulse 1.5s ease-in-out infinite alternate; }
+@keyframes dependent-pulse { to { opacity: .45; } }
+.dependent-modal { position: fixed; inset: 0; margin: auto; width: min(430px, calc(100% - 32px)); max-height: calc(100svh - 32px); overflow-y: auto; border: 1px solid #e8e0e4; border-radius: 9px; padding: 22px 20px 20px; background: #fcf9fa; color: #292729; font-family: var(--font-sans); box-shadow: 0 24px 80px #0002; }
+.dependent-modal::backdrop { background: #000a; }
+.dependent-modal > h2 { font-size: 22px; font-weight: 700; text-align: center; line-height: 1.25; letter-spacing: -.4px; }
+.dependent-modal > p { text-align: center; font-size: 12px; color: #817a7f; margin: 8px 0 22px; }
+.dependent-modal-close { position: absolute; right: 13px; top: 7px; padding: 4px 8px; font-size: 25px; font-weight: 300; color: #8b8489; }
+.dependent-modal-close:disabled { opacity: .4; }
+.dependent-form { display: grid; gap: 19px; }
+.dependent-form label { font-size: 12px; color: #302a2f; font-weight: 500; margin-bottom: 8px; }
+.dependent-form .field-shell { background: transparent; border-color: #e6dfe3; border-radius: 6px; min-height: 47px; padding: 11px 14px; }
+.dependent-form .field-shell input, .dependent-form .field-shell select { font-size: 14px; min-width: 0; }
+.dependent-form .field-shell input::placeholder { color: #a59da2; }
+.dependent-form .field-shell:focus-within { border-color: #b44687; }
+.dependent-form button[type=submit], .dependent-done { width: 100%; border-radius: 4px; background: #9f2c73; color: white; font-size: 13px; font-weight: 600; padding: 14px; }
+.dependent-form button[type=submit]:hover, .dependent-done:hover { background: #84205e; }
+.dependent-save-error { color: #b42318; font-size: 13px; }
+.dependent-detail-name { display: flex; align-items: center; gap: 12px; margin-top: 24px; }
+.dependent-details { margin: 24px 0; display: grid; gap: 16px; }
+.dependent-details > div { display: flex; justify-content: space-between; gap: 20px; padding-bottom: 12px; border-bottom: 1px solid #eae1e6; font-size: 13px; }
+.dependent-details dt { color: #8b7c85; }
+.dependent-details dd { text-align: right; overflow-wrap: anywhere; }
+@media (max-width: 900px) {
+  .patient-account:has(.dependents-screen) > header > div { gap: 12px; }
+  .patient-account:has(.dependents-screen) > header .brand-logo { width: 140px; }
+}
+@media (max-width: 640px) {
+  .patient-account:has(.dependents-screen) > header > div { flex-wrap: wrap; padding: 15px 20px; }
+  .patient-account:has(.dependents-screen) > header > div > div { flex-wrap: wrap; justify-content: flex-end; }
+  .dependents-hero { padding: 30px 20px 38px; }
+  .dependents-hero h1 { font-size: 28px; }
+  .dependents-hero p { font-size: 13px; margin-top: 10px; }
+  .dependents-content { padding: 28px 16px 36px; }
+  .dependent-card { padding: 14px 12px; gap: 10px; }
+  .dependent-avatar { width: 38px; height: 38px; font-size: 12px; }
+  .dependent-summary h2 { font-size: 14px; }
+  .dependent-summary p { font-size: 10px; }
+  .dependent-coverage { font-size: 10px; }
+  .dependent-view { padding: 8px 13px; }
+  .dependent-add { margin-top: 24px; font-size: 12px; }
+  .dependent-modal { padding: 23px 18px 18px; }
+  .dependent-modal > h2 { font-size: 21px; }
+  .dependent-form { gap: 16px; }
+  .dependent-form .field-shell input, .dependent-form .field-shell select { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .dependent-loading > div { animation: none; } }
+
