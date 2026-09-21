@@ -1,5 +1,7 @@
 'use client';
 
+import { Busy } from '@/components/ui/spinner';
+
 import { useSignOut } from '../hooks/use-sign-out';
 
 /**
@@ -27,7 +29,7 @@ export function SignOutButton({
       disabled={signOut.isPending}
       className={className}
     >
-      {signOut.isPending ? 'Signing out…' : label}
+      {signOut.isPending ? <Busy>Signing out…</Busy> : label}
     </button>
   );
 }

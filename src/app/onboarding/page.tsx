@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 
 import { OnboardingFlow } from '@/features/onboarding/onboarding-flow';
 import { resolveSession } from '@/server/auth/session';
+import { LoadingPanel } from '@/components/ui/spinner';
 
 export const metadata: Metadata = { title: 'Provider Onboarding | CareOndeck' };
 
@@ -25,7 +26,7 @@ export default async function OnboardingPage() {
   if (session.userType !== 'provider') redirect('/home');
 
   return (
-    <Suspense fallback={<div aria-hidden="true" className="mx-auto h-96 max-w-md animate-pulse rounded-card bg-white" />}>
+    <Suspense fallback={<LoadingPanel className="mx-auto max-w-md" label="Loading your application…" rows={5} />}>
       <OnboardingFlow />
     </Suspense>
   );

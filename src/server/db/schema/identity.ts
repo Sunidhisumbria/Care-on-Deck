@@ -183,8 +183,13 @@ export const trustedDevices = pgTable(
 );
 
 /**
- * One-time codes for mobile verification, login OTP and MFA.
- * Only a hash is stored. Every issued code is metered -- IA: Usage Tracking > OTP.
+ * One-time codes for sign-up verification, sign-in and password reset.
+ *
+ * Only a hash of the code is stored, and a row lives only while it can still be
+ * used: it is deleted when spent or replaced, and the daily cleanup job removes
+ * the rest once expired. The durable record of each code sent -- what usage
+ * tracking counts (IA: Usage Tracking > OTP) -- is `outbound_messages`.
+ * Readable only by the server acting as `system`, and by staff tooling.
  */
 export const verificationCodes = pgTable(
   'verification_codes',
@@ -200,9 +205,9 @@ export const verificationCodes = pgTable(
     /** Set when the correct code was entered. The row is then "verified". */
     consumedAt: timestamp('consumed_at', { withTimezone: true }),
     /**
-     * Set when the verification was spent on its follow-up action -- the
-     * signup completed, the password reset. A verified code can be spent once;
-     * this is what makes the proof token single-use without storing it.
+     * No longer written: a code spent on its follow-up action is now deleted,
+     * which is what keeps the proof token single-use. Kept for rows written
+     * before that change, which the cleanup job removes.
      */
     completedAt: timestamp('completed_at', { withTimezone: true }),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),

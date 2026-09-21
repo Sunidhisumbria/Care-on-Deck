@@ -10,17 +10,74 @@
  *
  * IA: 7. Scheduling
  */
+import { DateTime } from 'luxon';
+
 import type { RequestContext } from '@/server/auth/context';
 import type { Tx } from '@/server/db/tenant';
+import { ApiError } from '@/server/http/errors';
 import { notImplemented } from '@/server/http/response';
+
+import { NEXT_AVAILABLE_DAYS, openSlots, type Slot } from './availability';
+import type { BookableSlotsQuery } from './scheduling.schemas';
+
+export interface BookableDay {
+  /** Calendar date in the clinic's zone. */
+  date: string;
+  slots: Slot[];
+}
+
+export interface BookableSlotsResult {
+  provider_id: string;
+  timezone: string;
+  days: BookableDay[];
+}
 
 export const schedulingService = {
   /**
-   * Open slots for a provider or facility over a date range.
-   * IA: 2. Select Date / Select Time
+   * Open slots for a provider over a span of dates.
+   *
+   * Only days with something open are returned. A date the calendar does not
+   * get back is a date that cannot be booked -- a closed Saturday and a fully
+   * taken Tuesday look the same to a patient, and both are unpickable.
+   *
+   * Public: this is what the booking picker reads before anyone signs in.
+   * It exposes free time only -- who booked the rest is never part of it.
    */
-  async getBookableSlots(tx: Tx, query: unknown): Promise<unknown> {
-    return notImplemented('schedulingService.getBookableSlots');
+  async getBookableSlots(tx: Tx, query: BookableSlotsQuery): Promise<BookableSlotsResult> {
+    const found = await openSlots(tx, {
+      providerIds: [query.provider_id],
+      // Wide enough to cover the requested dates in any clinic zone; the dates
+      // themselves are resolved against the clinic's calendar inside.
+      from: DateTime.now().minus({ days: 1 }).toJSDate(),
+      to: DateTime.now().plus({ days: NEXT_AVAILABLE_DAYS * 3 }).toJSDate(),
+      dates: {
+        from: query.from ?? DateTime.now().toISODate()!,
+        to: query.to ?? DateTime.now().plus({ days: NEXT_AVAILABLE_DAYS }).toISODate()!,
+      },
+    });
+
+    const provider = found.get(query.provider_id);
+    if (!provider) {
+      // Either there is no such provider, or they are not listed. Both are the
+      // same answer to someone who cannot see them.
+      throw ApiError.notFound('That provider is not taking bookings.');
+    }
+
+    const byDate = new Map<string, Slot[]>();
+    for (const slot of provider.slots) {
+      const date = DateTime.fromISO(slot.starts_at).setZone(provider.timezone).toISODate()!;
+      const list = byDate.get(date);
+      if (list) list.push(slot);
+      else byDate.set(date, [slot]);
+    }
+
+    return {
+      provider_id: query.provider_id,
+      timezone: provider.timezone,
+      days: [...byDate.entries()]
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, slots]) => ({ date, slots })),
+    };
   },
 
   /** IA: 7. Calendar > Day View, Week View, Provider View, Facility View */

@@ -8,24 +8,30 @@ import { OptionCards } from '@/components/ui/option-cards';
 import { useBooking } from '../booking-state';
 import { ProviderSummary } from '../components/provider-summary';
 import { ReasonIcon } from '../components/reason-icon';
-import { PLACEHOLDER_VISIT_REASONS } from '../placeholder-data';
+import { useVisitReasons } from '../hooks/use-booking';
 
 /**
  * Step two: what the visit is for.
+ *
+ * The reasons belong to the practice being booked, not to CareOndeck -- each
+ * one is a row that practice can rename, retire or set its own length for. So
+ * the list is fetched for the chosen provider rather than hard-coded, and the
+ * appointment records which of their reasons was picked.
  *
  * The list is the shared `OptionCards`, which provider onboarding also uses for
  * its role choice -- the designs draw the two identically.
  */
 export function VisitReasonStep() {
   const { draft, set, next } = useBooking();
-  const [selected, setSelected] = useState<string>(
-    draft.reason?.id ?? PLACEHOLDER_VISIT_REASONS[0]!.id,
-  );
+  const { data: reasons = [], isPending, isError } = useVisitReasons(draft.provider?.id ?? null);
+  const [selected, setSelected] = useState<string | null>(draft.reason?.id ?? null);
 
   if (!draft.provider) return null;
 
+  const chosen = selected ?? reasons[0]?.id ?? null;
+
   function onContinue() {
-    set('reason', PLACEHOLDER_VISIT_REASONS.find((reason) => reason.id === selected) ?? null);
+    set('reason', reasons.find((reason) => reason.id === chosen) ?? null);
     next();
   }
 
@@ -38,27 +44,53 @@ export function VisitReasonStep() {
         <ProviderSummary provider={draft.provider} />
 
         <div>
-          <OptionCards
-            name="visit-reason"
-            label="Reason for visit"
-            value={selected}
-            onChange={setSelected}
-            options={PLACEHOLDER_VISIT_REASONS.map((reason) => ({
-              value: reason.id,
-              title: reason.title,
-              caption: reason.caption,
-              icon: <ReasonIcon name={reason.icon} />,
-            }))}
-          />
+          {isPending ? (
+            <div className="space-y-3" aria-hidden>
+              {[0, 1, 2, 3].map((row) => (
+                <div key={row} className="h-16 animate-pulse rounded-card bg-ink-100" />
+              ))}
+            </div>
+          ) : null}
 
-          <button
-            type="button"
-            onClick={onContinue}
-            className="mt-5 flex w-full items-center justify-center gap-1.5 rounded-field bg-brand-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
-          >
-            Continue
-            <ChevronRight className="h-4 w-4" />
-          </button>
+          {isError ? (
+            <p className="rounded-card border border-dashed border-line bg-white p-6 text-center text-sm text-ink-500">
+              Could not load the reasons this practice offers. Go back and try again.
+            </p>
+          ) : null}
+
+          {!isPending && !isError && reasons.length === 0 ? (
+            <p className="rounded-card border border-dashed border-line bg-white p-6 text-center text-sm text-ink-500">
+              This practice has not listed any visit reasons yet.
+            </p>
+          ) : null}
+
+          {reasons.length > 0 ? (
+            <>
+              <OptionCards
+                name="visit-reason"
+                label="Reason for visit"
+                iconFrame={false}
+                value={chosen}
+                onChange={setSelected}
+                options={reasons.map((reason) => ({
+                  value: reason.id,
+                  title: reason.name,
+                  caption: reason.description ?? `${reason.duration_minutes} minutes`,
+                  icon: <ReasonIcon reason={reason.name} />,
+                }))}
+              />
+
+              <button
+                type="button"
+                onClick={onContinue}
+                disabled={!chosen}
+                className="mt-5 flex w-full items-center justify-center gap-1.5 rounded-field bg-brand-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Continue
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </>
+          ) : null}
         </div>
       </div>
     </div>

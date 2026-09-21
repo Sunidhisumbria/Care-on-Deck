@@ -11,6 +11,7 @@ import {
   Field,
   PASSWORD_HINT,
   PasswordField,
+  PhoneField,
   SelectField,
   SubmitButton,
 } from '@/components/ui/field';
@@ -18,7 +19,6 @@ import {
   CalendarIcon,
   GenderIcon,
   MailIcon,
-  PhoneIcon,
   PinIcon,
   UserIcon,
 } from '@/components/ui/icons';
@@ -154,12 +154,8 @@ function SignupScreen() {
         </div>
         ) : null}
 
-        <Field
+        <PhoneField
           label="Phone"
-          type="tel"
-          autoComplete="tel"
-          placeholder="Enter phone number"
-          icon={<PhoneIcon />}
           error={error('phone')}
           {...register('phone')}
         />

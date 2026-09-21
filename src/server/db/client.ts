@@ -5,10 +5,7 @@ import { env } from '@/server/config/env';
 
 import * as schema from './schema';
 
-/**
- * A single pooled connection, reused across hot reloads in dev so Next's module
- * refresh does not exhaust Postgres connections.
- */
+
 declare global {
   var __careondeckSql: ReturnType<typeof postgres> | undefined;
 }
@@ -16,7 +13,15 @@ declare global {
 function createClient() {
   return postgres(env.DATABASE_URL, {
     max: env.DATABASE_POOL_MAX,
-    idle_timeout: 20,
+    /*
+     * Seconds an unused connection stays open. Opening one to a hosted database
+     * costs a TLS handshake and a password exchange -- about 3 seconds from
+     * India to Neon in Ohio, against ~0.3s for a query on an open one -- so
+     * closing them after a few idle seconds made every pause cost a reconnect.
+     * Through Neon's pooler an idle client connection holds no database
+     * process, so keeping it costs nothing and does not keep Neon awake.
+     */
+    idle_timeout: 300,
     max_lifetime: 60 * 30,
     prepare: false, // required when running behind a transaction-mode pooler
     onnotice: () => {},

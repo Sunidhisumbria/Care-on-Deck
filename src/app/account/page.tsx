@@ -6,6 +6,7 @@ import { usePatientProfile } from '@/features/patient/hooks';
 import { formatDate, fullName, titleCase } from '@/features/patient/lib/format';
 import type { PatientProfile } from '@/features/patient/types';
 import { ApiError } from '@/lib/http/errors';
+import { LoadingPanel } from '@/components/ui/spinner';
 
 /**
  * IA: 3. Patient Account > Personal Information.
@@ -107,10 +108,7 @@ function insuranceOf(profile: PatientProfile): string | null {
 
 function Skeleton() {
   return (
-    <div aria-hidden="true" className="space-y-6">
-      <div className="h-28 animate-pulse rounded-card bg-white" />
-      <div className="h-96 animate-pulse rounded-card bg-white" />
-    </div>
+    <LoadingPanel label="Loading your profile…" rows={6} />
   );
 }
 

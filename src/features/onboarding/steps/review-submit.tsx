@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { toast } from 'sonner';
 
@@ -10,6 +9,7 @@ import { toApiError } from '@/lib/http/errors';
 import type { NpiLookupAnswer } from '@/lib/npi';
 import { formatUsPhone, labelForOfficeType } from '@/lib/practice';
 import { WEEKDAYS, formatAppointmentLength, formatTime, type ScheduleValues } from '@/lib/schedule';
+import { pushSamePage } from '@/lib/same-page-navigation';
 
 import { useSubmitApplication } from '../hooks';
 import { providerTypeLabel } from '../provider-types';
@@ -45,7 +45,6 @@ const ATTEST_REQUIRED = 'Confirm the information is accurate to submit.';
  * applicant should read them once as a whole before they are sent.
  */
 export function ReviewSubmit({ session }: { session: OnboardingSession }) {
-  const router = useRouter();
   const submit = useSubmitApplication(session.id);
   const [attested, setAttested] = useState(false);
   const [attestError, setAttestError] = useState<string>();
@@ -62,7 +61,7 @@ export function ReviewSubmit({ session }: { session: OnboardingSession }) {
   };
 
   const resubmitting = session.status === 'needs_changes';
-  const edit = (key: StepperKey) => router.push(`/onboarding?step=${key}`);
+  const edit = (key: StepperKey) => pushSamePage(`/onboarding?step=${key}`);
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -71,7 +70,14 @@ export function ReviewSubmit({ session }: { session: OnboardingSession }) {
       return;
     }
     submit.mutate(undefined, {
-      onSuccess: () => toast.success(resubmitting ? 'Application resubmitted.' : 'Application submitted.'),
+      onSuccess: (updated) =>
+        toast.success(
+          updated.status === 'approved'
+            ? 'Application approved.'
+            : resubmitting
+              ? 'Application resubmitted.'
+              : 'Application submitted.',
+        ),
       onError: (error) => toast.error(toApiError(error).message),
     });
   }

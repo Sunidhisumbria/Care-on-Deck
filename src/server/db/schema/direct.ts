@@ -17,10 +17,7 @@ import { users } from './identity';
 import { facilities, organizations } from './organizations';
 import { providers } from './providers';
 
-/**
- * A booking page an office owns and drives traffic to itself -- no marketplace
- * listing, no lead fee. IA: 8. Direct > Private Booking Page
- */
+
 export const directPages = pgTable(
   'direct_pages',
   {
@@ -31,14 +28,11 @@ export const directPages = pgTable(
     /** Null = an org-wide page with a Location Selector. */
     facilityId: uuid('facility_id').references(() => facilities.id, { onDelete: 'cascade' }),
 
-    /** IA: 8. Direct > Private URL -- careondeck.com/d/{slug} */
     slug: varchar('slug', { length: 140 }).notNull().unique(),
-    /** Unguessable suffix so the page is unlisted rather than merely obscure. */
     privateToken: varchar('private_token', { length: 48 }).notNull().unique(),
 
     isPublished: boolean('is_published').notNull().default(false),
 
-    /** IA: 8. Direct > Direct Settings > Branding */
     branding: jsonb('branding')
       .$type<{
         logoUrl?: string;
@@ -89,10 +83,7 @@ export const directPageProviders = pgTable(
   (t) => [uniqueIndex('direct_page_providers_unique').on(t.directPageId, t.providerId)],
 );
 
-/**
- * The snippet an office pastes into its own site, and how far they got.
- * IA: 8. Direct > Website Install
- */
+
 export const directInstalls = pgTable(
   'direct_installs',
   {
@@ -111,11 +102,9 @@ export const directInstalls = pgTable(
       .notNull()
       .default(sql`'[]'::jsonb`),
     status: installStatusEnum('status').notNull().default('not_started'),
-    /** Set the first time we see a real embed request from the site. */
     firstSeenAt: timestamp('first_seen_at', { withTimezone: true }),
     lastSeenAt: timestamp('last_seen_at', { withTimezone: true }),
     detectedUrl: text('detected_url'),
-    /** IA: 8. Website Install > Done For You Setup */
     doneForYouRequestedAt: timestamp('done_for_you_requested_at', { withTimezone: true }),
     doneForYouCompletedAt: timestamp('done_for_you_completed_at', { withTimezone: true }),
     doneForYouAssigneeUserId: uuid('done_for_you_assignee_user_id').references(() => users.id, {

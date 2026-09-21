@@ -6,11 +6,12 @@
  */
 import { defineRoute } from '@/server/http/handler';
 import { ok } from '@/server/http/response';
+import { bookableSlotsQuerySchema } from '@/server/modules/scheduling/scheduling.schemas';
 import { schedulingService } from '@/server/modules/scheduling/scheduling.service';
 
 /** Open slots for the booking picker. IA: 2. Select Date / Select Time */
 export const GET = defineRoute({
   access: 'public',
-  handler: async ({ tx, query }) =>
-    ok(await schedulingService.getBookableSlots(tx, query)),
+  query: bookableSlotsQuerySchema,
+  handler: async ({ tx, query }) => ok(await schedulingService.getBookableSlots(tx, query)),
 });

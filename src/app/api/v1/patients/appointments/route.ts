@@ -6,11 +6,13 @@
  */
 import { defineRoute } from '@/server/http/handler';
 import { ok } from '@/server/http/response';
+import { appointmentListQuerySchema } from '@/server/modules/patients/own-appointments.schemas';
 import { patientService } from '@/server/modules/patients/patient.service';
 
-/** IA: 3. Patient Dashboard > Upcoming / Confirmed / Past Visits */
+/** IA: 3. Patient Dashboard > Upcoming / Completed / Canceled. `?status=` picks the tab. */
 export const GET = defineRoute({
   access: 'patient',
-  handler: async ({ tx, ctx }) =>
-    ok(await patientService.listOwnAppointments(tx, ctx)),
+  query: appointmentListQuerySchema,
+  handler: async ({ tx, ctx, query }) =>
+    ok(await patientService.listOwnAppointments(tx, ctx, query.status)),
 });

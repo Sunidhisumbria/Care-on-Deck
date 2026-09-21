@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { Avatar } from '@/components/ui/avatar';
-import { DependentsIcon, LockIcon, LogoutIcon, PersonCardIcon } from '@/components/ui/icons';
+import { DependentsIcon, LockIcon, LogoutIcon, PersonCardIcon, ShieldCheckIcon } from '@/components/ui/icons';
+import { Spinner } from '@/components/ui/spinner';
 
 import { useSignOut } from '../hooks/use-sign-out';
 import type { CurrentUser } from '../types';
@@ -123,6 +124,7 @@ function AccountMenu({ user }: { user: Account }) {
 
           <MenuItem href="/account" label="Personal information" icon={<PersonCardIcon />} />
           <MenuItem href="/account/dependents" label="Dependents" icon={<DependentsIcon />} />
+          <MenuItem href="/account/insurance" label="Insurance" icon={<ShieldCheckIcon />} />
           <MenuItem href="/account/password" label="Change password" icon={<LockIcon />} />
 
           <button
@@ -132,7 +134,11 @@ function AccountMenu({ user }: { user: Account }) {
             disabled={signOut.isPending}
             className="flex w-full items-center gap-3 border-t border-line px-4 py-3 text-left text-sm font-medium text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand-700 disabled:opacity-60"
           >
-            <LogoutIcon className="h-[1.125rem] w-[1.125rem] text-ink-500" />
+            {signOut.isPending ? (
+              <Spinner className="h-[1.125rem] w-[1.125rem] text-brand-600" />
+            ) : (
+              <LogoutIcon className="h-[1.125rem] w-[1.125rem] text-ink-500" />
+            )}
             {signOut.isPending ? 'Signing out…' : 'Logout'}
           </button>
         </div>
@@ -146,7 +152,7 @@ function MenuItem({
   label,
   icon,
 }: {
-  href: '/account' | '/account/dependents' | '/account/password';
+  href: '/account' | '/account/dependents' | '/account/insurance' | '/account/password';
   label: string;
   icon: React.ReactNode;
 }) {

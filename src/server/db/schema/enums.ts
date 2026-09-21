@@ -279,6 +279,10 @@ export const mediaKindEnum = pgEnum('media_kind', [
   'other',
 ]);
 
+// --- Patient insurance -----------------------------------------------------
+/** IA: 3. Saved Insurance. Health and dental only, per the client's OCR handoff. */
+export const insuranceTypeEnum = pgEnum('insurance_type', ['health', 'dental']);
+
 // --- Reports ---------------------------------------------------------------
 export const reportKindEnum = pgEnum('report_kind', [
   'appointments',

@@ -1,6 +1,6 @@
 import { apiGet, apiPatch, apiPost } from '@/lib/http/client';
 
-import type { InsuranceCarrier, OnboardingSession, ProviderStep } from '../types';
+import type { OnboardingSession, ProviderStep } from '../types';
 
 /** The onboarding endpoints, and nothing else. Owner-scoped server-side. */
 export const onboardingApi = {
@@ -16,6 +16,4 @@ export const onboardingApi = {
   /** `attested` is the applicant's own statement that the application is accurate. */
   submit: (id: string) =>
     apiPost<OnboardingSession>(`/onboarding/sessions/${encodeURIComponent(id)}/submit`, { attested: true }),
-
-  carriers: () => apiGet<InsuranceCarrier[]>('/insurance/carriers'),
 };

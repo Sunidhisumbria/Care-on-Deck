@@ -1,14 +1,21 @@
 'use client';
 
 import {
+  useEffect,
   useId,
+  useRef,
   useState,
+  type FocusEvent,
   type InputHTMLAttributes,
   type ReactNode,
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
 } from 'react';
-import { LockIcon } from './icons';
+import { localPhoneDigits, PHONE_LOCAL_MAX } from '@/lib/phone';
+
+import { LockIcon, UsFlagIcon } from './icons';
+import { SelectMenu } from './select-menu';
+import { Busy } from './spinner';
 
 /**
  * Form controls for the auth screens.
@@ -183,6 +190,18 @@ interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
   options: Array<{ value: string; label: string }>;
 }
 
+/**
+ * A select whose list is drawn by the app rather than by the operating system.
+ *
+ * The real `<select>` is still here, hidden. It is what react-hook-form
+ * registers, what `reset()` writes to, and what a plain form submit reads --
+ * so nothing calling this had to change. Picking a row writes the value back
+ * to it and fires its change event, which is exactly what the browser would
+ * have done, and the form cannot tell the difference.
+ *
+ * The visible control is `SelectMenu`, because an open `<select>` is painted
+ * by the OS and ignores every style on this page.
+ */
 export function SelectField({
   label,
   icon,
@@ -194,22 +213,72 @@ export function SelectField({
 }: SelectFieldProps) {
   const id = useId();
   const errorId = `${id}-error`;
+  const labelId = `${id}-label`;
+  const { onChange, defaultValue, value: given, disabled, ...rest } = select;
+
+  const node = useRef<HTMLSelectElement | null>(null);
+  const [value, setValue] = useState(String(given ?? defaultValue ?? ''));
+
+  /*
+   * react-hook-form writes straight to the DOM node on reset() and setValue(),
+   * and neither fires an event. Reading the node back after each render is
+   * what keeps the button's label from drifting away from the form's value.
+   */
+  // Deliberately every render: the DOM node can change without this component's
+  // state changing, which is the case being caught. The check stops it looping.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const current = node.current?.value ?? '';
+    if (current !== value) setValue(current);
+  });
+
+  function choose(next: string) {
+    const element = node.current;
+    if (!element) return;
+
+    element.value = next;
+    element.dispatchEvent(new Event('change', { bubbles: true }));
+  }
 
   return (
     <div className={className}>
-      <label htmlFor={id} className={labelClass()}>
+      <span id={labelId} className={labelClass()}>
         {label}
-      </label>
+      </span>
       <div className={shellClass(Boolean(error))}>
         {icon ? <span className="shrink-0 text-ink-300">{icon}</span> : null}
+
         <select
+          {...rest}
           id={id}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={error ? errorId : undefined}
-          defaultValue=""
-          className="w-full appearance-none bg-transparent text-[0.9375rem] text-ink-900 outline-none [&:invalid]:text-ink-300"
-          required
-          {...select}
+          ref={(element) => {
+            node.current = element;
+            const forwarded = (select as { ref?: unknown }).ref;
+            if (typeof forwarded === 'function') forwarded(element);
+            else if (forwarded && typeof forwarded === 'object') {
+              (forwarded as { current: HTMLSelectElement | null }).current = element;
+            }
+          }}
+          defaultValue={String(given ?? defaultValue ?? '')}
+          disabled={disabled}
+          onChange={(event) => {
+            setValue(event.target.value);
+            onChange?.(event);
+          }}
+          /*
+           * A form that focuses its first invalid field would otherwise send
+           * focus into a control nobody can see. Hand it to the button that
+           * replaced it instead.
+           */
+          onFocus={(event) => {
+            const trigger = event.currentTarget.parentElement?.querySelector<HTMLButtonElement>(
+              'button[role="combobox"]',
+            );
+            trigger?.focus();
+          }}
+          tabIndex={-1}
+          aria-hidden
+          className="sr-only"
         >
           <option value="" disabled>
             {placeholder}
@@ -220,9 +289,147 @@ export function SelectField({
             </option>
           ))}
         </select>
-        <ChevronIcon />
+
+        <SelectMenu
+          options={options}
+          value={value}
+          onSelect={choose}
+          placeholder={placeholder}
+          disabled={disabled}
+          invalid={Boolean(error)}
+          labelledBy={labelId}
+          describedBy={error ? errorId : undefined}
+          triggerClassName="text-[0.9375rem]"
+        />
       </div>
       <ErrorText id={errorId}>{error}</ErrorText>
+    </div>
+  );
+}
+
+interface PhoneFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
+  label: string;
+  error?: string;
+  hint?: string;
+}
+
+/**
+ * A US phone number: the flag and +1 are fixed, and the person types the rest.
+ *
+ * The visible box holds only the digits after +1 -- 8 to 14 of them, see
+ * lib/phone. Typing or pasting anything else is reduced to digits, so
+ * "(503) 555-0142" and "+1 503 555 0142" both land as 5035550142.
+ *
+ * A hidden input carries the whole number, "+1" and all. That is what
+ * react-hook-form registers and submits, so forms and the server receive the
+ * same "+15035550142" they always did, and nothing downstream changed.
+ */
+export function PhoneField({
+  label,
+  error,
+  hint,
+  className = '',
+  placeholder = 'Enter phone number',
+  ...input
+}: PhoneFieldProps) {
+  const id = useId();
+  const errorId = `${id}-error`;
+  const hintId = `${id}-hint`;
+  const { onChange, onBlur, name, defaultValue, value: given, disabled, ...others } = input;
+  const { ref: forwarded, ...rest } = others as typeof others & { ref?: unknown };
+
+  const hidden = useRef<HTMLInputElement | null>(null);
+  const visible = useRef<HTMLInputElement | null>(null);
+  const [local, setLocal] = useState(localPhoneDigits(String(given ?? defaultValue ?? '')));
+
+  /*
+   * react-hook-form writes straight to the hidden input on reset() and when it
+   * applies default values, and neither fires an event. Reading it back after
+   * each render keeps the box in step -- except while someone is typing in it.
+   */
+  // Deliberately every render; the comparison stops it looping.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (typeof document !== 'undefined' && document.activeElement === visible.current) return;
+    const digits = localPhoneDigits(hidden.current?.value ?? '');
+    if (digits !== local) setLocal(digits);
+  });
+
+  function type(raw: string) {
+    const trimmed = raw.trim();
+    // A pasted "+1 503 555 0142" keeps its +1 out of the local part.
+    const digits = (trimmed.startsWith('+1') ? trimmed.slice(2) : trimmed)
+      .replace(/\D/g, '')
+      .slice(0, PHONE_LOCAL_MAX);
+    setLocal(digits);
+
+    const element = hidden.current;
+    if (!element) return;
+    // Through the native setter, so React notices the change and the form hears it.
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set?.call(
+      element,
+      digits ? `+1${digits}` : '',
+    );
+    element.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  return (
+    <div className={className}>
+      <label htmlFor={id} className={labelClass()}>
+        {label}
+      </label>
+      <div className={shellClass(Boolean(error))}>
+        <span className="flex shrink-0 items-center gap-2 border-r border-line pr-3 text-[0.9375rem] font-semibold text-ink-700">
+          <UsFlagIcon className="h-[14px] w-5 shrink-0 rounded-[3px] shadow-[0_0_0_1px_rgba(28,17,25,0.08)]" />
+          +1
+        </span>
+        <input
+          {...rest}
+          ref={visible}
+          id={id}
+          type="tel"
+          inputMode="numeric"
+          autoComplete="tel-national"
+          placeholder={placeholder}
+          disabled={disabled}
+          value={local}
+          onChange={(event) => type(event.target.value)}
+          onBlur={() => {
+            // The form tracks "touched" by the registered input, which is the hidden one.
+            if (hidden.current) {
+              onBlur?.({ target: hidden.current, type: 'blur' } as unknown as FocusEvent<HTMLInputElement>);
+            }
+          }}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : hint ? hintId : undefined}
+          className="w-full bg-transparent text-[0.9375rem] text-ink-900 outline-none placeholder:text-ink-300"
+        />
+        <input
+          ref={(element) => {
+            hidden.current = element;
+            if (typeof forwarded === 'function') forwarded(element);
+            else if (forwarded && typeof forwarded === 'object') {
+              (forwarded as { current: HTMLInputElement | null }).current = element;
+            }
+          }}
+          name={name}
+          defaultValue={String(given ?? defaultValue ?? '')}
+          disabled={disabled}
+          onChange={onChange}
+          // A form that focuses its first invalid field lands on the box people can see.
+          onFocus={() => visible.current?.focus()}
+          tabIndex={-1}
+          aria-hidden
+          className="sr-only"
+        />
+      </div>
+      {error ? (
+        <ErrorText id={errorId}>{error}</ErrorText>
+      ) : hint ? (
+        <p id={hintId} className="mt-1.5 text-xs text-ink-500">
+          {hint}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -232,9 +439,10 @@ export function SubmitButton({ children, pending }: { children: ReactNode; pendi
     <button
       type="submit"
       disabled={pending}
+      aria-busy={pending || undefined}
       className="w-full rounded-field bg-brand-600 py-3.5 text-[0.9375rem] font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {pending ? 'Please wait…' : children}
+      {pending ? <Busy>Please wait…</Busy> : children}
     </button>
   );
 }
@@ -263,14 +471,6 @@ const stroke = {
   strokeLinecap: 'round' as const,
   strokeLinejoin: 'round' as const,
 };
-
-function ChevronIcon() {
-  return (
-    <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 text-ink-500" {...stroke}>
-      <path d="m6 8 4 4 4-4" />
-    </svg>
-  );
-}
 
 function EyeIcon({ crossed }: { crossed: boolean }) {
   return (

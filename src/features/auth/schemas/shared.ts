@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { isValidUsPhone, PHONE_RULE } from '@/lib/phone';
+
 /**
  * The pieces every auth form shares.
  *
@@ -21,7 +23,7 @@ export const phoneField = z
   .string()
   .trim()
   .min(1, 'Enter your mobile number.')
-  .refine((value) => value.replace(/\D/g, '').length >= 10, 'Enter a valid mobile number.');
+  .refine(isValidUsPhone, PHONE_RULE);
 
 /**
  * Mirrors the server's rules so the form can say what is wrong before a

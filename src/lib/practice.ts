@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { isValidUsPhone, localPhoneDigits, PHONE_RULE } from './phone';
 import { US_STATE_CODES } from './us-states';
 
 /**
@@ -29,7 +30,7 @@ const OFFICE_TYPE_VALUES = OFFICE_TYPES.map((type) => type.value) as [OfficeType
 export const practiceSchema = z.object({
   name: z.string().trim().min(2, 'Enter your practice name.').max(200),
   office_type: z.enum(OFFICE_TYPE_VALUES, { errorMap: () => ({ message: 'Select the type of practice.' }) }),
-  phone: z.string().trim().refine(isUsPhone, 'Enter a 10-digit US phone number.'),
+  phone: z.string().trim().refine(isValidUsPhone, PHONE_RULE),
   email: z.string().trim().min(1, 'Enter the practice email.').email('Enter a valid email address.').max(320),
   website: z
     .string()
@@ -50,15 +51,9 @@ export function labelForOfficeType(value: string): string {
   return OFFICE_TYPES.find((type) => type.value === value)?.label ?? 'Practice';
 }
 
-function isUsPhone(value: string): boolean {
-  const digits = value.replace(/\D/g, '');
-  return digits.length === 10 || (digits.length === 11 && digits.startsWith('1'));
-}
-
 /** "(888) 803-3370" -> "+18888033370". Stored in one form so it can be compared and dialled. */
 export function normalizeUsPhone(value: string): string {
-  const digits = value.replace(/\D/g, '');
-  return digits.length === 10 ? `+1${digits}` : `+${digits}`;
+  return `+1${localPhoneDigits(value)}`;
 }
 
 /** "+18888033370" -> "(888) 803-3370". */

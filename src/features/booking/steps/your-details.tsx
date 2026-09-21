@@ -2,8 +2,9 @@
 
 import { z } from 'zod';
 
-import { Field, SelectField } from '@/components/ui/field';
-import { CalendarIcon, ChevronRight, GenderIcon, PhoneIcon, UserIcon } from '@/components/ui/icons';
+import { Field, PhoneField, SelectField } from '@/components/ui/field';
+import { CalendarIcon, ChevronRight, GenderIcon, UserIcon } from '@/components/ui/icons';
+import { isValidUsPhone, PHONE_RULE } from '@/lib/phone';
 import { useApiForm } from '@/lib/forms/use-api-form';
 
 import { useBooking } from '../booking-state';
@@ -28,7 +29,11 @@ const detailsSchema = z.object({
       return !Number.isNaN(date.getTime()) && date <= new Date();
     }, 'That date is in the future.'),
   gender: z.string().min(1, 'Select an option.'),
-  phone: z.string().trim().min(7, 'Enter a phone number we can reach you on.'),
+  phone: z
+    .string()
+    .trim()
+    .min(1, 'Enter a phone number we can reach you on.')
+    .refine(isValidUsPhone, PHONE_RULE),
 });
 
 export function YourDetailsStep() {
@@ -98,12 +103,8 @@ export function YourDetailsStep() {
             error={error('gender')}
             {...register('gender')}
           />
-          <Field
+          <PhoneField
             label="Phone"
-            icon={<PhoneIcon />}
-            type="tel"
-            placeholder="Enter phone number"
-            autoComplete="tel"
             error={error('phone')}
             {...register('phone')}
           />

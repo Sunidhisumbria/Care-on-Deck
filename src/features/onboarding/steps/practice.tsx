@@ -1,13 +1,13 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 
-import { Field, SelectField, SubmitButton } from '@/components/ui/field';
-import { MailIcon, PhoneIcon, PinIcon } from '@/components/ui/icons';
+import { Field, PhoneField, SelectField, SubmitButton } from '@/components/ui/field';
+import { MailIcon, PinIcon } from '@/components/ui/icons';
 import { useApiForm } from '@/lib/forms/use-api-form';
 import type { NpiLookupAnswer } from '@/lib/npi';
 import { OFFICE_TYPES, formatUsPhone, practiceSchema, type PracticeValues } from '@/lib/practice';
 import { isUsStateCode, stateOptions } from '@/lib/us-states';
+import { pushSamePage } from '@/lib/same-page-navigation';
 
 import { useSaveStep } from '../hooks';
 import type { OnboardingSession } from '../types';
@@ -34,7 +34,6 @@ interface SavedPractice {
  * location, so a practice needs one to be found at all.
  */
 export function PracticeStep({ session }: { session: OnboardingSession }) {
-  const router = useRouter();
   const save = useSaveStep(session.id);
 
   const saved = session.draft.practice_setup as SavedPractice | undefined;
@@ -64,7 +63,7 @@ export function PracticeStep({ session }: { session: OnboardingSession }) {
         noValidate
         onSubmit={submit(async (values) => {
           await save.mutateAsync({ step: 'practice_setup', data: values });
-          router.push('/onboarding');
+          pushSamePage('/onboarding');
         })}
         className="mt-6 space-y-4"
       >
@@ -82,12 +81,8 @@ export function PracticeStep({ session }: { session: OnboardingSession }) {
           error={error('office_type')}
           {...register('office_type')}
         />
-        <Field
+        <PhoneField
           label="Practice Phone"
-          type="tel"
-          icon={<PhoneIcon />}
-          placeholder="Enter phone number"
-          autoComplete="tel"
           error={error('phone')}
           {...register('phone')}
         />

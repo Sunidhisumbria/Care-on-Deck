@@ -18,7 +18,7 @@ const DB_URL = process.env.DATABASE_URL;
 if (!DB_URL) {
   console.error(
     'DATABASE_URL is not set.\n' +
-      'Create a .env file in the project root (copy .env.example) and put the\n' +
+      'Create a .env file in the project root and put the\n' +
       'connection string on the DATABASE_URL line.',
   );
   process.exit(WARN_ONLY ? 0 : 1);

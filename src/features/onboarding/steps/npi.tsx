@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -12,6 +11,8 @@ import { useCurrentUser } from '@/features/auth/hooks';
 import { useApiForm } from '@/lib/forms/use-api-form';
 import { toApiError } from '@/lib/http/errors';
 import { npiField, profileFlags } from '@/lib/npi';
+import { Busy } from '@/components/ui/spinner';
+import { pushSamePage } from '@/lib/same-page-navigation';
 
 import { useSaveStep } from '../hooks';
 import { providerTypeLabel } from '../provider-types';
@@ -146,7 +147,6 @@ function ConfirmProfile({
   lookup: NpiLookupAnswer;
   onSearchAgain: () => void;
 }) {
-  const router = useRouter();
   const confirm = useSaveStep(session.id);
   const retry = useSaveStep(session.id);
   const { user } = useCurrentUser();
@@ -167,7 +167,7 @@ function ConfirmProfile({
   async function onConfirm() {
     try {
       await confirm.mutateAsync({ step: 'confirm_profile', data: { confirmed: true } });
-      router.push('/onboarding');
+      pushSamePage('/onboarding');
     } catch (error) {
       toast.error(toApiError(error).message);
     }
@@ -197,10 +197,10 @@ function ConfirmProfile({
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           <button type="button" onClick={onRetry} disabled={retry.isPending} className={SECONDARY}>
-            {retry.isPending ? 'Trying…' : 'Try again'}
+            {retry.isPending ? <Busy>Trying…</Busy> : 'Try again'}
           </button>
           <button type="button" onClick={onConfirm} disabled={confirm.isPending} className={PRIMARY}>
-            {confirm.isPending ? 'Saving…' : 'Continue'}
+            {confirm.isPending ? <Busy>Saving…</Busy> : 'Continue'}
           </button>
         </div>
       </>
@@ -277,7 +277,7 @@ function ConfirmProfile({
           chose <strong>{providerTypeLabel(providerType)}</strong>.{' '}
           <button
             type="button"
-            onClick={() => router.push('/onboarding?step=select_role')}
+            onClick={() => pushSamePage('/onboarding?step=select_role')}
             className="font-semibold underline"
           >
             Change my role
@@ -290,7 +290,7 @@ function ConfirmProfile({
           No, search again
         </button>
         <button type="button" onClick={onConfirm} disabled={confirm.isPending} className={PRIMARY}>
-          {confirm.isPending ? 'Saving…' : 'Yes, this is me'}
+          {confirm.isPending ? <Busy>Saving…</Busy> : 'Yes, this is me'}
         </button>
       </div>
 
@@ -302,7 +302,6 @@ function ConfirmProfile({
 }
 
 function ConfirmedProfile({ lookup, onChange }: { lookup: NpiLookupAnswer; onChange: () => void }) {
-  const router = useRouter();
   const profile = lookup.profile;
   const name = profile
     ? [profile.first_name, profile.middle_name, profile.last_name].filter(Boolean).join(' ')
@@ -329,7 +328,7 @@ function ConfirmedProfile({ lookup, onChange }: { lookup: NpiLookupAnswer; onCha
         <button type="button" onClick={onChange} className={SECONDARY}>
           Change NPI
         </button>
-        <button type="button" onClick={() => router.push('/onboarding')} className={PRIMARY}>
+        <button type="button" onClick={() => pushSamePage('/onboarding')} className={PRIMARY}>
           Continue
           <ChevronRight className="h-4 w-4" />
         </button>

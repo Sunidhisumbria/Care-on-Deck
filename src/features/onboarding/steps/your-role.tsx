@@ -1,12 +1,13 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { ChevronRight } from '@/components/ui/icons';
 import { OptionCards } from '@/components/ui/option-cards';
 import { toApiError } from '@/lib/http/errors';
+import { Busy } from '@/components/ui/spinner';
+import { pushSamePage } from '@/lib/same-page-navigation';
 
 import { ProviderTypeIcon } from '../components/provider-type-icon';
 import { useSaveStep } from '../hooks';
@@ -22,7 +23,6 @@ import type { OnboardingSession, ProviderType } from '../types';
  * mismatch the applicant never chose. Continue stays disabled until they pick.
  */
 export function YourRoleStep({ session }: { session: OnboardingSession }) {
-  const router = useRouter();
   const save = useSaveStep(session.id);
 
   const saved = (session.draft.select_role as { provider_type?: ProviderType } | undefined)?.provider_type ?? null;
@@ -37,7 +37,7 @@ export function YourRoleStep({ session }: { session: OnboardingSession }) {
     if (!selected) return;
     try {
       await save.mutateAsync({ step: 'select_role', data: { provider_type: selected } });
-      router.push('/onboarding');
+      pushSamePage('/onboarding');
     } catch (error) {
       toast.error(toApiError(error).message);
     }
@@ -71,7 +71,7 @@ export function YourRoleStep({ session }: { session: OnboardingSession }) {
         disabled={!selected || save.isPending}
         className="mt-5 flex w-full items-center justify-center gap-1.5 rounded-field bg-brand-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {save.isPending ? 'Saving…' : 'Continue'}
+        {save.isPending ? <Busy>Saving…</Busy> : 'Continue'}
         {save.isPending ? null : <ChevronRight className="h-4 w-4" />}
       </button>
     </>

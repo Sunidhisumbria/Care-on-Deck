@@ -11,6 +11,7 @@ import { SelectProviderStep } from './steps/select-provider';
 import { VisitReasonStep } from './steps/visit-reason';
 import { YourAddressStep } from './steps/your-address';
 import { YourDetailsStep } from './steps/your-details';
+import type { BookingConfirmation } from './types';
 
 /** The heading each step shows. Kept together so the wording stays consistent. */
 const HEADINGS = {
@@ -32,7 +33,7 @@ export function BookingFlow() {
 
 function Steps() {
   const { step, draft, goTo } = useBooking();
-  const [reference, setReference] = useState<string | null>(null);
+  const [confirmation, setConfirmation] = useState<BookingConfirmation | null>(null);
   const heading = HEADINGS[step];
 
   /*
@@ -70,22 +71,15 @@ function Steps() {
       {step === 'when' ? <PickWhenStep /> : null}
       {step === 'details' ? <YourDetailsStep /> : null}
       {step === 'address' ? <YourAddressStep /> : null}
-      {step === 'insurance' ? <InsuranceStep onBooked={() => setReference(placeholderReference())} /> : null}
+      {step === 'insurance' ? <InsuranceStep onBooked={setConfirmation} /> : null}
 
-      {reference ? (
-        <ConfirmationDialog draft={draft} reference={reference} onClose={() => setReference(null)} />
+      {confirmation ? (
+        <ConfirmationDialog
+          draft={draft}
+          confirmation={confirmation}
+          onClose={() => setConfirmation(null)}
+        />
       ) : null}
     </>
   );
-}
-
-/**
- * Stands in for the reference the server would issue.
- *
- * Deliberately not persisted and deliberately labelled in the dialog: until
- * `booking.requestAppointment` exists there is no appointment row and no real
- * reference to show.
- */
-function placeholderReference(): string {
-  return `CD${Math.floor(100000 + Math.random() * 899999)}`;
 }

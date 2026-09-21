@@ -60,5 +60,46 @@ export interface UpcomingAppointment {
     rating_average: number | null;
     rating_count: number;
   } | null;
-  facility: { name: string; address: string | null } | null;
+  /** `timezone` is the clinic's; times are shown in it, not the reader's. */
+  facility: { name: string; address: string | null; timezone: string } | null;
+}
+
+/** The Appointments tabs, as the list endpoint's `?status=` names them. */
+export type AppointmentListStatus = 'upcoming' | 'completed' | 'canceled';
+
+/** One appointment, as View Details shows it. */
+export interface AppointmentDetail {
+  id: string;
+  reference: string;
+  status: string;
+  starts_at: string;
+  ends_at: string;
+  duration_minutes: number;
+  requested_at: string;
+  visit_reason: string | null;
+  patient_note: string | null;
+  payment:
+    | { kind: 'self_pay' }
+    | { kind: 'insurance'; carrier: string | null; member_id_last4: string | null };
+  provider: {
+    id: string;
+    name: string;
+    specialty: string | null;
+    rating_average: number | null;
+    rating_count: number;
+  } | null;
+  patient: { full_name: string; gender: string | null; age: number | null } | null;
+  booking_for: 'self' | 'dependent';
+  /** Upcoming and not closed by the practice: Cancel and Reschedule are offered. */
+  can_change: boolean;
+  facility: {
+    name: string;
+    address_line1: string | null;
+    address_line2: string | null;
+    city: string | null;
+    state: string | null;
+    postal_code: string | null;
+    phone: string | null;
+    timezone: string;
+  } | null;
 }

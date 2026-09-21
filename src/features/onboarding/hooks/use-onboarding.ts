@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { insuranceKeys, onboardingKeys } from '@/lib/query/keys';
+import { onboardingKeys } from '@/lib/query/keys';
 
 import { onboardingApi } from '../api/onboarding.api';
 import type { OnboardingSession, ProviderStep } from '../types';
@@ -56,14 +56,5 @@ export function useSubmitApplication(sessionId: string) {
     onSuccess: (session) => {
       queryClient.setQueryData(onboardingKeys.current(), session);
     },
-  });
-}
-
-/** The insurance directory. Reference data, so it is kept for a while. */
-export function useInsuranceCarriers() {
-  return useQuery({
-    queryKey: insuranceKeys.carriers(),
-    queryFn: () => onboardingApi.carriers(),
-    staleTime: 10 * 60 * 1000,
   });
 }
