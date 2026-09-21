@@ -7,6 +7,7 @@ import { normalizeUsPhone, normalizeWebsite, type PracticeValues } from '@/lib/p
 import type { ProfileValues } from '@/lib/profile';
 import { timezoneForState } from '@/lib/us-states';
 import type { RequestContext } from '@/server/auth/context';
+import { env } from '@/server/config/env';
 import { insuranceCarriers, onboardingSessions, providers, users } from '@/server/db/schema';
 import { withElevated, type Tx } from '@/server/db/tenant';
 import { ApiError } from '@/server/http/errors';
@@ -15,6 +16,7 @@ import { nppes, type NpiRecord } from '@/server/integrations';
 import { ownedFile, type UploadedFileView } from '@/server/modules/uploads/uploads.service';
 import { recordAudit } from '@/server/observability/audit';
 
+import { AUTO_APPROVAL_NOTE, approveApplication, flaggedApprovalNote } from './approve';
 import { submitApplication } from './submit';
 import {
   AUTOMATIC_STEPS,
@@ -242,7 +244,29 @@ export const onboardingService = {
     const npi = (row.draft.npi_lookup as { npi?: string } | undefined)?.npi;
     if (npi) await assertNpiNotClaimed(tx, userId, npi);
 
-    return toView(await submitApplication(tx, ctx, row, userId));
+    const submitted = await submitApplication(tx, ctx, row, userId);
+
+    // Local and staging only, until Control Center approvals exist. env.ts
+    // refuses this setting in production.
+    if (!env.PROVIDER_AUTO_APPROVE) return toView(submitted);
+
+    // Auto-approval is there so the flow can be walked without a reviewer, not
+    // to wave through an application our own checks disagreed with. An NPI
+    // registered to somebody else is exactly what a reviewer exists to catch,
+    // so it waits for one -- unless PROVIDER_AUTO_APPROVE_FLAGGED says the
+    // environment is for testing later flows with borrowed NPIs.
+    const held = heldFlags(submitted);
+    if (held.length > 0 && !env.PROVIDER_AUTO_APPROVE_FLAGGED) {
+      return toView(await holdForReview(tx, submitted, held));
+    }
+
+    return toView(
+      await approveApplication(tx, ctx, submitted, {
+        decidedByUserId: null,
+        note: held.length > 0 ? flaggedApprovalNote(held) : AUTO_APPROVAL_NOTE,
+        automatic: true,
+      }),
+    );
   },
 
   /**
@@ -258,6 +282,52 @@ export const onboardingService = {
     return { profile: toProfile(assertUsable(await nppes.lookupByNpi(query.npi))) };
   },
 };
+
+/**
+ * Flags that keep an application in the queue even when auto-approval is on.
+ *
+ * Each one means an automatic check disagreed with the applicant, and none of
+ * them is refused outright: a married name or an unreachable registry is
+ * usually innocent. What they cannot be is approved by nobody.
+ */
+const HELD_FLAGS = ['name_mismatch', 'role_mismatch', 'registry_unavailable'] as const;
+
+type HeldFlag = (typeof HELD_FLAGS)[number];
+
+const HOLD_REASON: Record<HeldFlag, string> = {
+  name_mismatch: 'the name on this NPI record does not match the name on the account',
+  role_mismatch: 'the registry lists a different kind of provider than the one chosen',
+  registry_unavailable: 'the NPI registry could not be reached to check this number',
+};
+
+function heldFlags(session: SessionRow): HeldFlag[] {
+  const confirmed = session.draft.confirm_profile as { flags?: unknown } | undefined;
+  const flags = Array.isArray(confirmed?.flags) ? confirmed.flags : [];
+
+  return HELD_FLAGS.filter((flag) => flags.includes(flag));
+}
+
+/**
+ * Leaves the application submitted and says why it is waiting.
+ *
+ * The note is what the applicant reads on their status screen, so it is
+ * written for them: what we could not confirm, not which flag fired.
+ */
+async function holdForReview(tx: Tx, session: SessionRow, flags: HeldFlag[]): Promise<SessionRow> {
+  const reasons = flags.map((flag) => HOLD_REASON[flag]);
+  const note =
+    reasons.length === 1
+      ? `A member of our team is checking this application, because ${reasons[0]}.`
+      : `A member of our team is checking this application, because ${reasons.slice(0, -1).join(', ')} and ${reasons.at(-1)}.`;
+
+  const [row] = await tx
+    .update(onboardingSessions)
+    .set({ reviewerNote: note, updatedAt: new Date() })
+    .where(eq(onboardingSessions.id, session.id))
+    .returning();
+
+  return row ?? session;
+}
 
 /** The first step still to do, in flow order. */
 export function nextStep(completed: readonly string[]): ProviderStep {

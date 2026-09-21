@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 
+import { Busy } from '@/components/ui/spinner';
+
 import { useRequestVerification } from '../hooks/use-request-verification';
 import type { Contacts, InterfaceRole } from '../types';
 
@@ -65,7 +67,7 @@ export function VerifyMethodDialog({
               disabled={request.isPending}
               className="w-full rounded-field bg-brand-600 py-3.5 text-[0.9375rem] font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {request.isPending ? 'Please wait…' : 'Send verification text'}
+              {request.isPending ? <Busy>Please wait…</Busy> : 'Send verification text'}
             </button>
           ) : null}
 

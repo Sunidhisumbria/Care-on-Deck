@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
 import { SubmitButton } from '@/components/ui/field';
@@ -8,6 +7,8 @@ import { SearchIcon } from '@/components/ui/icons';
 import { Toggle } from '@/components/ui/toggle';
 import { acceptedInsuranceSchema } from '@/lib/accepted-insurance';
 import { useApiForm } from '@/lib/forms/use-api-form';
+import { SectionLoader } from '@/components/ui/spinner';
+import { pushSamePage } from '@/lib/same-page-navigation';
 
 import { useInsuranceCarriers, useSaveStep } from '../hooks';
 import type { OnboardingSession } from '../types';
@@ -28,7 +29,6 @@ interface SavedInsurance {
  * answer that decides who finds the practice at all.
  */
 export function AcceptedInsuranceStep({ session }: { session: OnboardingSession }) {
-  const router = useRouter();
   const save = useSaveStep(session.id);
   const carriers = useInsuranceCarriers();
   const [query, setQuery] = useState('');
@@ -73,7 +73,7 @@ export function AcceptedInsuranceStep({ session }: { session: OnboardingSession 
         noValidate
         onSubmit={submit(async (values) => {
           await save.mutateAsync({ step: 'insurance_setup', data: values });
-          router.push('/onboarding');
+          pushSamePage('/onboarding');
         })}
         className="mt-6"
       >
@@ -106,7 +106,7 @@ export function AcceptedInsuranceStep({ session }: { session: OnboardingSession 
 
             <div className="mt-2 max-h-80 overflow-y-auto rounded-card border border-line bg-white">
               {carriers.isPending ? (
-                <div aria-hidden="true" className="h-40 animate-pulse bg-canvas" />
+                <SectionLoader label="Loading insurance companies…" className="py-8" />
               ) : carriers.error ? (
                 <p className="p-4 text-sm text-ink-500">The insurance list could not be loaded. Refresh to try again.</p>
               ) : (carriers.data ?? []).length === 0 ? (

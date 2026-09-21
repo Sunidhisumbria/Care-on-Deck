@@ -1,9 +1,12 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
-import type { BookableProvider, VisitReason } from './placeholder-data';
+import type { SavedInsurance } from '@/features/insurance/types';
+import { pushSamePage } from '@/lib/same-page-navigation';
+
+import type { BookableProvider, ChosenSlot, VisitReasonOption } from './types';
 
 /** The wizard's steps, in order. The URL carries the current one. */
 export const BOOKING_STEPS = [
@@ -17,19 +20,22 @@ export const BOOKING_STEPS = [
 
 export type BookingStep = (typeof BOOKING_STEPS)[number];
 
+/** How the visit is paid for. A saved card's masked summary only -- never a full member ID. */
+export type BookingPayment = { kind: 'self_pay' } | { kind: 'insurance'; insurance: SavedInsurance };
+
 export interface BookingDraft {
   provider: BookableProvider | null;
-  reason: VisitReason | null;
-  date: string | null;
-  time: string | null;
+  reason: VisitReasonOption | null;
+  /** The exact slot picked, carrying the clinic zone it is shown in. */
+  slot: ChosenSlot | null;
   details: { first_name: string; last_name: string; date_of_birth: string; gender: string; phone: string } | null;
   address: { line1: string; line2: string; city: string; state: string; postal_code: string } | null;
-  insurance: { carrier: string; member_id: string; group_number: string } | null;
+  payment: BookingPayment | null;
 }
 
 const EMPTY: BookingDraft = {
-  provider: null, reason: null, date: null, time: null,
-  details: null, address: null, insurance: null,
+  provider: null, reason: null, slot: null,
+  details: null, address: null, payment: null,
 };
 
 interface BookingContextValue {
@@ -51,7 +57,7 @@ const BookingContext = createContext<BookingContextValue | null>(null);
  * The step in the URL means the browser's Back button walks the flow instead
  * of leaving it, which is what people expect from a six-screen form. The
  * answers stay in memory because they are a half-finished booking containing a
- * date of birth and an insurance member ID -- that does not belong in a URL,
+ * date of birth and insurance details -- that does not belong in a URL,
  * in history, or in a referrer header sent to a third party.
  *
  * The cost is that a refresh loses the draft. That is the right trade for this
@@ -59,7 +65,6 @@ const BookingContext = createContext<BookingContextValue | null>(null);
  * not query parameters.
  */
 export function BookingProvider({ children }: { children: ReactNode }) {
-  const router = useRouter();
   const params = useSearchParams();
   const [draft, setDraft] = useState<BookingDraft>(EMPTY);
 
@@ -67,8 +72,8 @@ export function BookingProvider({ children }: { children: ReactNode }) {
   const step: BookingStep = isStep(requested) ? requested : 'provider';
 
   const goTo = useCallback(
-    (target: BookingStep) => router.push(target === 'provider' ? '/book' : `/book?step=${target}`),
-    [router],
+    (target: BookingStep) => pushSamePage(target === 'provider' ? '/book' : `/book?step=${target}`),
+    [],
   );
 
   const value = useMemo<BookingContextValue>(() => {

@@ -59,6 +59,46 @@ export const PhoneIcon = ({ className }: IconProps) => (
   </Stroked>
 );
 
+// --- insurance and payment ---------------------------------------------------
+
+const SHIELD = 'M10 2.5 4 4.8v4.6c0 3.9 2.6 6.9 6 8.1 3.4-1.2 6-4.2 6-8.1V4.8L10 2.5Z';
+
+export const ShieldCheckIcon = ({ className }: IconProps) => (
+  <Stroked className={className}>
+    <path d={SHIELD} />
+    <path d="m7.4 10 1.8 1.8 3.5-3.6" />
+  </Stroked>
+);
+
+export const ScanFrameIcon = ({ className }: IconProps) => (
+  <Stroked className={className}>
+    <path d="M3 7V5a2 2 0 0 1 2-2h2M13 3h2a2 2 0 0 1 2 2v2M17 13v2a2 2 0 0 1-2 2h-2M7 17H5a2 2 0 0 1-2-2v-2" />
+    <path d="M6.5 10h7" />
+  </Stroked>
+);
+
+export const ImageIcon = ({ className }: IconProps) => (
+  <Stroked className={className}>
+    <rect x="3" y="3.5" width="14" height="13" rx="2" />
+    <circle cx="7.5" cy="8" r="1.4" />
+    <path d="m17 13.5-3.8-3.8L5 16.5" />
+  </Stroked>
+);
+
+export const FormIcon = ({ className }: IconProps) => (
+  <Stroked className={className}>
+    <rect x="4" y="2.8" width="12" height="14.4" rx="2" />
+    <path d="M7 7h6M7 10h6M7 13h3.5" />
+  </Stroked>
+);
+
+export const AlertTriangleIcon = ({ className }: IconProps) => (
+  <Stroked className={className}>
+    <path d="M10 3.2 2.6 16h14.8L10 3.2Z" />
+    <path d="M10 8v3.6M10 13.9h.01" />
+  </Stroked>
+);
+
 export const GenderIcon = ({ className }: IconProps) => (
   <Stroked className={className}>
     <circle cx="8.5" cy="11.5" r="4" />
@@ -271,4 +311,27 @@ export const ChevronDown = ({ className }: IconProps) => (
   <Stroked className={className}>
     <path d="m6 8 4 4 4-4" />
   </Stroked>
+);
+
+/**
+ * The US flag, for the country code in front of phone numbers. Simplified to
+ * read at 20px: thirteen stripes, and a canton with a scatter of stars.
+ */
+export const UsFlagIcon = ({ className }: IconProps) => (
+  <svg viewBox="0 0 20 14" className={className} aria-hidden="true">
+    <rect width="20" height="14" fill="#ffffff" />
+    {[0, 2, 4, 6, 8, 10, 12].map((stripe) => (
+      <rect key={stripe} y={(stripe * 14) / 13} width="20" height={14 / 13} fill="#b22234" />
+    ))}
+    <rect width="8.4" height={(14 / 13) * 7} fill="#3c3b6e" />
+    {[
+      [1.2, 1.3], [3.2, 1.3], [5.2, 1.3], [7.2, 1.3],
+      [2.2, 2.55], [4.2, 2.55], [6.2, 2.55],
+      [1.2, 3.8], [3.2, 3.8], [5.2, 3.8], [7.2, 3.8],
+      [2.2, 5.05], [4.2, 5.05], [6.2, 5.05],
+      [1.2, 6.3], [3.2, 6.3], [5.2, 6.3], [7.2, 6.3],
+    ].map(([cx, cy]) => (
+      <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="0.38" fill="#ffffff" />
+    ))}
+  </svg>
 );

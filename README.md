@@ -44,9 +44,11 @@ grant usage on schema public to careondeck_app;
 
 ### 2. Environment
 
-```bash
-cp .env.example .env
-```
+Create a `.env` file in the project root. It is the only environment file and is
+git-ignored, so real passwords and keys never reach GitHub. Every setting the
+app reads, and which ones are required, is defined in
+`src/server/config/env.ts`. Get a working copy from a teammate rather than
+committing one.
 
 Fill in `DATABASE_URL` (the app role) and `DATABASE_URL_MIGRATOR` (the owner),
 then confirm the database is reachable and the roles are set up correctly:

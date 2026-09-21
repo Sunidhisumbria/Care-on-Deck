@@ -1,16 +1,3 @@
-/**
- * Seeds the reference data the application cannot boot without: the permission
- * catalogue, the system roles, and a starting insurance carrier directory.
- *
- * Run after migrations and RLS:
- *     npm run db:migrate && npm run db:rls && npm run db:seed
- *
- * Idempotent -- safe to re-run after adding a permission.
- *
- * Note the `set_config('app.actor_kind', 'system', ...)` below. `rls.sql`
- * applies FORCE ROW LEVEL SECURITY, so policies bind the table owner too; a
- * seed that skipped this would be treated as anonymous traffic and rejected.
- */
 import 'dotenv/config';
 
 import { sql as raw } from 'drizzle-orm';

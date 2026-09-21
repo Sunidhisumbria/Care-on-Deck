@@ -4,7 +4,6 @@ import { and, desc, eq, gt, isNull, ne, sql } from 'drizzle-orm';
 import type { RequestContext } from '@/server/auth/context';
 import { issueSession, type IssuedSession } from '@/server/auth/session';
 import { env } from '@/server/config/env';
-import { db } from '@/server/db/client';
 import {
   onboardingSessions,
   memberships,
@@ -18,7 +17,7 @@ import {
   users,
   verificationCodes,
 } from '@/server/db/schema';
-import { assumeUser, withElevated, type Tx } from '@/server/db/tenant';
+import { assumeUser, withElevated, withSystem, type Tx } from '@/server/db/tenant';
 import { ApiError, IntegrationNotConfiguredError } from '@/server/http/errors';
 import { consumeRateLimit, RATE_LIMITS } from '@/server/http/ratelimit';
 import { notImplemented } from '@/server/http/response';
@@ -182,19 +181,22 @@ export const authService = {
       await consumeRateLimit(`otp:send:ip:${ctx.ipAddress}`, RATE_LIMITS.otpSendPerIp);
     }
 
-    const [latest] = await tx
-      .select({ createdAt: verificationCodes.createdAt })
-      .from(verificationCodes)
-      .where(
-        and(
-          eq(verificationCodes.destination, destination),
-          eq(verificationCodes.purpose, purpose),
-          isNull(verificationCodes.consumedAt),
-          gt(verificationCodes.expiresAt, new Date()),
-        ),
-      )
-      .orderBy(desc(verificationCodes.createdAt))
-      .limit(1);
+    // Codes are server-only rows: every read and write below is elevated.
+    const [latest] = await withElevated(tx, () =>
+      tx
+        .select({ createdAt: verificationCodes.createdAt })
+        .from(verificationCodes)
+        .where(
+          and(
+            eq(verificationCodes.destination, destination),
+            eq(verificationCodes.purpose, purpose),
+            isNull(verificationCodes.consumedAt),
+            gt(verificationCodes.expiresAt, new Date()),
+          ),
+        )
+        .orderBy(desc(verificationCodes.createdAt))
+        .limit(1),
+    );
 
     if (latest) {
       const sinceLast = (Date.now() - latest.createdAt.getTime()) / 1000;
@@ -221,30 +223,30 @@ export const authService = {
       recipientUserId = existing.id;
     }
 
-    await tx
-      .update(verificationCodes)
-      .set({ expiresAt: new Date() })
-      .where(
-        and(
-          eq(verificationCodes.destination, destination),
-          eq(verificationCodes.purpose, purpose),
-          isNull(verificationCodes.consumedAt),
-        ),
-      );
+    // A new code replaces every earlier one for this address and purpose.
+    // Deleted rather than expired: a superseded code is of no use to anyone,
+    // and the row still names the address it went to.
+    await withElevated(tx, () =>
+      tx
+        .delete(verificationCodes)
+        .where(and(eq(verificationCodes.destination, destination), eq(verificationCodes.purpose, purpose))),
+    );
 
     const code = generateCode();
     const expiresAt = new Date(Date.now() + OTP_TTL_SECONDS * 1000);
-    const [row] = await tx
-      .insert(verificationCodes)
-      .values({
-        userId: recipientUserId,
-        purpose,
-        destination,
-        codeHash: hashCode(code, destination, purpose),
-        maxAttempts: OTP_MAX_ATTEMPTS,
-        expiresAt,
-      })
-      .returning({ id: verificationCodes.id });
+    const [row] = await withElevated(tx, () =>
+      tx
+        .insert(verificationCodes)
+        .values({
+          userId: recipientUserId,
+          purpose,
+          destination,
+          codeHash: hashCode(code, destination, purpose),
+          maxAttempts: OTP_MAX_ATTEMPTS,
+          expiresAt,
+        })
+        .returning({ id: verificationCodes.id }),
+    );
     if (!row) throw ApiError.internal('Could not create a verification code.');
 
     const delivery = await deliverCode({ channel, destination, purpose, code, codeId: row.id });
@@ -277,8 +279,8 @@ export const authService = {
 
   /**
    * Checks a code. A wrong code counts as an attempt whether or not this
-   * request's transaction survives -- the increment goes through `db`
-   * directly for exactly that reason.
+   * request's transaction survives -- the increment runs in a transaction of
+   * its own for exactly that reason.
    */
   async verifyOtp(tx: Tx, ctx: RequestContext, input: VerifyOtpInput): Promise<VerifyOtpResult> {
     const { channel, destination, purpose, code } = input;
@@ -289,18 +291,20 @@ export const authService = {
       'Too many attempts for this number or address. Please wait an hour.',
     );
 
-    const [row] = await tx
-      .select()
-      .from(verificationCodes)
-      .where(
-        and(
-          eq(verificationCodes.destination, destination),
-          eq(verificationCodes.purpose, purpose),
-          isNull(verificationCodes.consumedAt),
-        ),
-      )
-      .orderBy(desc(verificationCodes.createdAt))
-      .limit(1);
+    const [row] = await withElevated(tx, () =>
+      tx
+        .select()
+        .from(verificationCodes)
+        .where(
+          and(
+            eq(verificationCodes.destination, destination),
+            eq(verificationCodes.purpose, purpose),
+            isNull(verificationCodes.consumedAt),
+          ),
+        )
+        .orderBy(desc(verificationCodes.createdAt))
+        .limit(1),
+    );
 
     if (!row) throw ApiError.forbidden('No active code. Request a new one.');
     if (row.expiresAt.getTime() < Date.now()) {
@@ -312,10 +316,12 @@ export const authService = {
 
     if (!codeMatches(code, destination, purpose, row.codeHash)) {
       // Autonomous write: must survive the rollback this throw will cause.
-      await db
-        .update(verificationCodes)
-        .set({ attempts: sql`${verificationCodes.attempts} + 1`, updatedAt: new Date() })
-        .where(eq(verificationCodes.id, row.id));
+      await withSystem({ requestId: ctx.requestId }, (own) =>
+        own
+          .update(verificationCodes)
+          .set({ attempts: sql`${verificationCodes.attempts} + 1`, updatedAt: new Date() })
+          .where(eq(verificationCodes.id, row.id)),
+      );
       const left = row.maxAttempts - row.attempts - 1;
       throw ApiError.forbidden(
         left > 0
@@ -324,10 +330,12 @@ export const authService = {
       );
     }
 
-    await tx
-      .update(verificationCodes)
-      .set({ consumedAt: new Date(), attempts: row.attempts + 1 })
-      .where(eq(verificationCodes.id, row.id));
+    await withElevated(tx, () =>
+      tx
+        .update(verificationCodes)
+        .set({ consumedAt: new Date(), attempts: row.attempts + 1 })
+        .where(eq(verificationCodes.id, row.id)),
+    );
 
     const verificationToken = signProof({ codeId: row.id, purpose, channel, destination });
     const result: VerifyOtpResult = {
@@ -376,10 +384,8 @@ export const authService = {
           deviceToken: input.device_token ?? null,
           deviceType: input.device_type ?? null,
         });
-        await tx
-          .update(verificationCodes)
-          .set({ completedAt: new Date() })
-          .where(eq(verificationCodes.id, row.id));
+        // Spent: nothing follows this code, so it is deleted rather than kept.
+        await withElevated(tx, () => tx.delete(verificationCodes).where(eq(verificationCodes.id, row.id)));
         await tx.update(users).set({ lastSeenAt: new Date() }).where(eq(users.id, owner.id));
         result.body.signed_in = true;
         result.body.user_id = owner.id;
@@ -426,10 +432,8 @@ export const authService = {
         deviceToken: input.device_token ?? null,
         deviceType: input.device_type ?? null,
       });
-      await tx
-        .update(verificationCodes)
-        .set({ completedAt: new Date() })
-        .where(eq(verificationCodes.id, row.id));
+      // Spent on signing in, so it is deleted rather than kept.
+      await withElevated(tx, () => tx.delete(verificationCodes).where(eq(verificationCodes.id, row.id)));
       await tx.update(users).set({ lastSeenAt: new Date() }).where(eq(users.id, user.id));
       await recordAudit(
         tx,
@@ -448,8 +452,8 @@ export const authService = {
 
   /**
    * Spends a verification proof on its follow-up action. Single use: the
-   * code row's `completed_at` is set here, and a second call with the same
-   * proof is refused.
+   * code row is deleted here, so a second call with the same proof finds
+   * nothing and is refused.
    */
   async completeVerification(
     tx: Tx,
@@ -458,16 +462,18 @@ export const authService = {
   ): Promise<VerificationProof> {
     const proof = verifyProof(token, purpose);
 
-    const [row] = await tx
-      .select({
-        id: verificationCodes.id,
-        destination: verificationCodes.destination,
-        consumedAt: verificationCodes.consumedAt,
-        completedAt: verificationCodes.completedAt,
-      })
-      .from(verificationCodes)
-      .where(eq(verificationCodes.id, proof.codeId))
-      .limit(1);
+    const [row] = await withElevated(tx, () =>
+      tx
+        .select({
+          id: verificationCodes.id,
+          destination: verificationCodes.destination,
+          consumedAt: verificationCodes.consumedAt,
+          completedAt: verificationCodes.completedAt,
+        })
+        .from(verificationCodes)
+        .where(eq(verificationCodes.id, proof.codeId))
+        .limit(1),
+    );
 
     if (!row || !row.consumedAt || row.destination !== proof.destination) {
       throw ApiError.forbidden('The verification token is not valid.');
@@ -476,10 +482,7 @@ export const authService = {
       throw ApiError.forbidden('This verification has already been used. Request a new code.');
     }
 
-    await tx
-      .update(verificationCodes)
-      .set({ completedAt: new Date() })
-      .where(eq(verificationCodes.id, row.id));
+    await withElevated(tx, () => tx.delete(verificationCodes).where(eq(verificationCodes.id, row.id)));
 
     return proof;
   },

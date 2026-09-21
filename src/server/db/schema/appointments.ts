@@ -20,19 +20,10 @@ import { patients } from './patients';
 import { providers } from './providers';
 import { visitReasons } from './scheduling';
 
-/**
- * The central record. Every column named in IA 13. Reports > Appointments
- * Report is either here or one join away.
- *
- * `startsAt` is absolute (timestamptz); the facility's local wall-clock time is
- * derived from `facilities.timezone` on read. Storing local time would break
- * the moment a DST boundary falls between booking and visit.
- */
 export const appointments = pgTable(
   'appointments',
   {
     id: pk(),
-    /** Human-quotable reference shown in the UI and on reports. */
     reference: varchar('reference', { length: 16 }).notNull().unique(),
 
     organizationId: uuid('organization_id')
@@ -45,14 +36,7 @@ export const appointments = pgTable(
     patientId: uuid('patient_id')
       .notNull()
       .references(() => patients.id, { onDelete: 'restrict' }),
-    /**
-     * Denormalised from `patients.user_id`, and load-bearing for the same
-     * reason as `patient_dependents.guardian_user_id`: the RLS policy that lets
-     * a patient read their own appointments cannot join `patients`, because the
-     * patients policy reads `appointments` and the two would recurse. Kept in
-     * step by a trigger in drizzle/sql/rls.sql. Also the index the Patient
-     * Dashboard reads on.
-     */
+  
     patientUserId: uuid('patient_user_id'),
     visitReasonId: uuid('visit_reason_id').references(() => visitReasons.id, {
       onDelete: 'set null',
@@ -66,7 +50,6 @@ export const appointments = pgTable(
     endsAt: timestamp('ends_at', { withTimezone: true }).notNull(),
     durationMinutes: smallint('duration_minutes').notNull(),
 
-    /** IA: 13. Reports -- explicit lifecycle stamps, not derived from events. */
     requestedAt: timestamp('requested_at', { withTimezone: true }).notNull().defaultNow(),
     confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
     checkedInAt: timestamp('checked_in_at', { withTimezone: true }),
@@ -76,25 +59,15 @@ export const appointments = pgTable(
     cancelledByUserId: uuid('cancelled_by_user_id').references(() => users.id, {
       onDelete: 'set null',
     }),
-    /** IA: 6. Unified Dashboard > No-Shows */
     isNoShow: boolean('is_no_show').notNull().default(false),
     noShowMarkedAt: timestamp('no_show_marked_at', { withTimezone: true }),
 
-    /** IA: 6. Unified Dashboard > Reschedules -- points at the appointment replaced. */
     rescheduledFromId: uuid('rescheduled_from_id'),
 
-    /** Free text the patient supplied. IA: 13. Reports > Reason for Visit */
     patientNote: text('patient_note'),
     staffNote: text('staff_note'),
-
-    /** Insurance as presented at booking time. */
     patientInsuranceId: uuid('patient_insurance_id'),
     insuranceCarrierName: varchar('insurance_carrier_name', { length: 200 }),
-
-    /**
-     * Contact and demographic values frozen at booking. Reports must reproduce
-     * what was true then, and a later profile edit must not rewrite history.
-     */
     patientSnapshot: jsonb('patient_snapshot').$type<{
       firstName: string;
       lastName: string;

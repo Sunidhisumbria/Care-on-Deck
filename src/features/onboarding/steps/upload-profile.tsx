@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { Field, SubmitButton, TextAreaField } from '@/components/ui/field';
@@ -11,6 +10,7 @@ import type { UploadedFile } from '@/features/uploads/types';
 import { useApiForm } from '@/lib/forms/use-api-form';
 import type { NpiLookupAnswer } from '@/lib/npi';
 import { profileSchema } from '@/lib/profile';
+import { pushSamePage } from '@/lib/same-page-navigation';
 
 import { useSaveStep } from '../hooks';
 import type { OnboardingSession } from '../types';
@@ -30,7 +30,6 @@ interface SavedProfile {
  * answers.
  */
 export function UploadProfileStep({ session }: { session: OnboardingSession }) {
-  const router = useRouter();
   const save = useSaveStep(session.id);
   const { user } = useCurrentUser();
 
@@ -77,7 +76,7 @@ export function UploadProfileStep({ session }: { session: OnboardingSession }) {
         noValidate
         onSubmit={submit(async (values) => {
           await save.mutateAsync({ step: 'photo_uploads', data: values });
-          router.push('/onboarding');
+          pushSamePage('/onboarding');
         })}
         className="mt-6 space-y-4"
       >

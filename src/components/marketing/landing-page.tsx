@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
+import { SelectMenu } from "@/components/ui/select-menu";
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 
@@ -28,6 +29,13 @@ const insuranceNames = [
   "Aetna",
   "Delta Dental",
   "Humana",
+];
+
+/** The search bar's insurance list: the two "not sure" answers, then carriers. */
+const INSURANCE_CHOICES = [
+  { value: "self-pay", label: "I’m paying for myself" },
+  { value: "not-sure", label: "I’ll choose my insurance later" },
+  ...insuranceNames.map((name) => ({ value: name, label: name })),
 ];
 function InsuranceLogo({ index }: { index: number }) {
   if (index === 0)
@@ -567,28 +575,21 @@ function CareDiscoveryPage({ variant }: { variant: "landing" | "home" }) {
                 placeholder="City, state, or ZIP code"
               />
             </label>
-            <label className="lp-search-insurance">
+            <div className="lp-search-insurance">
               <Icon name="shield" />
-              <span className="sr-only">Insurance plan</span>
-              <select
+              <span className="sr-only" id="lp-insurance-label">
+                Insurance plan
+              </span>
+              <SelectMenu
+                options={INSURANCE_CHOICES}
                 value={insurance}
-                onChange={(event) => setInsurance(event.target.value)}
-              >
-                <option value="">Insurance plan (optional)</option>
-                <option value="self-pay">I’m paying for myself</option>
-                <option value="not-sure">I’ll choose my insurance later</option>
-                <option disabled>──────────</option>
-                <option value="BlueCross BlueShield">
-                  BlueCross BlueShield
-                </option>
-                <option value="Cigna">Cigna</option>
-                <option value="United Healthcare">United Healthcare</option>
-                <option value="Aetna">Aetna</option>
-                <option value="Delta Dental">Delta Dental</option>
-                <option value="Humana">Humana</option>
-              </select>
-              <Icon name="chevron" />
-            </label>
+                onSelect={setInsurance}
+                placeholder="Insurance plan (optional)"
+                labelledBy="lp-insurance-label"
+                className="lp-search-select"
+                triggerClassName="lp-search-trigger"
+              />
+            </div>
             <button className="lp-primary" type="submit">
               Find Doctor
             </button>

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { deviceInfo } from '@/lib/device';
-import { authKeys } from '@/lib/query/keys';
 
 import { authApi } from '../api/auth.api';
 import { destinationFor } from '../lib/destination';
@@ -30,9 +29,15 @@ export function useLogin() {
   return useMutation({
     mutationFn: (values: LoginValues) => authApi.login({ ...values, ...deviceInfo() }),
 
-    onSuccess: async (data) => {
-      // The cookie changed, so anything cached about the old session is stale.
-      await queryClient.invalidateQueries({ queryKey: authKeys.all });
+    onSuccess: (data) => {
+      /*
+       * The cookie changed, so everything cached belongs to whoever was here
+       * before -- possibly someone else on a shared computer. It is dropped,
+       * not refetched: waiting for a fresh "who am I" before moving on added a
+       * whole database round trip to every sign-in. The next page asks for it
+       * itself, alongside its own data, instead of after.
+       */
+      queryClient.clear();
       toast.success('Signed in.');
       router.push(destinationFor(data.user_type));
     },

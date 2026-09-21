@@ -4,8 +4,11 @@ import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 import { Avatar } from '@/components/ui/avatar';
 import { CrossIcon } from '@/components/ui/icons';
+import { SuccessBurst } from '@/components/ui/success-burst';
 
 import type { BookingDraft } from '../booking-state';
+import { formatSlotDate, formatSlotTime } from '../format';
+import type { BookingConfirmation } from '../types';
 
 /**
  * The confirmation, shown once the last step is submitted.
@@ -15,18 +18,17 @@ import type { BookingDraft } from '../booking-state';
  * edge. `showModal()` is called from an effect because it cannot run during
  * render.
  *
- * The confirmation number is generated on the client. It has to be, because
- * `booking.requestAppointment` is a stub: nothing has been written, and no
- * reference has been issued. That is called out in the dialog rather than
- * quietly presented as a real booking.
+ * Everything shown comes back from the server that wrote the appointment --
+ * the reference, the time it actually booked, and the clinic's zone. The
+ * draft supplies only what the patient already chose on screen.
  */
 export function ConfirmationDialog({
   draft,
-  reference,
+  confirmation,
   onClose,
 }: {
   draft: BookingDraft;
-  reference: string;
+  confirmation: BookingConfirmation;
   onClose: () => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -36,14 +38,14 @@ export function ConfirmationDialog({
     if (node && !node.open) node.showModal();
   }, []);
 
-  const when = draft.date ? new Date(draft.date) : null;
+  const zone = confirmation.timezone;
 
   return (
     <dialog
       ref={dialog}
       onClose={onClose}
       aria-labelledby="booking-confirmed-title"
-      className="w-[min(420px,calc(100vw-32px))] rounded-card border border-line bg-white p-0 text-ink-900 backdrop:bg-ink-900/40"
+      className="m-auto w-[min(420px,calc(100vw-32px))] rounded-card border border-line bg-white p-0 text-ink-900 backdrop:bg-ink-900/40"
     >
       <div className="relative p-6 text-center">
         <button
@@ -55,7 +57,7 @@ export function ConfirmationDialog({
           <CrossIcon className="h-4 w-4" />
         </button>
 
-        <Burst />
+        <SuccessBurst />
 
         <h2 id="booking-confirmed-title" className="mt-4 text-xl font-extrabold">
           Appointment Confirmed!
@@ -74,28 +76,18 @@ export function ConfirmationDialog({
           </div>
 
           <dl className="mt-4 space-y-2 border-t border-line pt-3 text-xs">
-            <Row label="Date">
-              {when
-                ? when.toLocaleDateString(undefined, {
-                    weekday: 'long',
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })
-                : '--'}
-            </Row>
-            <Row label="Time">{draft.time ?? '--'}</Row>
-            <Row label="Location">{draft.provider?.facility ?? '--'}</Row>
-            <Row label="Visit Reason">{draft.reason?.title ?? '--'}</Row>
+            <Row label="Date">{formatSlotDate(confirmation.starts_at, zone)}</Row>
+            <Row label="Time">{formatSlotTime(confirmation.starts_at, zone)}</Row>
+            <Row label="Location">{confirmation.facility_name}</Row>
+            <Row label="Visit Reason">{draft.reason?.name ?? '--'}</Row>
             <Row label="Confirmation #">
-              <span className="font-bold text-brand-600">{reference}</span>
+              <span className="font-bold text-brand-600">{confirmation.reference}</span>
             </Row>
           </dl>
         </div>
 
-        <p className="mt-3 rounded-field bg-amber-50 px-3 py-2 text-left text-[0.6875rem] text-amber-900">
-          Nothing has been booked. The booking endpoint is not built yet, so this reference is a
-          placeholder and no appointment has been saved.
+        <p className="mt-3 rounded-field bg-brand-50 px-3 py-2 text-left text-[0.6875rem] text-ink-700">
+          The practice still has to confirm this request. You will hear from them before the visit.
         </p>
 
         <Link
@@ -121,34 +113,5 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
       <dt className="shrink-0 text-ink-500">{label}</dt>
       <dd className="min-w-0 text-right font-semibold">{children}</dd>
     </div>
-  );
-}
-
-/** The dotted ring from the design. Decoration; hidden from assistive tech. */
-function Burst() {
-  return (
-    <svg viewBox="0 0 96 96" className="mx-auto h-20 w-20" aria-hidden="true">
-      {Array.from({ length: 12 }, (_, i) => {
-        const angle = (i / 12) * Math.PI * 2;
-        return (
-          <circle
-            key={i}
-            cx={48 + Math.cos(angle) * 38}
-            cy={48 + Math.sin(angle) * 38}
-            r={i % 2 === 0 ? 4 : 3}
-            fill={i % 3 === 0 ? '#a51e69' : i % 3 === 1 ? '#f172ae' : '#7c3aed'}
-          />
-        );
-      })}
-      <circle cx="48" cy="48" r="22" fill="#a51e69" />
-      <path
-        d="m38 48 7 7 14-14"
-        fill="none"
-        stroke="#fff"
-        strokeWidth="4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import type { ComponentType } from 'react';
 
 import { ApplicationStatus, isClosed } from './components/application-status';
@@ -16,6 +16,8 @@ import { ScheduleStep } from './steps/schedule';
 import { UploadProfileStep } from './steps/upload-profile';
 import { YourRoleStep } from './steps/your-role';
 import type { OnboardingSession } from './types';
+import { LoadingPanel } from '@/components/ui/spinner';
+import { pushSamePage } from '@/lib/same-page-navigation';
 
 const SCREENS: Record<StepperKey, ComponentType<{ session: OnboardingSession }>> = {
   select_role: YourRoleStep,
@@ -39,12 +41,11 @@ const SCREENS: Record<StepperKey, ComponentType<{ session: OnboardingSession }>>
  * becomes the review of the whole application with the Submit button.
  */
 export function OnboardingFlow() {
-  const router = useRouter();
   const params = useSearchParams();
   const { data: session, isPending, error } = useOnboardingSession();
 
   if (isPending) {
-    return <div aria-hidden="true" className="mx-auto h-96 max-w-md animate-pulse rounded-card bg-white" />;
+    return <LoadingPanel className="mx-auto max-w-md" label="Loading your application…" rows={5} />;
   }
 
   if (error || !session) {
@@ -72,7 +73,7 @@ export function OnboardingFlow() {
       <Stepper
         completed={session.completed_steps}
         current={session.current_step}
-        onSelect={(key) => router.push(`/onboarding?step=${key}`)}
+        onSelect={(key) => pushSamePage(`/onboarding?step=${key}`)}
       />
 
       {session.status === 'needs_changes' && session.reviewer_note ? (

@@ -76,13 +76,58 @@ const schema = z.object({
 
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
   INTERNAL_JOB_SECRET: z.string().optional(),
+  /*
+   * What Vercel Cron sends as `Authorization: Bearer <CRON_SECRET>` when it
+   * calls a scheduled job. Jobs accept this or INTERNAL_JOB_SECRET; with
+   * neither set, every job route answers not found.
+   */
+  CRON_SECRET: z.string().min(16).optional(),
+
+  /*
+   * Approves a provider application the moment it is submitted, with no review.
+   * For local and staging only, until Control Center's Provider Approvals exists.
+   * Refused outright in production, where it would put unchecked clinicians in
+   * front of patients.
+   */
+  PROVIDER_AUTO_APPROVE: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
+  /**
+   * Also auto-approve applications our own checks flagged: an NPI registered
+   * under a different name, a different kind of provider, or one the registry
+   * could not confirm. Does nothing unless PROVIDER_AUTO_APPROVE is on too.
+   *
+   * For walking later flows with test NPIs. The flags are still saved on the
+   * application and written into the approval note, so every one of these
+   * approvals can be found and reviewed once Control Center exists.
+   */
+  PROVIDER_AUTO_APPROVE_FLAGGED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
+}).superRefine((value, ctx) => {
+  if (value.PROVIDER_AUTO_APPROVE && value.APP_ENV === 'production') {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['PROVIDER_AUTO_APPROVE'],
+      message: 'must not be true when APP_ENV=production -- every provider would go live unreviewed.',
+    });
+  }
+  if (value.PROVIDER_AUTO_APPROVE_FLAGGED && value.APP_ENV === 'production') {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['PROVIDER_AUTO_APPROVE_FLAGGED'],
+      message: 'must not be true when APP_ENV=production -- providers with the wrong NPI would go live.',
+    });
+  }
 });
 
 /**
  * `.env` keys left blank arrive as empty strings, not as absent. Without this
  * an unfilled optional line ("POSTMARK_FROM_EMAIL=") fails validation as an
  * invalid email and takes the whole server down -- which is exactly what
- * copying .env.example produces. Blank means "not set".
+ * a .env with unfilled lines produces. Blank means "not set".
  */
 const present = Object.fromEntries(
   Object.entries(process.env).filter(([, value]) => value !== undefined && value !== ''),

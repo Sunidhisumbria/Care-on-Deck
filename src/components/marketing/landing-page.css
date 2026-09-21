@@ -286,19 +286,18 @@
   flex: 1.15;
   position: relative;
 }
-.lp-search-insurance select {
-  appearance: none;
-  padding-right: 17px;
-  color: #999699;
+/*
+ * The insurance picker is a listbox rather than a <select>: an open <select>
+ * is drawn by the operating system and cannot be styled to match this bar.
+ * Its own chevron ships with the component, so there is no icon rule here.
+ */
+.lp-search-select {
+  flex: 1;
+  min-width: 0;
 }
-.lp-search-insurance > .lp-icon:last-child {
-  width: 14px;
-  height: 14px;
-  color: #747177;
-  transform: rotate(90deg);
-  position: absolute;
-  right: 0;
-  pointer-events: none;
+.lp-search-trigger {
+  padding: 8px 0;
+  font-size: 12px;
 }
 .lp-primary {
   display: inline-flex;

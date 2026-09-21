@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useFieldArray } from 'react-hook-form';
 
 import { Field, SelectField, SubmitButton } from '@/components/ui/field';
@@ -15,6 +14,7 @@ import {
   scheduleSchema,
   type ScheduleValues,
 } from '@/lib/schedule';
+import { pushSamePage } from '@/lib/same-page-navigation';
 
 import { useSaveStep } from '../hooks';
 import type { OnboardingSession } from '../types';
@@ -33,7 +33,6 @@ const MAX_BREAKS = 3;
  * the scheduling screens after approval, where hours are edited week to week.
  */
 export function ScheduleStep({ session }: { session: OnboardingSession }) {
-  const router = useRouter();
   const save = useSaveStep(session.id);
 
   const saved = session.draft.schedule_setup as ScheduleValues | undefined;
@@ -54,7 +53,7 @@ export function ScheduleStep({ session }: { session: OnboardingSession }) {
         noValidate
         onSubmit={submit(async (values) => {
           await save.mutateAsync({ step: 'schedule_setup', data: values });
-          router.push('/onboarding');
+          pushSamePage('/onboarding');
         })}
         className="mt-6"
       >

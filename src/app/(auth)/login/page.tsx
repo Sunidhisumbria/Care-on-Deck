@@ -7,8 +7,8 @@ import { Suspense, useState } from 'react';
 import { SocialButtons } from '@/components/auth/social-buttons';
 import { Logo } from '@/components/brand/logo';
 import { Divider } from '@/components/ui/divider';
-import { Field, PasswordField, SubmitButton } from '@/components/ui/field';
-import { MailIcon, PhoneIcon } from '@/components/ui/icons';
+import { Field, PasswordField, PhoneField, SubmitButton } from '@/components/ui/field';
+import { MailIcon } from '@/components/ui/icons';
 import { Segmented } from '@/components/ui/segmented';
 import { VerifyMethodDialog } from '@/features/auth/components/verify-method-dialog';
 import { useLogin, useRequestLoginCode } from '@/features/auth/hooks';
@@ -133,12 +133,8 @@ function MobileForm({ role }: { role?: InterfaceRole }) {
       className="mt-6 grid gap-4"
       noValidate
     >
-      <Field
+      <PhoneField
         label="Mobile Number"
-        type="tel"
-        autoComplete="tel"
-        placeholder="Enter phone number"
-        icon={<PhoneIcon />}
         error={error('phone')}
         {...register('phone')}
       />

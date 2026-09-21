@@ -14,7 +14,7 @@ import {
 } from 'drizzle-orm/pg-core';
 
 import { pk, softDelete, timestamps } from './_shared';
-import { accountStatusEnum } from './enums';
+import { accountStatusEnum, insuranceTypeEnum } from './enums';
 import { users } from './identity';
 import { insuranceCarriers, insurancePlans } from './insurance';
 import { facilities, organizations } from './organizations';
@@ -122,6 +122,8 @@ export const patientInsurance = pgTable(
     planId: uuid('plan_id').references(() => insurancePlans.id, { onDelete: 'set null' }),
     /** What the patient typed, when it matched no directory entry. */
     carrierNameRaw: varchar('carrier_name_raw', { length: 200 }),
+    /** Health or dental. Chosen by the patient before any card is read, never inferred from the card. */
+    insuranceType: insuranceTypeEnum('insurance_type').notNull(),
 
     memberIdEncrypted: text('member_id_encrypted'),
     groupNumberEncrypted: text('group_number_encrypted'),

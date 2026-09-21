@@ -248,13 +248,18 @@ drop policy if exists user_credentials_system_only on public.user_credentials;
 create policy user_credentials_system_only on public.user_credentials
   for all using (app.is_system()) with check (app.is_system());
 
--- OTP codes are written before a session exists, so they are guarded by the
--- short expiry and attempt counter in application code rather than by RLS.
+-- One-time codes. They are written before any session exists, so no user
+-- could own them -- instead only the server's sign-in code touches them, acting
+-- as `system` (withElevated in auth.service). Staff tooling may read them.
+-- Anything else, including a connection that sets no actor at all, sees
+-- nothing: each row names the email or phone number a code was sent to.
 alter table public.verification_codes enable row level security;
 alter table public.verification_codes force row level security;
 drop policy if exists verification_codes_all on public.verification_codes;
-create policy verification_codes_all on public.verification_codes for all
-  using (true) with check (true);
+drop policy if exists verification_codes_server_only on public.verification_codes;
+create policy verification_codes_server_only on public.verification_codes for all
+  using (app.is_system() or app.is_internal())
+  with check (app.is_system() or app.is_internal());
 
 -- Rate-limit counters are written before any identity exists, and hold only
 -- hashed keys -- there is nothing here worth isolating.
@@ -672,6 +677,25 @@ create policy appointments_patient_read on public.appointments
         and pd.guardian_user_id = app.current_user_id()
         and pd.deleted_at is null
     )
+  );
+
+/*
+ * A patient cancelling or moving their own appointment -- IA: 3. Appointments >
+ * Cancel, Reschedule.
+ *
+ * Only their own rows, and only into the two states a patient may put one in:
+ * `cancelled`, or `rescheduled` (superseded by the new booking that points back
+ * at it). Confirming, checking in and marking a no-show stay with the practice.
+ * Which columns change alongside the status is decided by
+ * own-appointments.service -- the only code that runs this update.
+ */
+drop policy if exists appointments_patient_update on public.appointments;
+create policy appointments_patient_update on public.appointments
+  for update
+  using (app.current_user_id() is not null and patient_user_id = app.current_user_id())
+  with check (
+    patient_user_id = app.current_user_id()
+    and status in ('cancelled', 'rescheduled')
   );
 
 /* Keeps appointments.patient_user_id in step with the patient's account. */

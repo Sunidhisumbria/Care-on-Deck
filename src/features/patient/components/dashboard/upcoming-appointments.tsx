@@ -5,6 +5,8 @@ import { Avatar } from '@/components/ui/avatar';
 import { ArrowRight, ChevronRight, ClockIcon, PinIcon, StarIcon, StethoscopeIcon } from '@/components/ui/icons';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { appointmentStatusLabel, appointmentStatusTone } from '@/features/patient/lib/appointment-status';
+import { formatClinicTime } from '@/lib/clinic-time';
+import { LoadingPanel } from '@/components/ui/spinner';
 
 import { useUpcomingAppointments } from '../../hooks';
 import type { UpcomingAppointment } from '../../types';
@@ -64,7 +66,7 @@ function AppointmentCard({ appointment }: { appointment: UpcomingAppointment }) 
       <div className="flex items-center justify-between gap-3">
         <p className="flex items-center gap-1.5 text-sm font-bold text-brand-600">
           <ClockIcon className="h-4 w-4" />
-          {formatTime(appointment.starts_at)}
+          {formatClinicTime(appointment.starts_at, facility?.timezone ?? 'UTC')}
         </p>
         <StatusBadge tone={appointmentStatusTone(appointment.status)}>
           {appointmentStatusLabel(appointment.status)}
@@ -109,7 +111,7 @@ function AppointmentCard({ appointment }: { appointment: UpcomingAppointment }) 
       ) : null}
 
       <Link
-        href="/appointments"
+        href={`/appointments/${appointment.id}`}
         className="mt-4 flex items-center justify-center gap-1.5 rounded-field bg-brand-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
       >
         View Details
@@ -139,16 +141,10 @@ function NothingBooked() {
 
 function CardSkeletons() {
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-hidden="true">
-      {[0, 1, 2].map((i) => (
-        <div key={i} className="h-64 animate-pulse rounded-card border border-line bg-white" />
-      ))}
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <LoadingPanel label="Loading your appointments…" rows={5} />
     </div>
   );
 }
 
-/** The facility's local time is not modelled yet, so this is the viewer's. */
-function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-}
 

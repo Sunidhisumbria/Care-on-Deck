@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 
 import { BookingFlow } from '@/features/booking/booking-flow';
 import { resolveSession } from '@/server/auth/session';
+import { LoadingPanel } from '@/components/ui/spinner';
 
 export const metadata: Metadata = { title: 'Book Appointment | CareOndeck' };
 
@@ -22,7 +23,13 @@ export default async function BookPage() {
   if (!session) redirect('/login?role=patient');
 
   return (
-    <Suspense fallback={<div aria-hidden="true" className="h-screen animate-pulse bg-brand-50/40" />}>
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-3xl px-5 py-10">
+          <LoadingPanel label="Loading booking…" rows={4} />
+        </div>
+      }
+    >
       <BookingFlow />
     </Suspense>
   );

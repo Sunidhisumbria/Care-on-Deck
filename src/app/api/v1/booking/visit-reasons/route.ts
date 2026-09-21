@@ -6,11 +6,12 @@
  */
 import { defineRoute } from '@/server/http/handler';
 import { ok } from '@/server/http/response';
+import { visitReasonsQuerySchema } from '@/server/modules/booking/booking.schemas';
 import { bookingService } from '@/server/modules/booking/booking.service';
 
 /** IA: 2. Patient Booking > Select Visit Reason */
 export const GET = defineRoute({
   access: 'public',
-  handler: async ({ tx, query }) =>
-    ok(await bookingService.listVisitReasons(tx, query)),
+  query: visitReasonsQuerySchema,
+  handler: async ({ tx, query }) => ok(await bookingService.listVisitReasons(tx, query)),
 });

@@ -5,12 +5,12 @@ import { recordAudit } from '@/server/observability/audit';
  * Everything a patient can do with their own record.
  *
  * Reads here are self-scoped: the RLS policy on `patients` resolves through
- * `current_user_id`, so a bug in this file cannot expose another patient. Insurance
- * member and group numbers are decrypted only on the detail read, never in a list.
+ * `current_user_id`, so a bug in this file cannot expose another patient. Saved
+ * insurance, with its encrypted member and group IDs, lives in insurance.service.
  *
  * IA: 3. Patient Account
  */
-import { and, asc, desc, eq, gte, inArray, isNull } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 
 import type { RequestContext } from '@/server/auth/context';
 import { appointments } from '@/server/db/schema/appointments';
@@ -23,6 +23,9 @@ import {
   patients,
 } from '@/server/db/schema/patients';
 import { providerSpecialties, providers } from '@/server/db/schema/providers';
+import { visitReasons } from '@/server/db/schema/scheduling';
+
+import type { AppointmentListStatus } from './own-appointments.schemas';
 import type { Tx } from '@/server/db/tenant';
 import { ApiError } from '@/server/http/errors';
 import { notImplemented } from '@/server/http/response';
@@ -40,8 +43,70 @@ export interface OwnAppointment {
     rating_average: number | null;
     rating_count: number;
   } | null;
-  facility: { name: string; address: string | null } | null;
+  /** `timezone` is the clinic's. Times are shown in it, never the reader's. */
+  facility: { name: string; address: string | null; timezone: string } | null;
 }
+
+/** One appointment, opened from View Details. */
+export interface OwnAppointmentDetail {
+  id: string;
+  reference: string;
+  status: string;
+  starts_at: string;
+  ends_at: string;
+  duration_minutes: number;
+  requested_at: string;
+  visit_reason: string | null;
+  patient_note: string | null;
+  /** The carrier's name and the card's last four only -- never a member ID. */
+  payment:
+    | { kind: 'self_pay' }
+    | { kind: 'insurance'; carrier: string | null; member_id_last4: string | null };
+  provider: {
+    id: string;
+    name: string;
+    specialty: string | null;
+    /** Null until patients have reviewed them. */
+    rating_average: number | null;
+    rating_count: number;
+  } | null;
+  /** Who the visit is for, as the patient record held them when this was read. */
+  patient: { full_name: string; gender: string | null; age: number | null } | null;
+  booking_for: 'self' | 'dependent';
+  /** Upcoming and not yet closed by the practice, so Cancel and Reschedule are offered. */
+  can_change: boolean;
+  facility: {
+    name: string;
+    address_line1: string | null;
+    address_line2: string | null;
+    city: string | null;
+    state: string | null;
+    postal_code: string | null;
+    phone: string | null;
+    timezone: string;
+  } | null;
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Whole years since a YYYY-MM-DD birth date, counting the birthday itself. */
+function ageOn(dateOfBirth: string | Date | null, today = new Date()): number | null {
+  if (!dateOfBirth) return null;
+  const [year, month, day] = String(dateOfBirth).slice(0, 10).split('-').map(Number);
+  if (!year || !month || !day) return null;
+
+  const beforeBirthday =
+    today.getUTCMonth() + 1 < month || (today.getUTCMonth() + 1 === month && today.getUTCDate() < day);
+  return today.getUTCFullYear() - year - (beforeBirthday ? 1 : 0);
+}
+
+/**
+ * A provider's specialty when they have not picked one: the NPI registry's.
+ * `specialties` is reference data nobody has filled in yet.
+ */
+const registrySpecialty = sql<
+  string | null
+>`${providers.npiRegistrySnapshot} #>> '{profile,primary_taxonomy,desc}'`;
 
 /** IA: 3. Patient Profile -- everything the Personal Information screen shows. */
 export interface OwnProfile {
@@ -80,6 +145,36 @@ export interface DependentSummary {
   date_of_birth: string | null;
   relationship: string;
   can_book_on_behalf: boolean;
+}
+
+/** Still to happen. A visit under way counts until it ends. */
+const ACTIVE = ['requested', 'confirmed', 'checked_in'] as const;
+
+/**
+ * Which appointments each Appointments tab holds.
+ *
+ *   upcoming   active, and not yet over.
+ *   completed  the visit's time has passed and it was not called off -- or the
+ *              practice has closed it as completed or a no-show. Each keeps its
+ *              real status badge, so a visit the practice never confirmed still
+ *              says "Requested" rather than claiming it happened.
+ *   canceled   cancelled by either side, or a request the practice declined.
+ *
+ * A rescheduled appointment is in none of them: its replacement is listed
+ * instead, and showing both would count one visit twice.
+ */
+function tabCondition(status: AppointmentListStatus, now: Date) {
+  switch (status) {
+    case 'upcoming':
+      return and(inArray(appointments.status, [...ACTIVE]), gt(appointments.endsAt, now));
+    case 'completed':
+      return or(
+        inArray(appointments.status, ['completed', 'no_show']),
+        and(inArray(appointments.status, [...ACTIVE]), lte(appointments.endsAt, now)),
+      );
+    case 'canceled':
+      return inArray(appointments.status, ['cancelled', 'declined']);
+  }
 }
 
 export const patientService = {
@@ -177,7 +272,11 @@ export const patientService = {
    * Cancelled visits are left out. This feeds a dashboard answering "what is
    * coming up", and a cancelled appointment is not.
    */
-  async listOwnAppointments(tx: Tx, ctx: RequestContext): Promise<OwnAppointment[]> {
+  async listOwnAppointments(
+    tx: Tx,
+    ctx: RequestContext,
+    status: AppointmentListStatus = 'upcoming',
+  ): Promise<OwnAppointment[]> {
     const userId = ctx.session?.userId;
     if (!userId) throw ApiError.unauthenticated();
 
@@ -200,6 +299,8 @@ export const patientService = {
         city: facilities.city,
         state: facilities.state,
         postalCode: facilities.postalCode,
+        timezone: facilities.timezone,
+        registrySpecialty,
       })
       .from(appointments)
       .leftJoin(providers, eq(providers.id, appointments.providerId))
@@ -208,12 +309,12 @@ export const patientService = {
         and(
           eq(appointments.patientUserId, userId),
           isNull(appointments.deletedAt),
-          gte(appointments.startsAt, new Date()),
-          inArray(appointments.status, ['requested', 'confirmed', 'checked_in']),
+          tabCondition(status, new Date()),
         ),
       )
-      .orderBy(asc(appointments.startsAt))
-      .limit(20);
+      // Upcoming reads soonest first; the history tabs read most recent first.
+      .orderBy(status === 'upcoming' ? asc(appointments.startsAt) : desc(appointments.startsAt))
+      .limit(50);
 
     // One query for every specialty involved, rather than one per row.
     const providerIds = rows.map((r) => r.providerId).filter((id): id is string => Boolean(id));
@@ -246,7 +347,7 @@ export const patientService = {
               row.providerDisplay ??
               ['Dr.', row.providerFirst, row.providerLast].filter(Boolean).join(' ') +
                 (row.providerCredentials ? `, ${row.providerCredentials}` : ''),
-            specialty: specialtyByProvider.get(row.providerId) ?? null,
+            specialty: specialtyByProvider.get(row.providerId) ?? row.registrySpecialty ?? null,
             rating_average: row.ratingAverage,
             rating_count: row.ratingCount ?? 0,
           }
@@ -258,9 +359,122 @@ export const patientService = {
               [row.addressLine1, row.city, row.state, row.postalCode]
                 .filter(Boolean)
                 .join(', ') || null,
+            timezone: row.timezone ?? 'UTC',
           }
         : null,
     }));
+  },
+
+  /**
+   * One of the caller's own appointments, for View Details.
+   *
+   * Scoped by `patient_user_id` like the list, so someone else's id, a
+   * malformed id and a missing one all read the same: not found.
+   */
+  async getOwnAppointment(tx: Tx, ctx: RequestContext, id: string): Promise<OwnAppointmentDetail> {
+    const userId = ctx.session?.userId;
+    if (!userId) throw ApiError.unauthenticated();
+    if (!UUID.test(id)) throw ApiError.notFound('That appointment was not found.');
+
+    const [row] = await tx
+      .select({
+        id: appointments.id,
+        reference: appointments.reference,
+        status: appointments.status,
+        startsAt: appointments.startsAt,
+        endsAt: appointments.endsAt,
+        durationMinutes: appointments.durationMinutes,
+        requestedAt: appointments.requestedAt,
+        patientNote: appointments.patientNote,
+        patientInsuranceId: appointments.patientInsuranceId,
+        carrierName: appointments.insuranceCarrierName,
+        memberIdLast4: patientInsurance.memberIdLast4,
+        visitReason: visitReasons.name,
+        providerId: appointments.providerId,
+        providerDisplay: providers.displayName,
+        providerFirst: providers.firstName,
+        providerLast: providers.lastName,
+        providerRatingAverage: providers.ratingAverage,
+        providerRatingCount: providers.ratingCount,
+        registrySpecialty,
+        patientFirst: patients.firstName,
+        patientLast: patients.lastName,
+        patientGender: patients.gender,
+        patientDateOfBirth: patients.dateOfBirth,
+        patientAccountUserId: patients.userId,
+        facilityName: facilities.name,
+        addressLine1: facilities.addressLine1,
+        addressLine2: facilities.addressLine2,
+        city: facilities.city,
+        state: facilities.state,
+        postalCode: facilities.postalCode,
+        phone: facilities.phone,
+        timezone: facilities.timezone,
+      })
+      .from(appointments)
+      .leftJoin(providers, eq(providers.id, appointments.providerId))
+      .leftJoin(facilities, eq(facilities.id, appointments.facilityId))
+      .leftJoin(visitReasons, eq(visitReasons.id, appointments.visitReasonId))
+      .leftJoin(patientInsurance, eq(patientInsurance.id, appointments.patientInsuranceId))
+      .leftJoin(patients, eq(patients.id, appointments.patientId))
+      .where(
+        and(
+          eq(appointments.id, id),
+          eq(appointments.patientUserId, userId),
+          isNull(appointments.deletedAt),
+        ),
+      )
+      .limit(1);
+
+    if (!row) throw ApiError.notFound('That appointment was not found.');
+
+    return {
+      id: row.id,
+      reference: row.reference,
+      status: row.status,
+      starts_at: row.startsAt.toISOString(),
+      ends_at: row.endsAt.toISOString(),
+      duration_minutes: row.durationMinutes,
+      requested_at: row.requestedAt.toISOString(),
+      visit_reason: row.visitReason,
+      patient_note: row.patientNote,
+      payment: row.patientInsuranceId
+        ? { kind: 'insurance', carrier: row.carrierName, member_id_last4: row.memberIdLast4 }
+        : { kind: 'self_pay' },
+      provider: row.providerId
+        ? {
+            id: row.providerId,
+            name:
+              row.providerDisplay ??
+              ['Dr.', row.providerFirst, row.providerLast].filter(Boolean).join(' '),
+            specialty: row.registrySpecialty,
+            rating_average: row.providerRatingCount ? row.providerRatingAverage : null,
+            rating_count: row.providerRatingCount ?? 0,
+          }
+        : null,
+      patient: row.patientFirst
+        ? {
+            full_name: [row.patientFirst, row.patientLast].filter(Boolean).join(' '),
+            gender: row.patientGender,
+            age: ageOn(row.patientDateOfBirth),
+          }
+        : null,
+      booking_for: row.patientAccountUserId === userId ? 'self' : 'dependent',
+      can_change:
+        ['requested', 'confirmed'].includes(row.status) && row.startsAt.getTime() > Date.now(),
+      facility: row.facilityName
+        ? {
+            name: row.facilityName,
+            address_line1: row.addressLine1,
+            address_line2: row.addressLine2,
+            city: row.city,
+            state: row.state,
+            postal_code: row.postalCode,
+            phone: row.phone,
+            timezone: row.timezone ?? 'UTC',
+          }
+        : null,
+    };
   },
 
   /** IA: 3. Saved Address */
@@ -270,16 +484,6 @@ export const patientService = {
 
   async addAddress(tx: Tx, ctx: RequestContext, body: unknown): Promise<unknown> {
     return notImplemented('patientService.addAddress');
-  },
-
-  /** IA: 3. Saved Insurance */
-  async listInsurance(tx: Tx, ctx: RequestContext): Promise<unknown> {
-    return notImplemented('patientService.listInsurance');
-  },
-
-  /** Encrypts the member and group numbers; keeps only last4 in the clear. */
-  async addInsurance(tx: Tx, ctx: RequestContext, body: unknown): Promise<unknown> {
-    return notImplemented('patientService.addInsurance');
   },
 
   /**

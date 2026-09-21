@@ -16,6 +16,11 @@ export const patientKeys = {
   profile: () => [...patientKeys.all, 'profile'] as const,
   dependents: () => [...patientKeys.all, 'dependents'] as const,
   appointments: () => [...patientKeys.all, 'appointments'] as const,
+  appointment: (id: string) => [...patientKeys.all, 'appointments', id] as const,
+  /** One tab of the list. Under `appointments()`, so a change refreshes every tab. */
+  appointmentList: (status: string) => [...patientKeys.all, 'appointments', 'list', status] as const,
+  insurance: () => [...patientKeys.all, 'insurance'] as const,
+  insuranceDetail: (id: string) => [...patientKeys.all, 'insurance', id] as const,
 };
 
 export const onboardingKeys = {
@@ -31,4 +36,15 @@ export const insuranceKeys = {
 export const uploadKeys = {
   all: ['uploads'] as const,
   view: (id: string) => [...uploadKeys.all, 'view', id] as const,
+};
+
+export const marketplaceKeys = {
+  all: ['marketplace'] as const,
+  /** Filters are part of the key: a different rail is a different result set. */
+  providerSearch: (filters: unknown) =>
+    [...marketplaceKeys.all, 'providers', filters] as const,
+  availability: (providerId: string, from: string, to: string) =>
+    [...marketplaceKeys.all, 'availability', providerId, from, to] as const,
+  visitReasons: (providerId: string) =>
+    [...marketplaceKeys.all, 'visit-reasons', providerId] as const,
 };

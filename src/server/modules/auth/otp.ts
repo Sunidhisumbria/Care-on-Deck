@@ -54,8 +54,8 @@ export function codeMatches(
 /**
  * Proof that a code was verified, handed to the step that follows -- signup
  * completion, password reset. Signed rather than stored; single use is
- * enforced by `verification_codes.completed_at`, which the consuming step
- * sets, so the same proof cannot reset a password twice.
+ * enforced by the consuming step deleting the code row, so the same proof
+ * finds nothing the second time and cannot reset a password twice.
  */
 export interface VerificationProof {
   codeId: string;

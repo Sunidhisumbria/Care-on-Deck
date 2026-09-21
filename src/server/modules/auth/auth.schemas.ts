@@ -1,10 +1,6 @@
 import { z } from 'zod';
 
-/*
- * Request and response fields are snake_case; the database and service layers
- * stay camelCase. The boundary is deliberate -- clients get one consistent
- * convention, and Drizzle's generated types are left alone.
- */
+import { isValidUsPhone, PHONE_RULE } from '@/lib/phone';
 
 
 export function normalizePhone(raw: string): string {
@@ -22,7 +18,9 @@ export const phoneSchema = z
   .trim()
   .min(7, 'Enter a mobile number.')
   .transform(normalizePhone)
-  .refine((v) => /^\+[1-9]\d{7,14}$/.test(v), 'Enter a valid mobile number.');
+  .refine((v) => /^\+[1-9]\d{7,14}$/.test(v), 'Enter a valid mobile number.')
+  // The app only takes +1 numbers, 8 to 14 digits after the code -- see lib/phone.
+  .refine(isValidUsPhone, PHONE_RULE);
 
 export const emailSchema = z
   .string()

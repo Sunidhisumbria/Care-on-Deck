@@ -27,12 +27,15 @@ export function OptionCards<T extends string>({
   options,
   value,
   onChange,
+  iconFrame = true,
 }: {
   name: string;
   label: string;
   options: OptionCard<T>[];
   value: T | null;
   onChange: (next: T) => void;
+  /** The tinted square behind each icon. Off for full-colour illustrations, which bring their own colour. */
+  iconFrame?: boolean;
 }) {
   return (
     <div role="radiogroup" aria-label={label} className="space-y-3">
@@ -59,7 +62,7 @@ export function OptionCards<T extends string>({
               <span
                 aria-hidden="true"
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-field ${
-                  active ? 'bg-brand-100 text-brand-700' : 'bg-brand-50 text-brand-600'
+                  !iconFrame ? '' : active ? 'bg-brand-100 text-brand-700' : 'bg-brand-50 text-brand-600'
                 }`}
               >
                 {option.icon}

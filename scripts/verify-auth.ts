@@ -280,6 +280,9 @@ async function cleanup() {
 
 async function main() {
   try {
+    // This connection reads verification_codes directly, and that table is
+    // server-only: without an actor it would see no rows at all.
+    await ownerSql.unsafe(`select set_config('app.actor_kind', 'internal', false)`);
     await seed();
     await run();
   } catch (error) {

@@ -1,22 +1,22 @@
 /**
  * patients/insurance
  *
- * Generated shape: validate, delegate, respond. All behaviour lives in the
- * module service so it can be unit-tested without an HTTP layer.
+ * IA: 3. Patient Dashboard > Saved Insurance. The caller's own cards only.
  */
+import { patientInsuranceSchema } from '@/lib/patient-insurance';
 import { defineRoute } from '@/server/http/handler';
 import { ok } from '@/server/http/response';
-import { patientService } from '@/server/modules/patients/patient.service';
+import { patientInsuranceService } from '@/server/modules/patients/insurance.service';
 
-/** IA: 3. Patient Dashboard > Saved Insurance */
+/** Member IDs arrive masked to their last four. */
 export const GET = defineRoute({
   access: 'patient',
-  handler: async ({ tx, ctx }) =>
-    ok(await patientService.listInsurance(tx, ctx)),
+  handler: async ({ tx, ctx }) => ok(await patientInsuranceService.list(tx, ctx)),
 });
 
+/** Adds a card. Adding one already on file updates it instead of saving a copy. */
 export const POST = defineRoute({
   access: 'patient',
-  handler: async ({ tx, ctx, body }) =>
-    ok(await patientService.addInsurance(tx, ctx, body)),
+  body: patientInsuranceSchema,
+  handler: async ({ tx, ctx, body }) => ok(await patientInsuranceService.create(tx, ctx, body)),
 });

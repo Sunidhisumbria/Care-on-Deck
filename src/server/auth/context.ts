@@ -1,7 +1,7 @@
 import { and, eq, isNull } from 'drizzle-orm';
 
-import { db } from '@/server/db/client';
 import { memberships, rolePermissions, roles } from '@/server/db/schema';
+import { withActor } from '@/server/db/tenant';
 import { ApiError } from '@/server/http/errors';
 
 import type { Permission } from './permissions';
@@ -31,27 +31,34 @@ export function isAuthenticated(
  *
  * The membership row is the authority, not the session: revoking a role takes
  * effect on the next request rather than when the session expires.
+ *
+ * Runs with the user and organization set because the membership policies show
+ * nothing without them -- a bare connection sees no memberships at all, and every
+ * member would be refused. Setting them grants nothing: the query is still pinned
+ * to this user's own active membership, so a forged X-Organization-Id finds no row.
  */
 export async function loadPermissions(
   userId: string,
   organizationId: string,
 ): Promise<{ permissions: Set<Permission>; facilityId: string | null }> {
-  const rows = await db
-    .select({
-      permissionKey: rolePermissions.permissionKey,
-      facilityId: memberships.facilityId,
-    })
-    .from(memberships)
-    .innerJoin(roles, eq(roles.id, memberships.roleId))
-    .leftJoin(rolePermissions, eq(rolePermissions.roleId, roles.id))
-    .where(
-      and(
-        eq(memberships.userId, userId),
-        eq(memberships.organizationId, organizationId),
-        eq(memberships.status, 'active'),
-        isNull(memberships.deletedAt),
+  const rows = await withActor({ kind: 'user', userId, organizationId }, (tx) =>
+    tx
+      .select({
+        permissionKey: rolePermissions.permissionKey,
+        facilityId: memberships.facilityId,
+      })
+      .from(memberships)
+      .innerJoin(roles, eq(roles.id, memberships.roleId))
+      .leftJoin(rolePermissions, eq(rolePermissions.roleId, roles.id))
+      .where(
+        and(
+          eq(memberships.userId, userId),
+          eq(memberships.organizationId, organizationId),
+          eq(memberships.status, 'active'),
+          isNull(memberships.deletedAt),
+        ),
       ),
-    );
+  );
 
   if (rows.length === 0) {
     throw ApiError.forbidden('You are not a member of this organization.');

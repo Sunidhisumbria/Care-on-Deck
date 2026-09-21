@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { deviceInfo } from '@/lib/device';
-import { authKeys } from '@/lib/query/keys';
 
 import { authApi } from '../api/auth.api';
 import { destinationFor } from '../lib/destination';
@@ -85,10 +84,10 @@ export function useVerifyCode(context: VerificationContext) {
         ...deviceInfo(),
       }),
 
-    onSuccess: async (result) => {
-      if (result.signed_in) {
-        await queryClient.invalidateQueries({ queryKey: authKeys.all });
-      }
+    onSuccess: (result) => {
+      // Signed in as someone new: drop the old session's cache rather than
+      // waiting to refetch it before moving on -- see use-login.
+      if (result.signed_in) queryClient.clear();
 
       if (context.purpose === 'password_reset') {
         // A bearer credential for the next step, so it goes in sessionStorage

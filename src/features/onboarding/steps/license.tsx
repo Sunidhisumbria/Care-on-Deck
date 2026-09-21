@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { Field, SelectField, SubmitButton } from '@/components/ui/field';
@@ -10,6 +9,7 @@ import { useApiForm } from '@/lib/forms/use-api-form';
 import { licenseMatchesRegistry, licenseSchema, type LicenseValues } from '@/lib/license';
 import type { NpiLookupAnswer } from '@/lib/npi';
 import { isUsStateCode, stateOptions } from '@/lib/us-states';
+import { pushSamePage } from '@/lib/same-page-navigation';
 
 import { useSaveStep } from '../hooks';
 import type { OnboardingSession } from '../types';
@@ -28,7 +28,6 @@ type SavedLicense = Partial<LicenseValues> & { document?: UploadedFile | null };
  * the license against the state board either way.
  */
 export function LicenseStep({ session }: { session: OnboardingSession }) {
-  const router = useRouter();
   const save = useSaveStep(session.id);
 
   const saved = session.draft.license_verification as SavedLicense | undefined;
@@ -73,7 +72,7 @@ export function LicenseStep({ session }: { session: OnboardingSession }) {
         noValidate
         onSubmit={submit(async (values) => {
           await save.mutateAsync({ step: 'license_verification', data: values });
-          router.push('/onboarding');
+          pushSamePage('/onboarding');
         })}
         className="mt-6 space-y-4"
       >

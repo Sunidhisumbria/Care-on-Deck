@@ -1,8 +1,8 @@
 'use client';
 import { Avatar } from '@/components/ui/avatar';
-import { GlobeIcon, PinIcon, ScreenIcon, StarIcon, StethoscopeIcon } from '@/components/ui/icons';
+import { GlobeIcon, PinIcon, ScreenIcon, StethoscopeIcon } from '@/components/ui/icons';
 
-import type { BookableProvider, VisitReason } from '../placeholder-data';
+import type { BookableProvider, VisitReasonOption } from '../types';
 import { ReasonIcon } from './reason-icon';
 
 /**
@@ -11,6 +11,9 @@ import { ReasonIcon } from './reason-icon';
  * It is the flow's memory: six screens is long enough to forget which doctor
  * you picked, and long enough that being shown it is the difference between
  * finishing and starting over.
+ *
+ * Rows with nothing behind them are left out rather than filled in -- a doctor
+ * who has not listed their languages shows no language row.
  */
 export function ProviderSummary({
   provider,
@@ -18,40 +21,38 @@ export function ProviderSummary({
   onEditReason,
 }: {
   provider: BookableProvider;
-  reason?: VisitReason | null;
+  reason?: VisitReasonOption | null;
   onEditReason?: () => void;
 }) {
+  const where = [provider.facility.city, provider.facility.state].filter(Boolean).join(', ');
+
   return (
     <aside className="space-y-4">
       <div className="rounded-card border border-line bg-white p-5 text-center">
         <Avatar name={provider.name} className="mx-auto h-[72px] w-[72px] text-lg" />
         <p className="mt-3 text-sm font-bold text-ink-900">{provider.name}</p>
         <p className="mt-1 text-xs text-ink-500">
-          {provider.specialty} <span className="px-1 text-ink-300">•</span> {provider.visitModes.split(',')[0]}
-        </p>
-        <p className="mt-1.5 flex items-center justify-center gap-1 text-xs text-ink-500">
-          <StarIcon className="h-3.5 w-3.5 text-amber-400" />
-          <span className="font-semibold text-ink-700">{provider.ratingAverage.toFixed(1)}</span>
-          <span>({provider.ratingCount} reviews)</span>
+          {provider.specialty ?? 'General practice'}
+          <span className="px-1 text-ink-300">•</span> In-person
         </p>
 
         <dl className="mt-4 space-y-2 border-t border-line pt-4 text-left text-xs text-ink-500">
-          <Row icon={<StethoscopeIcon className="h-3.5 w-3.5" />}>{provider.facility}</Row>
-          <Row icon={<PinIcon className="h-3.5 w-3.5" />}>{provider.city}</Row>
-          <Row icon={<ScreenIcon className="h-3.5 w-3.5" />}>{provider.visitModes}</Row>
-          <Row icon={<GlobeIcon className="h-3.5 w-3.5" />}>{provider.languages}</Row>
+          <Row icon={<StethoscopeIcon className="h-3.5 w-3.5" />}>{provider.facility.name}</Row>
+          {where ? <Row icon={<PinIcon className="h-3.5 w-3.5" />}>{where}</Row> : null}
+          <Row icon={<ScreenIcon className="h-3.5 w-3.5" />}>In-person visit</Row>
+          {provider.languages.length > 0 ? (
+            <Row icon={<GlobeIcon className="h-3.5 w-3.5" />}>{provider.languages.join(', ')}</Row>
+          ) : null}
         </dl>
       </div>
 
       {reason ? (
         <div className="rounded-card border border-line bg-white p-4">
           <div className="flex items-start gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-field bg-brand-50 text-brand-600">
-              <ReasonIcon name={reason.icon} className="h-[1.125rem] w-[1.125rem]" />
-            </span>
+            <ReasonIcon reason={reason.name} className="h-10 w-10" />
             <div className="min-w-0">
-              <p className="text-sm font-bold text-ink-900">{reason.title}</p>
-              <p className="mt-0.5 text-xs text-ink-500">{reason.caption}</p>
+              <p className="text-sm font-bold text-ink-900">{reason.name}</p>
+              <p className="mt-0.5 text-xs text-ink-500">{reason.description}</p>
               {onEditReason ? (
                 <button
                   type="button"

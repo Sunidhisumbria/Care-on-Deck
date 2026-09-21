@@ -1,3 +1,9 @@
 export { usePatientProfile } from './use-patient-profile';
 export { useDependents } from './use-dependents';
-export { useUpcomingAppointments } from './use-appointments';
+export {
+  useAppointmentDetail,
+  useAppointments,
+  useCancelAppointment,
+  useRescheduleAppointment,
+  useUpcomingAppointments,
+} from './use-appointments';
