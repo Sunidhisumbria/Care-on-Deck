@@ -30,22 +30,7 @@ import type { InterfaceRole } from '@/features/auth/types';
 import { useApiForm } from '@/lib/forms/use-api-form';
 import { readRole } from '@/features/auth/lib/verification';
 
-/**
- * Sign up.
- *
- * One screen for both interfaces, switched by the Patient / Doctor tabs. A
- * patient gives date of birth, gender and location; a provider gives none of
- * those, because their identity is checked against the NPI registry during
- * onboarding instead. The server applies the same split, so a field hidden here
- * is not required there either.
- *
- * A provider's account comes with an onboarding application, and verifying
- * their contact lands them on its first step rather than on a patient home.
- *
- * On success the account exists but holds no session. The chooser that opens
- * over the form is what sends the code -- to the number or the address, the
- * person picks -- and entering it is what signs them in.
- */
+
 export default function SignupPage() {
   return (
     <Suspense fallback={null}>
@@ -71,12 +56,7 @@ function SignupScreen() {
     confirm_password: '',
   });
 
-  /*
-   * The tabs change more than a heading: the patient-only fields disappear for a
-   * provider. The form's own `role` has to follow, because validation reads it --
-   * and errors already showing on fields that just vanished are cleared, or they
-   * would block a submit whose reason the person can no longer see.
-   */
+ 
   function changeRole(next: InterfaceRole) {
     setRole(next);
     setValue('role', next);
@@ -170,11 +150,7 @@ function SignupScreen() {
           {...register('email')}
         />
 
-        {/*
-          Free text until the Google Maps key arrives. The API already accepts
-          the full place -- id, label, coordinates -- so swapping this for the
-          Places autocomplete is a change to this field alone.
-        */}
+        
         {role === 'patient' ? (
         <Field
           label="Location"

@@ -25,18 +25,18 @@
 .lp-home .lp-video-card { border-radius: 12px; }
 .lp-home .lp-videos-grid { gap: 18px; margin-top: 48px; }
 .lp-home .lp-content { padding-bottom: 100px; }
-.lp-home .ph-footer footer { background: #19000f; }
-.lp-home .ph-footer footer > div:first-child { max-width: 1216px; padding: 72px 48px 30px; }
-.lp-home .ph-footer footer > div:first-child > div:first-child { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 24px; }
-.lp-home .ph-footer h2 { color: #b4428c; font-size: 11px; font-weight: 600; }
-.lp-home .ph-footer li { font-size: 12px; }
-.lp-home .ph-footer li span, .lp-home .ph-footer li a { color: #c7b9c3; }
-.lp-home .ph-footer footer > div:first-child > div:last-child { margin-top: 30px; padding-top: 25px; }
-.lp-home .ph-footer footer > div:first-child > div:last-child h2 { text-transform: none; color: #d3c6ce; font-size: 12px; }
-.lp-home .ph-footer footer > div:first-child > div:last-child p { font-size: 11px; line-height: 1.5; }
-.lp-home .ph-footer footer > div:last-child > div { max-width: 1216px; padding: 24px 48px; }
-.lp-home .ph-footer footer > div:last-child p, .lp-home .ph-footer footer > div:last-child nav { font-size: 11px; }
-.lp-home .ph-footer .brand-logo { width: 120px; }
+.lp .ph-footer footer { background: #19000f; }
+.lp .ph-footer footer > div:first-child { max-width: 1216px; padding: 72px 48px 30px; }
+.lp .ph-footer footer > div:first-child > div:first-child { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 24px; }
+.lp .ph-footer h2 { color: #b4428c; font-size: 11px; font-weight: 600; }
+.lp .ph-footer li { font-size: 12px; }
+.lp .ph-footer li span, .lp .ph-footer li a { color: #c7b9c3; }
+.lp .ph-footer footer > div:first-child > div:last-child { margin-top: 30px; padding-top: 25px; }
+.lp .ph-footer footer > div:first-child > div:last-child h2 { text-transform: none; color: #d3c6ce; font-size: 12px; }
+.lp .ph-footer footer > div:first-child > div:last-child p { font-size: 11px; line-height: 1.5; }
+.lp .ph-footer footer > div:last-child > div { max-width: 1216px; padding: 24px 48px; }
+.lp .ph-footer footer > div:last-child p, .lp .ph-footer footer > div:last-child nav { font-size: 11px; }
+.lp .ph-footer .brand-logo { width: 120px; }
 .lp-home .lp-notification > span { display: none; }
 @media (min-width: 901px) and (max-width: 1150px) {
   .lp-home .lp-main-nav { padding-left: 0; gap: 24px; font-size: 12px; }
@@ -58,9 +58,9 @@
   .lp-home .lp-appointment-card { padding: 16px; min-height: 145px; }
   .lp-home .lp-date-tile { width: 74px; height: 108px; }
   .lp-home .lp-provider-card { padding: 13px; }
-  .lp-home .ph-footer footer > div:first-child { padding: 50px 28px 24px; }
-  .lp-home .ph-footer footer > div:first-child > div:first-child { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px 24px; }
-  .lp-home .ph-footer footer > div:last-child > div { padding: 24px 28px; }
+  .lp .ph-footer footer > div:first-child { padding: 50px 28px 24px; }
+  .lp .ph-footer footer > div:first-child > div:first-child { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px 24px; }
+  .lp .ph-footer footer > div:last-child > div { padding: 24px 28px; }
 }
 @media (max-width: 600px) {
   .lp-home .lp-container { width: calc(100% - 36px); }
@@ -87,9 +87,9 @@
   .lp-home .ph-specialty-caption { max-width: 130px; font-size: 11px; }
   .lp-home .lp-videos-grid { margin-top: 28px; }
   .lp-home .lp-content { padding-bottom: 54px; }
-  .lp-home .ph-footer footer > div:first-child { padding: 44px 22px 24px; }
-  .lp-home .ph-footer footer > div:first-child > div:first-child { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px 20px; }
-  .lp-home .ph-footer footer > div:last-child > div { padding: 24px 20px; }
+  .lp .ph-footer footer > div:first-child { padding: 44px 22px 24px; }
+  .lp .ph-footer footer > div:first-child > div:first-child { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px 20px; }
+  .lp .ph-footer footer > div:last-child > div { padding: 24px 20px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .lp-home *, .lp-home *::before, .lp-home *::after { scroll-behavior: auto !important; transition: none !important; }

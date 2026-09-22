@@ -1,6 +1,8 @@
 ﻿"use client";
 
 import Image from "next/image";
+import { useState, type ReactNode } from "react";
+
 import { DoctorAvatar, Icon } from "./care-visuals";
 import "./landing-sections.css";
 
@@ -247,145 +249,141 @@ export function BookingShortcuts({
   );
 }
 
-export function CareCategories({ onDiscover }: { onDiscover: Discover }) {
-  const categories: { label: string; query: string; art: ArtKind }[] = [
-    { label: "Teeth Whitening", query: "Teeth Whitening", art: "tooth" },
-    { label: "Skin Tightening", query: "Skin Tightening", art: "skin" },
-    { label: "Weight Lose", query: "Weight Loss", art: "waist" },
-    { label: "OB-GYN", query: "OB-GYN", art: "eye" },
-    { label: "Dermatologist", query: "Dermatologist", art: "hand" },
-    { label: "Psychiatrist", query: "Psychiatrist", art: "brain" },
-  ];
+/**
+ * An image exported from the Figma design, with a stand-in until the file exists.
+ *
+ * The illustrations, logos and category artwork live in public/images/landing and
+ * are exported from Figma by hand. Until a file is there, `fallback` is shown in
+ * its place -- never a broken-image icon -- and adding the file is the only change
+ * needed for the real artwork to appear. The image stays hidden until it has
+ * actually loaded, so the stand-in never flickers against it.
+ */
+export function DesignImage({
+  src,
+  alt,
+  width,
+  height,
+  className = "",
+  fallback = null,
+  sizes,
+  priority = false,
+}: {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  className?: string;
+  fallback?: ReactNode;
+  sizes?: string;
+  priority?: boolean;
+}) {
+  const [state, setState] = useState<"loading" | "loaded" | "missing">("loading");
+
   return (
-    <section
-      className="lp-section landing-categories"
-      aria-labelledby="care-categories-heading"
-    >
-      <h2 id="care-categories-heading">
-        Timely treatments, health topics, and popular care categories.
-      </h2>
-      <div className="landing-category-grid">
-        {categories.map((category) => (
-          <button
-            key={category.label}
-            onClick={() => onDiscover(category.query)}
-          >
-            <CareArt kind={category.art} />
-            <strong>{category.label}</strong>
-          </button>
-        ))}
-      </div>
-    </section>
+    <span className={"landing-design-image " + className} data-state={state}>
+      {state === "loaded" ? null : fallback}
+      {state === "missing" ? null : (
+        <Image
+          src={src}
+          alt={alt}
+          width={width}
+          height={height}
+          sizes={sizes}
+          priority={priority}
+          onLoad={() => setState("loaded")}
+          onError={() => setState("missing")}
+        />
+      )}
+    </span>
   );
 }
 
-const dentalTreatments: {
-  name: string;
-  description: string;
-  art: ArtKind;
-  tags: string[];
-  more?: string;
-}[] = [
-  {
-    name: "Teeth Cleaning",
-    description: "Professional cleaning for a fresher, healthier smile",
-    art: "tooth",
-    tags: ["Plaque Removal", "Tartar Cleaning", "Stain Removal"],
-    more: "+2",
-  },
-  {
-    name: "Tooth Filling",
-    description: "Restore and protect damaged teeth seamlessly",
-    art: "filling",
-    tags: ["Tooth-Colored Fillings", "Cavity Treatment", "Stronger Teeth"],
-  },
-  {
-    name: "Root Canal Treatment",
-    description: "Relieve pain and save your natural tooth today",
-    art: "root",
-    tags: ["Pain Relief", "Infection Treatment", "Tooth Preservation"],
-    more: "+1",
-  },
-  {
-    name: "Teeth Whitening",
-    description: "Brighten your smile and boost your confidence",
-    art: "tooth",
-    tags: ["Stain Removal", "Brighter Smile", "Safe & Effective"],
-    more: "+1",
-  },
-  {
-    name: "Dental Implants",
-    description: "Permanent solution for missing teeth",
-    art: "implant",
-    tags: ["Natural Look", "Long Lasting", "Strong & Stable"],
-    more: "+1",
-  },
-  {
-    name: "Orthodontic",
-    description: "Straighten your teeth for a beautiful smile",
-    art: "braces",
-    tags: ["Braces", "Clear Aligners", "Better Alignment"],
-    more: "+1",
-  },
+/** The hero's illustrations: the family with their doctor on the left, the clinic on the right. */
+export function HeroArt() {
+  return (
+    <div className="lp-hero-art" aria-hidden="true">
+      <DesignImage
+        src="/images/landing/hero-family.webp"
+        alt=""
+        width={620}
+        height={500}
+        sizes="(max-width: 1000px) 0px, 34vw"
+        className="lp-hero-art-left"
+        priority
+      />
+      <DesignImage
+        src="/images/landing/hero-hospital.webp"
+        alt=""
+        width={600}
+        height={500}
+        sizes="(max-width: 1000px) 0px, 32vw"
+        className="lp-hero-art-right"
+        priority
+      />
+    </div>
+  );
+}
+
+const HIGHLIGHTS = [
+  { title: "Book", caption: "Appointments in minutes", file: "hero-book", icon: "calendar" },
+  { title: "Trusted", caption: "Verified healthcare providers", file: "hero-trusted", icon: "shield" },
+  { title: "Care", caption: "For a healthier tomorrow", file: "hero-care", icon: "heart" },
+] as const;
+
+/** Book, Trusted, Care: the three promises under the hero search, joined by a dotted line. */
+export function HeroHighlights() {
+  return (
+    <ul className="lp-hero-highlights" aria-label="Why CareOndeck">
+      {HIGHLIGHTS.map((item) => (
+        <li key={item.title}>
+          <DesignImage
+            src={"/images/landing/" + item.file + ".webp"}
+            alt=""
+            width={112}
+            height={112}
+            className="lp-hero-highlight-art"
+            fallback={
+              <span className="lp-hero-highlight-icon">
+                <Icon name={item.icon} />
+              </span>
+            }
+          />
+          <strong>{item.title}</strong>
+          <span>{item.caption}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const TRENDING: { label: string; query: string; art: ArtKind; file: string }[] = [
+  { label: "Teeth Whitening", query: "Teeth Whitening", art: "tooth", file: "teeth-whitening" },
+  { label: "Skin Tightening", query: "Skin Tightening", art: "skin", file: "skin-tightening" },
+  { label: "Weight Lose", query: "Weight Loss", art: "waist", file: "weight-loss" },
+  { label: "OB-GYN", query: "OB-GYN", art: "eye", file: "ob-gyn" },
+  { label: "Dermatologist", query: "Dermatologist", art: "hand", file: "dermatologist" },
+  { label: "Psychiatrist", query: "Psychiatrist", art: "brain", file: "psychiatrist" },
 ];
 
-export function DentalTreatments({ onDiscover }: { onDiscover: Discover }) {
+/** Trending Now: six care categories, each opening a search for it. */
+export function TrendingNow({ onDiscover }: { onDiscover: Discover }) {
   return (
-    <section
-      className="lp-section landing-dental"
-      aria-labelledby="dental-treatments-heading"
-    >
-      <h2 id="dental-treatments-heading">Popular Dental Treatments</h2>
-      <div className="landing-treatment-grid">
-        <button
-          className="landing-treatment-summary"
-          onClick={() => onDiscover("Dental Treatments")}
-        >
-          <strong>20+</strong>
-          <span>Dental Treatments</span>
-          <div className="landing-treatment-tags">
-            <span>Advanced Care</span>
-            <span>Modern Technology</span>
-            <span>Expert Dentists</span>
-            <small>+ More</small>
-          </div>
-        </button>
-        {dentalTreatments.map((treatment) => (
-          <button
-            className="landing-treatment-card"
-            key={treatment.name}
-            onClick={() => onDiscover(treatment.name)}
-          >
-            <span className="landing-treatment-top">
-              <CareArt kind={treatment.art} />
-              <span>
-                <strong>{treatment.name}</strong>
-                <small>{treatment.description}</small>
-              </span>
-            </span>
-            <span className="landing-treatment-tags">
-              {treatment.tags.map((tag) => (
-                <span key={tag}>{tag}</span>
-              ))}
-              {treatment.more && <small>{treatment.more}</small>}
-            </span>
+    <section className="lp-section landing-categories" aria-labelledby="trending-heading">
+      <h2 id="trending-heading">Trending Now</h2>
+      <div className="landing-category-grid">
+        {TRENDING.map((item) => (
+          <button key={item.label} onClick={() => onDiscover(item.query)}>
+            <DesignImage
+              src={"/images/landing/trending/" + item.file + ".png"}
+              alt=""
+              width={128}
+              height={128}
+              className="landing-care-art"
+              fallback={<CareArt kind={item.art} />}
+            />
+            <strong>{item.label}</strong>
           </button>
         ))}
-        <button
-          className="landing-treatment-cta"
-          onClick={() => onDiscover("All dental treatments")}
-        >
-          <strong>
-            Not sure which
-            <br />
-            treatment is right
-            <br />
-            for you?
-          </strong>
-          <span>
-            View all treatments <Icon name="arrow" />
-          </span>
-        </button>
       </div>
     </section>
   );
