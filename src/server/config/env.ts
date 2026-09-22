@@ -106,6 +106,18 @@ const schema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((value) => value === 'true'),
+  /**
+   * Shows sign-up, login and password-reset codes on screen instead of sending
+   * them, as local development does, on a deploy that has no Postmark or Telnyx
+   * keys yet. Only applies while the matching keys are missing.
+   *
+   * Anyone who types an email address then receives that account's code, so
+   * this is for test data only. Refused outright in production.
+   */
+  SHOW_CODES_ON_SCREEN: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
 }).superRefine((value, ctx) => {
   if (value.PROVIDER_AUTO_APPROVE && value.APP_ENV === 'production') {
     ctx.addIssue({
@@ -119,6 +131,13 @@ const schema = z.object({
       code: z.ZodIssueCode.custom,
       path: ['PROVIDER_AUTO_APPROVE_FLAGGED'],
       message: 'must not be true when APP_ENV=production -- providers with the wrong NPI would go live.',
+    });
+  }
+  if (value.SHOW_CODES_ON_SCREEN && value.APP_ENV === 'production') {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['SHOW_CODES_ON_SCREEN'],
+      message: 'must not be true when APP_ENV=production -- anyone could sign in as anyone.',
     });
   }
 });
