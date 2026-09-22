@@ -1,4 +1,4 @@
-﻿.auth-shell {
+.auth-shell {
   min-height: 100svh; padding: 24px; background: #fbf8f9;
   font-family: var(--font-sans); color: #292729;
 }
@@ -13,6 +13,7 @@
 .auth-brand-copy { position: relative; }
 .auth-brand-copy h2 { font-size: clamp(32px, 3.2vw, 44px); line-height: 1.12; font-weight: 700; letter-spacing: -.6px; }
 .auth-brand-copy > p { margin-top: 12px; font-size: 15px; line-height: 1.3; }
+.auth-brand-art { position: relative; z-index: 1; display: block; width: min(90%, 520px); height: auto; object-fit: contain; margin: auto auto 8px; }
 .auth-previews { position: relative; width: 405px; max-width: 100%; height: 400px; margin: auto; flex-shrink: 0; color: #273045; zoom: .62; }
 .auth-preview { position: absolute; border: 1px solid #f0dce7; border-radius: 11px; padding: 13px 12px; background: linear-gradient(130deg, #fff, #fdf6fb); box-shadow: 0 8px 20px #53002b12; }
 .auth-preview h3 { font-size: 11px; line-height: 1.2; color: #bb0061; font-weight: 700; }

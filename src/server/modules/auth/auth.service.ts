@@ -1378,11 +1378,17 @@ async function deliverCode(input: {
      * would echo codes from any deploy whose env was not filled in, while
      * NODE_ENV is set to 'production' by `next build`/`next start` and by
      * every host. Either one being wrong is now not enough.
+     *
+     * A staging deploy without the keys can opt in with SHOW_CODES_ON_SCREEN,
+     * which env.ts refuses in production.
      */
-    if (env.APP_ENV === 'local' && process.env.NODE_ENV !== 'production') {
+    const localDev = env.APP_ENV === 'local' && process.env.NODE_ENV !== 'production';
+    if (localDev || env.SHOW_CODES_ON_SCREEN) {
       logger.warn(
         { purpose, channel, destination: maskDestination(channel, destination), code },
-        `OTP not delivered -- no ${adapter.vendor} credentials. Code echoed for local development only.`,
+        `OTP not delivered -- no ${adapter.vendor} credentials. Code echoed to the caller (${
+          localDev ? 'local development' : 'SHOW_CODES_ON_SCREEN'
+        }).`,
       );
       return { vendor: 'dev-console', vendorMessageId: null, status: 'suppressed', devCode: code };
     }
