@@ -12,7 +12,7 @@
  * wire up.
  *
  * Care Progress is the harder of the two and the reason this file exists.
- * "2 of 2 completed", "Next due Jan 2027" and "Time for your annual checkup"
+ * "50% completed", "Next due Mar 2027" and "Time for your annual checkup"
  * describe clinical recall: what is due, on what cadence, for whom. Guessing
  * at that means migrating patient data twice.
  */
@@ -33,23 +33,24 @@ export interface CareProgressItem {
 
 export const PLACEHOLDER_CARE_PROGRESS: CareProgressItem[] = [
   {
-    id: 'dental-cleaning',
-    title: 'Dental Cleaning',
-    caption: 'Keep your smile healthy',
-    icon: 'tooth',
-    completed: 2,
+    id: 'annual-preventive-last',
+    title: 'Annual Preventive Visit',
+    caption: 'Completed Apr 12, 2026',
+    icon: 'clipboard',
+    completed: 1,
     total: 2,
-    nextDue: 'Jan 2027',
-    state: 'complete',
-    note: "You're on track with your dental care.",
+    nextDue: 'Mar 2027',
+    state: 'due',
+    note: 'Book now to stay healthy.',
+    action: { label: 'Book Now' },
   },
   {
     id: 'annual-preventive',
     title: 'Annual Preventive Visit',
-    caption: 'Stay ahead, stay healthy',
+    caption: 'Stay ahead, stay healthy.',
     icon: 'clipboard',
-    completed: 0,
-    total: 1,
+    completed: 1,
+    total: 2,
     nextDue: 'Mar 2027',
     state: 'due',
     note: 'Book now to stay healthy.',

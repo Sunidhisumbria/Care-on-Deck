@@ -20,20 +20,35 @@ export function SiteHeader({ patientNavigation = false }: { patientNavigation?: 
       everything inside it, including the open account menu. The menu's own
       z-10 cannot help: it only orders things within this header.
     */
-    <header className="relative z-50 border-b border-line bg-white/80 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-5 py-4 lg:px-8">
-        <Link href="/" aria-label="CareOndeck home">
+    <header className={`relative z-50 ${patientNavigation ? 'patient-header border-b border-[#f4e8ee] bg-[#fffdfd]' : 'border-b border-line bg-white/80 backdrop-blur'}`}>
+      {/*
+        The patient header is three columns so the links sit in the true
+        centre of the page, whatever the widths of the logo and the name
+        button. Each child names its column: the links are hidden on phones,
+        and without that the account button would slide into the middle one.
+      */}
+      <div
+        className={`mx-auto max-w-7xl gap-6 px-5 lg:px-8 ${
+          patientNavigation
+            ? 'grid grid-cols-[1fr_auto_1fr] items-center py-4 sm:py-5'
+            : 'flex items-center justify-between py-4'
+        }`}
+      >
+        <Link href="/" aria-label="CareOndeck home" className="col-start-1 justify-self-start">
           <Logo />
         </Link>
 
-        <div className="flex items-center gap-3 sm:gap-5">
-          {patientNavigation && <PatientNav />}
-          <Link
-            href="/signup?role=doctor"
-            className="hidden text-sm font-medium text-ink-700 transition-colors hover:text-brand-600 sm:block"
-          >
-            CareOndeck for Providers
-          </Link>
+        {patientNavigation && <PatientNav />}
+
+        <div className="col-start-3 flex items-center gap-3 justify-self-end sm:gap-5">
+          {!patientNavigation && (
+            <Link
+              href="/signup?role=doctor"
+              className="hidden text-sm font-medium text-ink-700 transition-colors hover:text-brand-600 sm:block"
+            >
+              CareOndeck for Providers
+            </Link>
+          )}
 
           <AccountArea />
         </div>
@@ -54,7 +69,7 @@ function PatientNav() {
 
   return (
     <nav
-      className="mr-2 hidden items-center gap-4 text-[0.6875rem] sm:flex lg:mr-4 lg:gap-8 lg:text-[0.8125rem] [&_[aria-current]]:font-semibold [&_[aria-current]]:text-brand-600"
+      className="col-start-2 hidden items-center gap-4 text-[0.75rem] font-medium sm:flex lg:gap-10 lg:text-[0.9375rem] [&_[aria-current]]:text-brand-600"
       aria-label="Patient"
     >
       {links.map((link) => (
@@ -62,7 +77,7 @@ function PatientNav() {
           key={link.href}
           href={link.href}
           aria-current={pathname === link.href ? 'page' : undefined}
-          className="whitespace-nowrap text-ink-700 transition-colors hover:text-brand-600"
+          className="whitespace-nowrap text-ink-900 transition-colors hover:text-brand-600"
         >
           {link.label}
         </Link>

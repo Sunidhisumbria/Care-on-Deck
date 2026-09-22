@@ -20,7 +20,7 @@ export function AuthMessage({
       <p className="mt-2 text-sm text-ink-500">{body}</p>
       <Link
         href={action.href}
-        className="mt-6 block w-full rounded-field bg-brand-600 py-3.5 text-center text-[0.9375rem] font-semibold text-white transition-colors hover:bg-brand-700"
+        className="auth-message-action mt-6 block w-full rounded-field bg-brand-600 py-3.5 text-center text-[0.9375rem] font-semibold text-white transition-colors hover:bg-brand-700"
       >
         {action.label}
       </Link>
