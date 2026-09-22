@@ -10,18 +10,7 @@ import { StethoscopeIcon, UserIcon } from '@/components/ui/icons';
 import { UserMenu } from '@/features/auth/components/user-menu';
 import { useCurrentUser } from '@/features/auth/hooks';
 
-/**
- * The header, on every public screen.
- *
- * The right-hand side is the only part that knows whether anyone is signed in:
- * the notification bell and account menu when they are, Sign In / Sign Up when
- * they are not. Everything else -- and every screen underneath -- is the same
- * either way, which is why the home screen is the landing screen.
- *
- * Signed out, Sign In and Sign Up both open the same Doctor / Patient chooser.
- * The choice travels as `?role=`, and the server checks it against the account
- * before it means anything.
- */
+
 export function SiteHeader({ patientNavigation = false }: { patientNavigation?: boolean }) {
   return (
     /*
@@ -53,18 +42,7 @@ export function SiteHeader({ patientNavigation = false }: { patientNavigation?: 
   );
 }
 
-/**
- * The signed-in patient's navigation.
- *
- * Styled here rather than in a stylesheet, because this is the header's markup
- * and it renders on every patient screen. It used to live in dependents.css,
- * which only the dependents screen imports -- so anywhere else the links ran
- * together with no gap at all.
- *
- * The current section is marked with `aria-current`, and the styling hangs off
- * that rather than a parallel `className` condition, so the two cannot
- * disagree about which tab is active.
- */
+
 function PatientNav() {
   const pathname = usePathname();
 
@@ -93,20 +71,7 @@ function PatientNav() {
   );
 }
 
-/**
- * Whichever half of the header applies.
- *
- * Exported because the landing screen draws its own header markup and has to
- * render the same thing here. It used to hand-roll a bell and a `<details>`
- * menu of its own, which drifted: the account screens grew an avatar, a
- * different set of links and different wording, and the two headers stopped
- * looking like the same site. One component means they cannot drift again.
- *
- * While the session is still being resolved this renders a placeholder the
- * same width as the buttons, rather than Sign In / Sign Up -- otherwise every
- * signed-in visitor sees the signed-out header flash before it corrects
- * itself, which reads as being logged out.
- */
+
 export function AccountArea() {
   const { user, isLoading } = useCurrentUser();
 
@@ -135,12 +100,7 @@ export function AccountArea() {
   );
 }
 
-/**
- * A button that drops open a Doctor / Patient choice.
- *
- * One component for both doors so the two menus cannot drift apart -- same
- * keyboard handling, same dismissal, same wording.
- */
+
 export function RoleMenu({
   label,
   tone,
@@ -157,8 +117,7 @@ export function RoleMenu({
   const [open, setOpen] = useState(false);
   const wrapper = useRef<HTMLDivElement>(null);
 
-  // Close on a click elsewhere or on Escape -- the two ways people expect to
-  // dismiss a menu, and neither is free.
+
   useEffect(() => {
     if (!open) return;
 

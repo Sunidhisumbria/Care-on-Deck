@@ -10,12 +10,14 @@ import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 
 import { Icon, Wordmark, DoctorAvatar } from "./care-visuals";
 import {
-  BookingShortcuts,
-  CareCategories,
-  DentalTreatments,
   BookingBenefits,
+  BookingShortcuts,
   BookingSteps,
+  DesignImage,
   FeaturedCare,
+  HeroArt,
+  HeroHighlights,
+  TrendingNow,
 } from "./landing-sections";
 import { AccountArea, RoleMenu } from "./site-header";
 import "./landing-page.css";
@@ -29,6 +31,16 @@ const insuranceNames = [
   "Aetna",
   "Delta Dental",
   "Humana",
+];
+
+/** The logo files exported from Figma, in the same order as insuranceNames. */
+const insuranceLogoFiles = [
+  "bluecross-blueshield",
+  "cigna",
+  "united-healthcare",
+  "aetna",
+  "delta-dental",
+  "humana",
 ];
 
 /** The search bar's insurance list: the two "not sure" answers, then carriers. */
@@ -241,165 +253,6 @@ function ProviderCard({
   );
 }
 
-function TrustCards({
-  onDiscover,
-}: {
-  onDiscover: (specialty: string) => void;
-}) {
-  return (
-    <div className="lp-trust-cards">
-      <div className="lp-trust-side lp-trust-left">
-        <div className="lp-proof-card lp-patients">
-          <span className="lp-round-icon">
-            <Icon name="users" />
-          </span>
-          <div>
-            <small>Patients helped</small>
-            <strong>150k+</strong>
-            <span>and counting</span>
-          </div>
-        </div>
-        <div className="lp-proof-card lp-happiness">
-          <div>
-            <small>Happy patients</small>
-            <strong>98%</strong>
-          </div>
-          <svg viewBox="0 0 72 62" aria-hidden="true">
-            <path
-              d="m36 26 19-17m-12 0h12v12"
-              fill="none"
-              stroke="#b84991"
-              strokeWidth="4"
-            />
-            <rect x="4" y="47" width="9" height="11" rx="1" fill="#d57ab1" />
-            <rect x="20" y="39" width="9" height="19" rx="1" fill="#cb61a1" />
-            <rect x="36" y="30" width="9" height="28" rx="1" fill="#b7468b" />
-            <rect x="52" y="21" width="9" height="37" rx="1" fill="#a32a73" />
-          </svg>
-        </div>
-      </div>
-      <div className="lp-care-card">
-        <h2>Find Care You Can Trust</h2>
-        <p>Top-rated providers near you.</p>
-        <div className="lp-care-list">
-          {(
-            [
-              { name: "Dentists", icon: "tooth", rating: "4.8", date: "Today" },
-              {
-                name: "Primary Care",
-                icon: "stethoscope",
-                rating: "4.7",
-                date: "Tomorrow",
-              },
-              {
-                name: "Mental Health",
-                icon: "heart",
-                rating: "4.9",
-                date: "Today",
-              },
-            ] as const
-          ).map((item) => (
-            <button key={item.name} onClick={() => onDiscover(item.name)}>
-              <span className="lp-round-icon">
-                <Icon name={item.icon} />
-              </span>
-              <span className="lp-care-name">
-                <strong>{item.name}</strong>
-                <small>{item.rating} ★</small>
-              </span>
-              <span className="lp-care-date">
-                <small>Next available</small>
-                <strong>{item.date}</strong>
-              </span>
-              <Icon name="chevron" />
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="lp-trust-side lp-trust-right">
-        <div className="lp-proof-card lp-reviews">
-          <div className="lp-review-avatars">
-            {videoPortraits.slice(0, 3).map((photo, i) => (
-              <Image
-                key={photo}
-                src={"/images/landing/" + photo}
-                width={38}
-                height={38}
-                alt={"Portrait " + (i + 1)}
-              />
-            ))}
-          </div>
-          <div>
-            <strong>3.5k+</strong>
-            <span>Verified reviews</span>
-          </div>
-          <Icon name="check" />
-        </div>
-        <div className="lp-proof-card lp-security">
-          <Icon name="shield" />
-          <div>
-            <strong>100%</strong>
-            <span>Secure &amp; Private</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const footerColumns = [
-  {
-    title: "Top Specialists",
-    links: [
-      "Dentist",
-      "Pediatric Dentist",
-      "Dermatologist",
-      "Pediatrician",
-      "Family Doctor",
-    ],
-  },
-  {
-    title: "Cosmetic Dentistry",
-    links: [
-      "Teeth Whitening",
-      "Porcelain Veneers",
-      "Dental Implants",
-      "Invisalign®",
-      "Composite Bonding",
-    ],
-  },
-  {
-    title: "Cosmetic Doctors",
-    links: [
-      "Botox®",
-      "Dermal Fillers",
-      "Laser Resurfacing",
-      "IPL Photofacial",
-      "Chemical Peels",
-    ],
-  },
-  {
-    title: "For Providers",
-    links: [
-      "Independent Practices",
-      "New Practices",
-      "Specialties",
-      "Multi-Location Groups",
-    ],
-  },
-  {
-    title: "Platform",
-    links: [
-      "Marketplace",
-      "CareOndeck Direct™",
-      "CareOndeck Pulse™",
-      "CareOndeck Connect™",
-      "Pricing",
-    ],
-  },
-  { title: "About Us", links: ["About CareOndeck", "FAQs", "Contact Us"] },
-];
-
 export function LandingPage() {
   return <CareDiscoveryPage variant="landing" />;
 }
@@ -446,36 +299,6 @@ function CareDiscoveryPage({ variant }: { variant: "landing" | "home" }) {
       .getElementById(section === "doctor" ? "doctors" : "dentists")
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
-  function footerAction(column: string, title: string) {
-    if (
-      ["Top Specialists", "Cosmetic Dentistry", "Cosmetic Doctors"].includes(
-        column,
-      )
-    )
-      return discover(title);
-    if (title === "Marketplace") {
-      searchInput.current?.focus();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-    const messages: Record<string, string> = {
-      "About CareOndeck":
-        "CareOndeck helps patients discover care and connects practices with their communities. Find the right doctor, on your schedule.",
-      FAQs: "Browse providers by specialty, location, and insurance. Create an account to manage your profile. Online appointment booking and insurance verification are coming soon.",
-      "Contact Us":
-        "Patient support is coming soon. If you already have an account, sign in to manage your personal information.",
-      Pricing:
-        "Practice plans and pricing are coming soon. Create a provider account to get started.",
-    };
-    setModal({
-      kind: "info",
-      title,
-      body:
-        messages[title] ||
-        "Tools for your practice, connected in one place. Create a provider account to get started. More details are coming soon.",
-    });
-  }
-
   return (
     <div className={"lp lp-" + variant}>
       <a className="lp-skip-link" href="#main-content">
@@ -488,6 +311,7 @@ function CareDiscoveryPage({ variant }: { variant: "landing" | "home" }) {
           <i />
           <i />
         </div>
+        <HeroArt />
         <header className="lp-header lp-container">
           <Wordmark />
           <nav className="lp-main-nav" aria-label="Main navigation">
@@ -516,7 +340,7 @@ function CareDiscoveryPage({ variant }: { variant: "landing" | "home" }) {
                   absent -- it was the loudest control here, shown to the one
                   group with no use for it.
 
-                  My Home is now the first child, which is why the
+                  Go to Home is now the first child, which is why the
                   `:not(.lp-primary)` guard on the text-link hover rule in
                   landing-sections.css earns its keep: without it that rule
                   would turn this button's white label magenta on hover, on a
@@ -524,7 +348,7 @@ function CareDiscoveryPage({ variant }: { variant: "landing" | "home" }) {
                 */
                 <>
                   <Link href="/home" className="lp-primary lp-role-trigger">
-                    My Home
+                    Go to Home
                   </Link>
                   <SignOutButton className="lp-role-trigger lp-role-signin" />
                 </>
@@ -594,7 +418,7 @@ function CareDiscoveryPage({ variant }: { variant: "landing" | "home" }) {
               Find Doctor
             </button>
           </form>
-          <TrustCards onDiscover={discover} />
+          <HeroHighlights />
         </main>
       </div>
 
@@ -605,7 +429,7 @@ function CareDiscoveryPage({ variant }: { variant: "landing" | "home" }) {
               onDiscover={discover}
               onInsurance={() => setModal({ kind: "insurance" })}
             />
-            <CareCategories onDiscover={discover} />
+            <TrendingNow onDiscover={discover} />
           </>
         )}
         <section
@@ -631,7 +455,14 @@ function CareDiscoveryPage({ variant }: { variant: "landing" | "home" }) {
                 aria-label={"View " + insurer + " insurance plan"}
                 onClick={() => setModal({ kind: "insurance", index })}
               >
-                <InsuranceLogo index={index} />
+                <DesignImage
+                  src={"/images/landing/insurance/" + insuranceLogoFiles[index] + ".png"}
+                  alt=""
+                  width={220}
+                  height={90}
+                  className="lp-insurance-logo"
+                  fallback={<InsuranceLogo index={index} />}
+                />
               </button>
             ))}
           </div>
@@ -744,7 +575,6 @@ function CareDiscoveryPage({ variant }: { variant: "landing" | "home" }) {
           </div>
         </section>
 
-        {variant === "landing" && <DentalTreatments onDiscover={discover} />}
         <section
           className="lp-section lp-specialties-section"
           aria-labelledby="specialties-heading"
@@ -877,6 +707,8 @@ function CareDiscoveryPage({ variant }: { variant: "landing" | "home" }) {
             </button>
           </div>
         </section>
+
+        {variant === "landing" && <FeaturedCare onDiscover={discover} />}
       </div>
 
       {variant === "landing" && (
@@ -887,33 +719,13 @@ function CareDiscoveryPage({ variant }: { variant: "landing" | "home" }) {
               onDiscover={discover}
               onInsurance={() => setModal({ kind: "insurance" })}
             />
-            <FeaturedCare onDiscover={discover} />
           </div>
         </>
       )}
 
-      {variant === "home" ? <div className="ph-footer"><SiteFooter /></div> : <footer className="lp-footer">
-        <div className="lp-container lp-footer-grid">
-          {footerColumns.map((column) => (
-            <nav key={column.title} aria-label={column.title}>
-              <h2>{column.title}</h2>
-              <ul>
-                {column.links.map((label) => (
-                  <li key={label}>
-                    {column.title === "For Providers" ? (
-                      <Link href="/signup?role=doctor">{label}</Link>
-                    ) : (
-                      <button onClick={() => footerAction(column.title, label)}>
-                        {label}
-                      </button>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          ))}
-        </div>
-      </footer>}
+      <div className="ph-footer">
+        <SiteFooter />
+      </div>
 
       {modal && (
         <dialog

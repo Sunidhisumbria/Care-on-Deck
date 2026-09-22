@@ -36,7 +36,7 @@ const COLUMNS: FooterColumn[] = [
       { label: 'Family Doctor' },
       { label: 'Allergist/Immunologist' },
       { label: 'Pain Management Specialist' },
-      { label: 'Gastroenterologist' },
+      { label: 'Gastroenterology' },
       { label: 'Hemorrhoid Specialist' },
     ],
   },

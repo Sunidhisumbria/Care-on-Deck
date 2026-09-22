@@ -12,20 +12,9 @@ import { resetPasswordSchema } from '@/features/auth/schemas/password.schema';
 import { useApiForm } from '@/lib/forms/use-api-form';
 import { ApiError } from '@/lib/http/errors';
 
-/**
- * Step two of a reset: choose the new password.
- *
- * The proof from code entry is read once out of sessionStorage and held for
- * the submit. Arriving without one means the tab was reloaded or the page was
- * opened cold, and the only honest answer is to start again.
- *
- * Which of the three states shows is derived from the mutation rather than
- * tracked in its own state: react-query already knows whether the request
- * succeeded and how it failed, and a second copy of that could disagree.
- */
+
 export default function ResetPasswordPage() {
-  // `undefined` means "not looked yet", which is not the same as "looked and
-  // found nothing" -- the difference decides whether to render at all.
+
   const [proof, setProof] = useState<Proof | null | undefined>(undefined);
 
   const resetPassword = useResetPassword();
@@ -34,8 +23,7 @@ export default function ResetPasswordPage() {
     confirm_password: '',
   });
 
-  // sessionStorage is browser-only, so the read waits for mount. The read
-  // does not consume the proof -- see readProof.
+  
   useEffect(() => {
     setProof(readProof());
   }, []);

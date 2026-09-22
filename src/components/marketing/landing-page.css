@@ -1,5 +1,4 @@
-﻿/* Reference landing page. Styles are scoped so account and auth screens retain their design. */
-.lp {
+﻿.lp {
   --lp-brand: #9e2c74;
   --lp-pink: #c2599c;
   --lp-ink: #282829;
@@ -217,7 +216,7 @@
 }
 .lp-hero-copy {
   text-align: center;
-  padding-top: 20px;
+  padding-top: 40px;
 }
 .lp-hero-copy h1 {
   font-size: clamp(40px, 4.5vw, 60px);
@@ -240,9 +239,9 @@
 }
 .lp-search {
   width: calc(100% - 80px);
-  max-width: 936px;
+  max-width: 1000px;
   min-height: 72px;
-  margin: 50px auto 0;
+  margin: 58px auto 0;
   display: flex;
   align-items: center;
   gap: 18px;
@@ -285,6 +284,15 @@
 .lp-search-insurance {
   flex: 1.15;
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.lp-search-insurance > .lp-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--lp-pink);
 }
 /*
  * The insurance picker is a listbox rather than a <select>: an open <select>
@@ -325,49 +333,12 @@
   height: 44px;
   font-size: 13px;
 }
-.lp-trust-cards {
-  width: calc(100% - 80px);
-  max-width: 878px;
-  margin: 64px auto 0;
-  display: grid;
-  grid-template-columns: 216px 386px 216px;
-  justify-content: center;
-  gap: 28px;
-  align-items: end;
-}
-.lp-trust-side {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-self: stretch;
-  padding: 5px 0 19px;
-}
-.lp-proof-card {
-  background: #ffffffed;
-  border-radius: 17px;
-  display: flex;
-  align-items: center;
-  min-height: 88px;
-  padding: 14px 16px;
-  gap: 12px;
-  color: #34363f;
-}
-.lp-proof-card small {
-  font-size: 11px;
-  display: block;
-  font-weight: 600;
-  color: #606975;
-}
-.lp-proof-card strong {
-  display: block;
-  font-size: 25px;
-  font-weight: 750;
-  line-height: 1.15;
-}
-.lp-proof-card span:not(.lp-round-icon):not(.lp-review-avatars) {
-  font-size: 11px;
-  display: block;
-}
+
+
+
+
+
+
 .lp-round-icon {
   width: 57px;
   height: 57px;
@@ -383,144 +354,34 @@
   width: 36px;
   height: 36px;
 }
-.lp-patients {
-  transform: rotate(-5deg);
-}
-.lp-happiness {
-  transform: rotate(4deg);
-  justify-content: space-between;
-  margin-top: 34px;
-}
-.lp-happiness strong {
-  margin-top: 6px;
-}
-.lp-happiness > svg {
-  width: 70px;
-  height: 62px;
-}
-.lp-care-card {
-  height: 238px;
-  border-radius: 17px 17px 8px 8px;
-  background: #fffffff0;
-  padding: 13px 16px 9px;
-  text-align: center;
-  box-shadow: 0 3px 7px #97577e04;
-}
-.lp-care-card h2 {
-  font-size: 18px;
-  line-height: 1.1;
-  font-weight: 700;
-  color: #35414e;
-}
-.lp-care-card > p {
-  font-size: 11px;
-  color: #78818a;
-  margin: 2px 0 9px;
-}
-.lp-care-list {
-  display: grid;
-  gap: 5px;
-}
-.lp-care-list button {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 5px 9px;
-  border-radius: 14px;
-  background: #fafbfc;
-  box-shadow: 0 2px 3px #444b5510;
-  text-align: left;
-  min-height: 51px;
-  transition: background 0.15s;
-}
-.lp-care-list button:hover {
-  background: #f8eaf2;
-}
-.lp-care-list .lp-round-icon {
-  width: 41px;
-  height: 41px;
-}
-.lp-care-list .lp-round-icon .lp-icon {
-  width: 27px;
-  height: 27px;
-}
-.lp-care-name {
-  flex: 1;
-}
-.lp-care-name strong {
-  font-size: 11px;
-  color: #33404c;
-  display: block;
-}
-.lp-care-name small {
-  font-size: 10px;
-  color: #68737e;
-}
-.lp-care-date small {
-  display: block;
-  color: #97a0a5;
-  font-size: 8px;
-}
-.lp-care-date strong {
-  display: block;
-  color: #3bb077;
-  font-size: 10px;
-}
-.lp-care-list button > .lp-icon {
-  width: 17px;
-  height: 17px;
-  color: #9da6b0;
-  margin-left: 8px;
-}
-.lp-trust-right {
-  padding-top: 17px;
-  padding-bottom: 24px;
-}
-.lp-reviews {
-  min-height: 74px;
-  padding: 12px;
-  gap: 9px;
-  transform: rotate(2deg);
-}
-.lp-review-avatars {
-  display: flex;
-  padding-left: 0;
-}
-.lp-review-avatars img {
-  width: 35px;
-  height: 39px;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-left: -11px;
-}
-.lp-review-avatars img:first-child {
-  margin-left: 0;
-}
-.lp-reviews strong {
-  font-size: 21px;
-}
-.lp-reviews span:not(.lp-review-avatars) {
-  font-size: 10px !important;
-  white-space: nowrap;
-}
-.lp-reviews > .lp-icon {
-  width: 23px;
-  height: 23px;
-  color: white;
-  fill: var(--lp-brand);
-  stroke-width: 1.2;
-  margin-left: auto;
-}
-.lp-security {
-  transform: rotate(-5deg);
-  gap: 15px;
-}
-.lp-security > .lp-icon {
-  color: #b7428a;
-  width: 44px;
-  height: 44px;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .lp-content {
   padding-bottom: 104px;
 }
@@ -1139,43 +1000,13 @@
   width: 38px;
   height: 38px;
 }
-.lp-footer {
-  background: #19000e;
-  padding: 73px 0 20px;
-  color: #c0b0bb;
-}
-.lp-footer-grid {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr 0.96fr 1fr 0.9fr 0.8fr;
-  gap: 30px;
-}
-.lp-footer h2 {
-  color: #a64482;
-  text-transform: uppercase;
-  font-size: 10px;
-  letter-spacing: 1.1px;
-  font-weight: 650;
-  margin-bottom: 15px;
-}
-.lp-footer ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.lp-footer li {
-  margin-bottom: 9px;
-  line-height: 1.35;
-}
-.lp-footer li button,
-.lp-footer li a {
-  font-size: 12px;
-  text-align: left;
-  color: #c0b0bb;
-}
-.lp-footer li button:hover,
-.lp-footer li a:hover {
-  color: #fff;
-}
+
+
+
+
+
+
+
 .lp-dialog {
   position: fixed;
   inset: 0;
@@ -1428,31 +1259,16 @@
   .lp-search > .lp-primary {
     min-width: 110px;
   }
-  .lp-trust-cards {
-    grid-template-columns: 190px 330px 190px;
-    gap: 20px;
-  }
-  .lp-proof-card {
-    padding: 12px;
-  }
-  .lp-reviews {
-    padding: 10px;
-    gap: 7px;
-  }
-  .lp-review-avatars img {
-    width: 30px;
-    height: 34px;
-  }
+  
+  
+  
+  
   .lp-round-icon {
     width: 48px;
     height: 48px;
   }
-  .lp-proof-card strong {
-    font-size: 23px;
-  }
-  .lp-reviews strong {
-    font-size: 18px;
-  }
+  
+  
   .lp-section {
     margin-top: 76px;
   }
@@ -1571,17 +1387,9 @@
   .lp-video-caption > span {
     font-size: 10px;
   }
-  .lp-footer-grid {
-    gap: 18px;
-  }
-  .lp-footer h2 {
-    font-size: 9px;
-    letter-spacing: 0.6px;
-  }
-  .lp-footer li button,
-  .lp-footer li a {
-    font-size: 10px;
-  }
+  
+  
+  
 }
 @media (max-width: 760px) {
   .lp-container {
@@ -1639,33 +1447,12 @@
     grid-column: 1 / -1;
     width: 100%;
   }
-  .lp-trust-cards {
-    width: calc(100% - 40px);
-    grid-template-columns: 1fr 1.65fr 1fr;
-    gap: 12px;
-    margin-top: 42px;
-  }
-  .lp-proof-card {
-    border-radius: 11px;
-    padding: 10px 8px;
-    gap: 7px;
-    min-height: 68px;
-  }
-  .lp-proof-card small {
-    font-size: 8px;
-  }
-  .lp-proof-card strong {
-    font-size: 18px;
-  }
-  .lp-proof-card span:not(.lp-round-icon):not(.lp-review-avatars) {
-    font-size: 8px;
-  }
-  .lp-patients {
-    flex-wrap: wrap;
-    justify-content: center;
-    text-align: center;
-    gap: 4px;
-  }
+  
+  
+  
+  
+  
+  
   .lp-round-icon {
     width: 35px;
     height: 35px;
@@ -1674,71 +1461,24 @@
     width: 26px;
     height: 26px;
   }
-  .lp-happiness {
-    margin-top: 20px;
-  }
-  .lp-happiness > svg {
-    width: 40px;
-    height: 40px;
-  }
-  .lp-care-card {
-    padding: 12px 8px 8px;
-    height: 227px;
-  }
-  .lp-care-card h2 {
-    font-size: 14px;
-  }
-  .lp-care-card > p {
-    font-size: 9px;
-  }
-  .lp-care-list button {
-    padding: 6px;
-    gap: 5px;
-  }
-  .lp-care-list .lp-round-icon {
-    width: 31px;
-    height: 31px;
-  }
-  .lp-care-list .lp-round-icon .lp-icon {
-    width: 22px;
-    height: 22px;
-  }
-  .lp-care-name strong {
-    font-size: 9px;
-  }
-  .lp-care-date small {
-    font-size: 6px;
-  }
-  .lp-care-date strong {
-    font-size: 8px;
-  }
-  .lp-care-list button > .lp-icon {
-    margin-left: 0;
-    width: 11px;
-  }
-  .lp-reviews {
-    flex-wrap: wrap;
-    justify-content: center;
-    text-align: center;
-  }
-  .lp-reviews > .lp-icon {
-    width: 17px;
-    margin-left: 0;
-  }
-  .lp-reviews span:not(.lp-review-avatars) {
-    font-size: 8px !important;
-  }
-  .lp-review-avatars img {
-    width: 26px;
-    height: 29px;
-  }
-  .lp-security {
-    gap: 6px;
-  }
-  .lp-security > .lp-icon {
-    width: 28px;
-    height: 28px;
-  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   .lp-section {
     margin-top: 60px;
   }
@@ -1927,20 +1667,10 @@
   .lp-content {
     padding-bottom: 65px;
   }
-  .lp-footer {
-    padding: 45px 0 30px;
-  }
-  .lp-footer-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px 24px;
-  }
-  .lp-footer h2 {
-    font-size: 10px;
-  }
-  .lp-footer li button,
-  .lp-footer li a {
-    font-size: 11px;
-  }
+  
+  
+  
+  
 }
 @media (max-width: 420px) {
   .lp-main-nav {
@@ -1967,61 +1697,21 @@
   .lp-search label > .lp-icon {
     width: 18px;
   }
-  .lp-trust-cards {
-    grid-template-columns: 1fr 1.8fr 1fr;
-    width: calc(100% - 26px);
-    gap: 7px;
-  }
-  .lp-care-card {
-    padding-inline: 5px;
-  }
-  .lp-care-card h2 {
-    font-size: 12px;
-  }
-  .lp-care-card > p {
-    font-size: 8px;
-  }
-  .lp-care-list button {
-    padding: 6px 3px;
-    gap: 3px;
-  }
-  .lp-care-list .lp-round-icon {
-    width: 26px;
-    height: 29px;
-  }
-  .lp-care-name strong {
-    font-size: 8px;
-  }
-  .lp-care-date small {
-    font-size: 5px;
-  }
-  .lp-care-list button > .lp-icon {
-    width: 8px;
-  }
-  .lp-proof-card {
-    padding: 9px 6px;
-  }
-  .lp-happiness {
-    flex-wrap: wrap;
-    justify-content: center;
-    text-align: center;
-  }
-  .lp-happiness > svg {
-    width: 38px;
-    height: 31px;
-  }
-  .lp-security {
-    flex-wrap: wrap;
-    justify-content: center;
-    text-align: center;
-  }
-  .lp-review-avatars img {
-    width: 24px;
-    height: 26px;
-  }
-  .lp-reviews > .lp-icon {
-    display: none;
-  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   .lp-section h2 {
     font-size: 22px;
   }
@@ -2083,9 +1773,7 @@
   .lp-video-card {
     flex-basis: 66%;
   }
-  .lp-footer-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  
   .lp-dialog-inner {
     padding: 32px 22px 24px;
   }
@@ -2099,5 +1787,130 @@
   .lp *::after {
     scroll-behavior: auto !important;
     transition: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------ Hero (Figma) */
+/*
+ * The hero's illustrations sit in the bottom corners, behind the copy and the
+ * search. Below 1000px there is no room beside the search, so they step aside.
+ */
+.lp-hero > main {
+  position: relative;
+  z-index: 1;
+}
+.lp-hero-art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.lp-hero-art .landing-design-image {
+  position: absolute;
+  bottom: 0;
+}
+.lp-hero-art .landing-design-image > img {
+  height: auto;
+}
+.lp-hero-art .lp-hero-art-left {
+  left: 0;
+  bottom: -14px;
+  width: clamp(270px, 28vw, 425px);
+}
+.lp-hero-art-right {
+  right: 0;
+  width: clamp(280px, 29vw, 440px);
+}
+
+/* Book, Trusted, Care -- joined by a dotted line behind the icons. */
+.lp-hero-highlights {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  justify-content: center;
+  gap: clamp(28px, 6vw, 96px);
+  list-style: none;
+  margin: 72px auto 0;
+  padding: 0 0 96px;
+}
+.lp-hero-highlights::before {
+  content: "";
+  position: absolute;
+  top: 44px;
+  left: 50%;
+  width: min(420px, 60%);
+  transform: translateX(-50%);
+  border-top: 2px dashed #dbabc7;
+  z-index: -1;
+}
+.lp-hero-highlights li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 136px;
+  text-align: center;
+}
+.lp-hero-highlight-art {
+  width: 88px;
+  height: 88px;
+}
+.lp-hero-highlight-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  color: var(--lp-brand);
+  background: radial-gradient(circle at 50% 38%, #ffffff 0%, #f8dfeb 72%);
+  box-shadow: 0 10px 24px #a51e6914;
+}
+.lp-hero-highlight-icon .lp-icon {
+  width: 34px;
+  height: 34px;
+}
+.lp-hero-highlights strong {
+  margin-top: 12px;
+  color: #1c1119;
+  font-size: 18px;
+  font-weight: 700;
+}
+.lp-hero-highlights li > span:last-child {
+  margin-top: 2px;
+  color: #6f6a6e;
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+
+/* Insurance logos exported from Figma fill their card. */
+.lp-insurance-logo {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 1000px) {
+  .lp-hero-art {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .lp-hero-highlights {
+    gap: 12px;
+    margin-top: 36px;
+    padding-bottom: 48px;
+  }
+  .lp-hero-highlights li {
+    width: 104px;
+  }
+  .lp-hero-highlight-art,
+  .lp-hero-highlight-icon {
+    width: 64px;
+    height: 64px;
+  }
+  .lp-hero-highlights::before {
+    top: 32px;
+  }
+  .lp-hero-highlights strong {
+    font-size: 15px;
   }
 }

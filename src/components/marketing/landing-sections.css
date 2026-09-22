@@ -1077,3 +1077,26 @@
   .lp-role-trigger > svg { width: 12px; height: 12px; }
 }
 .lp-public-auth > div:first-child [role="menu"] { left: 0; right: auto; }
+
+/*
+ * An image exported from Figma, with its stand-in shown until the file loads.
+ * The image is laid over the stand-in, invisible, while it loads, so the switch
+ * happens in one frame and nothing jumps.
+ */
+.landing-design-image {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.landing-design-image > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.landing-design-image[data-state="loading"] > img {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
