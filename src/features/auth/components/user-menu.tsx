@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { Avatar } from '@/components/ui/avatar';
-import { DependentsIcon, LockIcon, LogoutIcon, PersonCardIcon, ShieldCheckIcon } from '@/components/ui/icons';
+import { BellIcon, DependentsIcon, LockIcon, LogoutIcon, PersonCardIcon, ShieldCheckIcon } from '@/components/ui/icons';
 import { Spinner } from '@/components/ui/spinner';
 
 import { useSignOut } from '../hooks/use-sign-out';
@@ -19,7 +18,7 @@ type Account = NonNullable<CurrentUser['user']>;
  */
 export function UserMenu({ user }: { user: Account }) {
   return (
-    <div className="flex items-center gap-3 sm:gap-4">
+    <div className="flex items-center gap-3 sm:gap-5">
       <NotificationBell />
       <AccountMenu user={user} />
     </div>
@@ -38,23 +37,11 @@ function NotificationBell({ count = 0 }: { count?: number }) {
     <button
       type="button"
       aria-label={count > 0 ? `Notifications, ${count} unread` : 'Notifications'}
-      className="relative rounded-full p-2 text-brand-600 transition-colors hover:bg-brand-50"
+      className="relative rounded-full p-1.5 text-ink-900 transition-colors hover:bg-brand-50"
     >
-      <svg
-        viewBox="0 0 24 24"
-        className="h-5 w-5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M18 8a6 6 0 1 0-12 0c0 4.5-1.5 6-1.5 6h15S18 12.5 18 8Z" />
-        <path d="M10.3 18a2 2 0 0 0 3.4 0" />
-      </svg>
+      <BellIcon className="h-6 w-6" />
       {count > 0 ? (
-        <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[0.625rem] font-bold text-white">
+        <span className="absolute right-1 top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-brand-600 px-0.5 text-[0.5625rem] font-bold leading-none text-white ring-2 ring-[#fffdfd]">
           {count > 9 ? '9+' : count}
         </span>
       ) : null}
@@ -94,14 +81,13 @@ function AccountMenu({ user }: { user: Account }) {
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="flex items-center gap-2 rounded-field border border-brand-200 py-1.5 pl-1.5 pr-3 text-sm font-semibold text-ink-700 transition-colors hover:border-brand-400"
+        className="flex h-10.5 items-center gap-2.5 rounded-lg border border-[#e6dfe3] bg-white px-4 text-[0.9375rem] font-semibold text-ink-900 transition-colors hover:border-brand-300"
       >
-        <Avatar name={name} url={user.avatar_url} className="h-7 w-7 text-xs" />
         <span className="max-w-[9rem] truncate">{name}</span>
         <svg
           viewBox="0 0 20 20"
           aria-hidden="true"
-          className={`h-4 w-4 shrink-0 text-ink-500 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 shrink-0 text-ink-900 transition-transform ${open ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"

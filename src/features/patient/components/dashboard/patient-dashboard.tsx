@@ -20,7 +20,7 @@ export function PatientDashboard() {
   return (
     <div className="mx-auto max-w-7xl space-y-10 px-5 py-6 lg:px-8 lg:py-8">
       {isLoading || !user ? (
-        <div aria-hidden="true" className="h-56 animate-pulse rounded-card bg-brand-50" />
+        <div aria-hidden="true" className="h-64 animate-pulse rounded-card bg-brand-50" />
       ) : (
         <WelcomeHero firstName={displayName(user)} />
       )}

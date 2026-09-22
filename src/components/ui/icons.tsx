@@ -205,10 +205,25 @@ export const ClipboardIcon = ({ className }: IconProps) => (
   </Stroked>
 );
 
+export const ClipboardCheckIcon = ({ className }: IconProps) => (
+  <Stroked className={className}>
+    <rect x="4" y="3.8" width="12" height="13.4" rx="2" />
+    <path d="M7.5 3.8V2.6h5v1.2M7.4 10.9l1.9 1.9 3.4-3.6" />
+  </Stroked>
+);
+
 export const EyeIcon = ({ className }: IconProps) => (
   <Stroked className={className}>
     <path d="M1.8 10S4.9 4.8 10 4.8 18.2 10 18.2 10 15.1 15.2 10 15.2 1.8 10 1.8 10Z" />
     <circle cx="10" cy="10" r="2.4" />
+  </Stroked>
+);
+
+export const EyeOffIcon = ({ className }: IconProps) => (
+  <Stroked className={className}>
+    <path d="M8.2 4.9a8 8 0 0 1 1.8-.1c5.1 0 8.2 5.2 8.2 5.2a14 14 0 0 1-2 2.6" />
+    <path d="M5.4 6.1A13.6 13.6 0 0 0 1.8 10s3.1 5.2 8.2 5.2a7.7 7.7 0 0 0 4.3-1.3" />
+    <path d="M8.3 8.3a2.4 2.4 0 0 0 3.4 3.4M2.5 2.5l15 15" />
   </Stroked>
 );
 
@@ -237,6 +252,19 @@ export const StarIcon = ({ className = DEFAULT_SIZE }: IconProps) => (
   <svg viewBox="0 0 20 20" className={className} aria-hidden="true" fill="currentColor">
     <path d="m10 2.6 2.3 4.7 5.2.8-3.8 3.6.9 5.1-4.6-2.4-4.6 2.4.9-5.1L2.5 8.1l5.2-.8Z" />
   </svg>
+);
+
+export const StarOutlineIcon = ({ className }: IconProps) => (
+  <Stroked className={className}>
+    <path d="m10 2.6 2.3 4.7 5.2.8-3.8 3.6.9 5.1-4.6-2.4-4.6 2.4.9-5.1L2.5 8.1l5.2-.8Z" />
+  </Stroked>
+);
+
+export const BellIcon = ({ className }: IconProps) => (
+  <Stroked className={className}>
+    <path d="M15 7.6a5 5 0 1 0-10 0c0 4-1.6 5.6-1.6 5.6h13.2S15 11.6 15 7.6Z" />
+    <path d="M8.6 16.2a1.6 1.6 0 0 0 2.8 0" />
+  </Stroked>
 );
 
 // --- state -------------------------------------------------------------------

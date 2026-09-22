@@ -64,3 +64,7 @@ body {
 /* Keep the shared wordmark proportions consistent across every screen. */
 .brand-logo { display: inline-block; width: 140px; flex-shrink: 0; vertical-align: middle; line-height: 0; }
 .brand-logo > svg { display: block; width: 100%; height: auto; overflow: visible; }
+/* The signed-in patient header draws the wordmark larger, as the Figma does. */
+@media (min-width: 640px) {
+  .patient-header .brand-logo { width: 166px; }
+}

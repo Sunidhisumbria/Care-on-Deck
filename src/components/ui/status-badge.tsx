@@ -17,9 +17,21 @@ const TONES: Record<StatusTone, string> = {
  * without colour vision. The insurance handoff calls that out explicitly; it
  * applies to every status on the site.
  */
-export function StatusBadge({ tone = 'neutral', children }: { tone?: StatusTone; children: ReactNode }) {
+export function StatusBadge({
+  tone = 'neutral',
+  icon,
+  children,
+}: {
+  tone?: StatusTone;
+  /** A small glyph before the label, as the dashboard's Due / Completed pills have. */
+  icon?: ReactNode;
+  children: ReactNode;
+}) {
   return (
-    <span className={`shrink-0 rounded-full px-2.5 py-1 text-[0.6875rem] font-bold ${TONES[tone]}`}>
+    <span
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[0.6875rem] font-bold ${TONES[tone]}`}
+    >
+      {icon}
       {children}
     </span>
   );

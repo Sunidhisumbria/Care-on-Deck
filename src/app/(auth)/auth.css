@@ -80,6 +80,9 @@
 .auth-content [role='radio'] { border-radius: 4px; font-size: 11px; color: #302c30; padding: 12px 8px; box-shadow: none; }
 .auth-content [role='radio'][aria-checked='true'] { background: #f1e6ec; border-bottom: 1px solid #be247e; color: #ae0869; }
 .auth-content a { color: #ad0065; }
+.auth-content .auth-message-action,
+.auth-content .auth-message-action:hover,
+.auth-content .auth-message-action:visited { color: #fff; }
 .auth-content form a { font-size: 11px; font-weight: 500; }
 .auth-content > div > p:last-child { font-size: 12px; }
 .auth-content > div > p:last-child a { text-decoration: underline; }
