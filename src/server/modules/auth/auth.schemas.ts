@@ -94,6 +94,7 @@ export type OtpPurpose = z.infer<typeof otpPurposeSchema>;
 const otpTarget = z.discriminatedUnion('channel', [
   z.object({ channel: z.literal('sms'), destination: phoneSchema }),
   z.object({ channel: z.literal('email'), destination: emailSchema }),
+  
 ]);
 
 export const sendOtpSchema = z.intersection(otpTarget, z.object({ purpose: otpPurposeSchema }));
