@@ -55,6 +55,7 @@ export function YourRoleStep({ session }: { session: OnboardingSession }) {
           value={selected}
           onChange={setSelected}
           options={PROVIDER_TYPES.map((role) => ({ ...role, icon: <ProviderTypeIcon type={role.value} /> }))}
+          iconFrame={false}
         />
       </div>
 

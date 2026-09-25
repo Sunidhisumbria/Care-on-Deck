@@ -73,7 +73,7 @@ function LoginScreen() {
 }
 
 function EmailForm({ role }: { role?: InterfaceRole }) {
-  const login = useLogin();
+  const login = useLogin(useSearchParams().get('next'));
   const { register, formState, submit, error } = useApiForm(loginSchema, {
     email: '',
     password: '',

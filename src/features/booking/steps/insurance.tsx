@@ -62,6 +62,8 @@ export function InsuranceStep({
       provider_id: draft.provider.id,
       starts_at: draft.slot.starts_at,
       visit_reason_id: draft.reason?.id ?? null,
+      patient: draft.details ? { date_of_birth: draft.details.date_of_birth, gender: draft.details.gender } : null,
+      address: draft.address ? { ...draft.address, line2: draft.address.line2 || null } : null,
       payment:
         chosen.kind === 'self_pay'
           ? { kind: 'self_pay' }

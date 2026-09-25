@@ -5,7 +5,6 @@ import { Suspense } from 'react';
 
 import { BookingFlow } from '@/features/booking/booking-flow';
 import { resolveSession } from '@/server/auth/session';
-import { LoadingPanel } from '@/components/ui/spinner';
 
 export const metadata: Metadata = { title: 'Book Appointment | CareOndeck' };
 
@@ -15,20 +14,21 @@ export const metadata: Metadata = { title: 'Book Appointment | CareOndeck' };
  * The session is checked on the server so an anonymous visitor never sees the
  * first step. `useSearchParams` inside needs a Suspense boundary.
  */
-export default async function BookPage() {
+export default async function BookPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const requestHeaders = await headers();
   const session = await resolveSession(
     new Request('http://careondeck.local/book', { headers: requestHeaders }),
   );
-  if (!session) redirect('/login?role=patient');
+  if (!session) {
+    // Come back here after signing in -- a campaign link's ?provider= included.
+    const provider = (await searchParams).provider;
+    const back = typeof provider === 'string' ? `/book?provider=${encodeURIComponent(provider)}` : '/book';
+    redirect(`/login?role=patient&next=${encodeURIComponent(back)}`);
+  }
 
   return (
     <Suspense
-      fallback={
-        <div className="mx-auto max-w-3xl px-5 py-10">
-          <LoadingPanel label="Loading booking…" rows={4} />
-        </div>
-      }
+      fallback={null}
     >
       <BookingFlow />
     </Suspense>

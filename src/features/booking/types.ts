@@ -35,6 +35,8 @@ export interface ProviderSearchResult {
 export interface ProviderSearchFilters {
   q?: string;
   insurance_carrier_id?: string;
+  /** One provider only: set when arriving from a campaign's tracking link. */
+  provider_id?: string;
   availability?: 'today' | 'tomorrow' | 'week';
   accepting_new_patients?: boolean;
   sort?: 'recommended' | 'soonest';
@@ -75,6 +77,10 @@ export interface BookingRequest {
   starts_at: string;
   visit_reason_id?: string | null;
   patient_note?: string | null;
+  /** Saved to the patient's record. */
+  patient?: { date_of_birth: string; gender: string } | null;
+  /** Saved as the patient's default address. */
+  address?: { line1: string; line2: string | null; city: string; state: string; postal_code: string } | null;
   payment: { kind: 'self_pay' } | { kind: 'insurance'; patient_insurance_id: string };
 }
 

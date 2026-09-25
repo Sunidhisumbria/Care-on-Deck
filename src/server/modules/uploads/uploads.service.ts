@@ -31,7 +31,7 @@ import {
 } from '@/lib/uploads';
 import type { RequestContext } from '@/server/auth/context';
 import { env } from '@/server/config/env';
-import { mediaAssets, onboardingSessions } from '@/server/db/schema';
+import { mediaAssets, onboardingSessions, providers } from '@/server/db/schema';
 import { withElevated, type Tx } from '@/server/db/tenant';
 import { ApiError } from '@/server/http/errors';
 import { consumeRateLimit, RATE_LIMITS } from '@/server/http/ratelimit';
@@ -55,6 +55,8 @@ const KIND: Record<UploadPurpose, MediaRow['kind']> = {
   license_document: 'license_document',
   provider_headshot: 'provider_headshot',
   certificate: 'other',
+  patient_photo: 'patient_photo',
+  insurance_card: 'insurance_card',
 };
 
 /**
@@ -66,6 +68,10 @@ const MODERATION: Record<UploadPurpose, MediaRow['moderationStatus']> = {
   license_document: 'auto_approved',
   provider_headshot: 'pending',
   certificate: 'auto_approved',
+  // Neither is ever shown to anyone but the patient and the practice they book
+  // with, so neither belongs in the public Photo Review queue.
+  patient_photo: 'auto_approved',
+  insurance_card: 'auto_approved',
 };
 
 /** Long enough to open the file; short enough that a forwarded link is soon useless. */
@@ -247,8 +253,15 @@ async function assertMayUpload(
   session: NonNullable<RequestContext['session']>,
   purpose: UploadPurpose,
 ): Promise<void> {
-  // Every purpose today belongs to a provider application. A purpose added for
-  // someone else -- a patient's insurance card -- needs its own rule here.
+  const forPatient: readonly UploadPurpose[] = ['patient_photo', 'insurance_card'];
+  if (forPatient.includes(purpose)) {
+    if (session.userType !== 'patient') {
+      throw ApiError.forbidden(`Only patient accounts can upload a ${UPLOAD_PURPOSES[purpose].label.toLowerCase()}.`);
+    }
+    return;
+  }
+
+  // The rest belong to a provider application.
   const forApplication: readonly UploadPurpose[] = ['license_document', 'provider_headshot', 'certificate'];
   if (forApplication.includes(purpose)) {
     const label = UPLOAD_PURPOSES[purpose].label.toLowerCase();
@@ -268,9 +281,21 @@ async function assertMayUpload(
       )
       .limit(1);
 
-    if (!application) {
-      throw ApiError.conflict(`A ${label} is uploaded as part of an open provider application.`);
-    }
+    if (application) return;
+
+    // An approved provider keeps their profile current from Personal
+    // Information: a new photo goes through photo review, and a changed
+    // license returns to the reviewer as pending.
+    const [provider] = await withElevated(tx, () =>
+      tx
+        .select({ id: providers.id })
+        .from(providers)
+        .where(and(eq(providers.userId, session.userId), isNull(providers.deletedAt)))
+        .limit(1),
+    );
+    if (provider) return;
+
+    throw ApiError.conflict(`A ${label} is uploaded as part of an open provider application.`);
   }
 }
 

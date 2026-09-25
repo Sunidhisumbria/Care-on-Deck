@@ -192,6 +192,7 @@ export async function submitApplication(
       displayName: `${firstName} ${lastName}${credentials ? `, ${credentials}` : ''}`,
       bio: profile.bio,
       headshotMediaId: profile.headshot?.media_id ?? null,
+      certificateMediaIds: profile.certificates.map((certificate) => certificate.media_id),
       yearsExperience: profile.years_experience,
       isPubliclyListed: false,
       updatedAt: now,

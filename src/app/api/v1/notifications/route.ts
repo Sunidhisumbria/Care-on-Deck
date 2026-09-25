@@ -10,7 +10,13 @@ import { notificationService } from '@/server/modules/notifications/notification
 
 /** IA: 11. Notifications > Notification List */
 export const GET = defineRoute({
-  access: 'optional',
+  access: 'account',
   handler: async ({ tx, ctx, query }) =>
     ok(await notificationService.list(tx, ctx, query)),
+});
+
+/** Clear all of the caller's notifications. */
+export const DELETE = defineRoute({
+  access: 'account',
+  handler: async ({ tx, ctx }) => ok(await notificationService.clearAll(tx, ctx)),
 });

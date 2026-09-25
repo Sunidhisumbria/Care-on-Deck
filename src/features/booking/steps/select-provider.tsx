@@ -1,11 +1,13 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { Avatar } from '@/components/ui/avatar';
 import { PinIcon, SearchIcon, StethoscopeIcon } from '@/components/ui/icons';
 import { SelectMenu } from '@/components/ui/select-menu';
 import { useInsuranceCarriers } from '@/features/insurance/hooks';
 import { SectionLoader } from '@/components/ui/spinner';
+import { SaveProviderButton } from '@/features/patient/components/save-provider-button';
 
 import { useBooking } from '../booking-state';
 import { MapPlaceholder } from '../components/map-placeholder';
@@ -36,6 +38,11 @@ export function SelectProviderStep() {
   const [availability, setAvailability] = useState<ProviderSearchFilters['availability']>();
   const [carrierId, setCarrierId] = useState<string>();
   const [sort, setSort] = useState<NonNullable<ProviderSearchFilters['sort']>>('recommended');
+  // A campaign link lands here with ?provider=: show that doctor, with a way to see everyone.
+  const linked = useSearchParams().get('provider');
+  const [onlyProvider, setOnlyProvider] = useState<string | undefined>(
+    linked && /^[0-9a-f-]{36}$/i.test(linked) ? linked : undefined,
+  );
 
   const query = useDebounced(term, 300);
   const filters = useMemo<ProviderSearchFilters>(
@@ -43,9 +50,10 @@ export function SelectProviderStep() {
       q: query || undefined,
       availability,
       insurance_carrier_id: carrierId,
+      provider_id: onlyProvider,
       sort,
     }),
-    [query, availability, carrierId, sort],
+    [query, availability, carrierId, onlyProvider, sort],
   );
 
   const { data, isPending, isError, error, refetch } = useProviderSearch(filters);
@@ -91,8 +99,17 @@ export function SelectProviderStep() {
 
         <div>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm font-semibold text-ink-900">
+            <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-ink-900">
               {isPending ? 'Finding providers…' : `${providers.length} providers found`}
+              {onlyProvider ? (
+                <button
+                  type="button"
+                  onClick={() => setOnlyProvider(undefined)}
+                  className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 hover:bg-brand-100"
+                >
+                  Show all providers
+                </button>
+              ) : null}
             </p>
             <div className="flex items-center gap-2 text-xs text-ink-500">
               <span id="sort-providers-label">Sort by:</span>
@@ -282,12 +299,19 @@ function ProviderCard({
                 In-person
               </p>
             </div>
-            <p className="shrink-0 text-right text-xs">
-              <span className="block text-ink-500">Next available</span>
-              <span className="font-semibold text-brand-600">
-                {formatNextAvailable(provider.next_available, provider.facility.timezone)}
-              </span>
-            </p>
+            <div className="flex shrink-0 items-start gap-2">
+              <p className="text-right text-xs">
+                <span className="block text-ink-500">Next available</span>
+                <span className="font-semibold text-brand-600">
+                  {formatNextAvailable(provider.next_available, provider.facility.timezone)}
+                </span>
+              </p>
+              <SaveProviderButton
+                providerId={provider.id}
+                providerName={provider.name}
+                className="-mr-1 -mt-1 h-9 w-9"
+              />
+            </div>
           </div>
 
           {where ? (

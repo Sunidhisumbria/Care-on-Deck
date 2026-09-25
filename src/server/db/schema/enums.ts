@@ -277,6 +277,7 @@ export const mediaKindEnum = pgEnum('media_kind', [
   'insurance_card',
   'report_export',
   'other',
+  'patient_photo',
 ]);
 
 // --- Patient insurance -----------------------------------------------------

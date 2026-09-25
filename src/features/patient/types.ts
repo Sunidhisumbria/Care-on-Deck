@@ -9,6 +9,7 @@ export interface PatientAddress {
 }
 
 export interface PatientInsurance {
+  id: string;
   carrier: string | null;
   plan: string | null;
   member_id_last4: string | null;
@@ -22,11 +23,19 @@ export interface PatientProfile {
   preferred_name: string | null;
   date_of_birth: string | null;
   gender: string | null;
+  gender_identity: string | null;
+  languages: string[];
+  photo_media_id: string | null;
   email: string | null;
   phone: string | null;
+  phone_type: string | null;
+  secondary_phone: string | null;
+  secondary_phone_type: string | null;
+  email_verified: boolean;
   location_label: string | null;
   address: PatientAddress | null;
   insurance: PatientInsurance | null;
+  secondary_insurance: { id: string; carrier: string | null; member_id_last4: string | null } | null;
 }
 
 export interface Dependent {
@@ -102,4 +111,22 @@ export interface AppointmentDetail {
     phone: string | null;
     timezone: string;
   } | null;
+}
+
+/** A provider on the patient's Saved Providers list. Mirrors `SavedProvider` on the server. */
+export interface SavedProvider {
+  provider_id: string;
+  name: string;
+  credentials: string | null;
+  specialty: string | null;
+  /** Null until patients have reviewed them. */
+  rating: { average: number; count: number } | null;
+  facility: {
+    name: string;
+    address_line1: string | null;
+    city: string | null;
+    state: string | null;
+    postal_code: string | null;
+  };
+  saved_at: string;
 }

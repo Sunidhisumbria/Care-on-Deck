@@ -5,6 +5,10 @@ import { z } from 'zod';
 import { Field, PhoneField, SelectField } from '@/components/ui/field';
 import { CalendarIcon, ChevronRight, GenderIcon, UserIcon } from '@/components/ui/icons';
 import { isValidUsPhone, PHONE_RULE } from '@/lib/phone';
+import { LoadingPanel } from '@/components/ui/spinner';
+import { usePatientProfile } from '@/features/patient/hooks';
+import type { PatientProfile } from '@/features/patient/types';
+import { GENDERS } from '@/lib/patient-profile';
 import { useApiForm } from '@/lib/forms/use-api-form';
 
 import { useBooking } from '../booking-state';
@@ -28,7 +32,7 @@ const detailsSchema = z.object({
       const date = new Date(value);
       return !Number.isNaN(date.getTime()) && date <= new Date();
     }, 'That date is in the future.'),
-  gender: z.string().min(1, 'Select an option.'),
+  gender: z.enum(['male', 'female'], { errorMap: () => ({ message: 'Select your sex assigned at birth.' }) }),
   phone: z
     .string()
     .trim()
@@ -36,14 +40,28 @@ const detailsSchema = z.object({
     .refine(isValidUsPhone, PHONE_RULE),
 });
 
+/**
+ * Starts from this booking's answers, else the profile -- so a patient who
+ * completed Create Profile only confirms, and one who skipped it fills in
+ * what is missing, once. Date of birth and gender are saved with the booking.
+ */
 export function YourDetailsStep() {
+  const { draft } = useBooking();
+  const profile = usePatientProfile();
+
+  if (!draft.details && profile.isPending) return <LoadingPanel label="Loading your details…" rows={4} />;
+
+  return <DetailsForm profile={profile.data ?? null} />;
+}
+
+function DetailsForm({ profile }: { profile: PatientProfile | null }) {
   const { draft, set, next } = useBooking();
   const { register, formState, submit, error } = useApiForm(detailsSchema, {
-    first_name: draft.details?.first_name ?? '',
-    last_name: draft.details?.last_name ?? '',
-    date_of_birth: draft.details?.date_of_birth ?? '',
-    gender: draft.details?.gender ?? '',
-    phone: draft.details?.phone ?? '',
+    first_name: draft.details?.first_name ?? profile?.first_name ?? '',
+    last_name: draft.details?.last_name ?? profile?.last_name ?? '',
+    date_of_birth: draft.details?.date_of_birth ?? profile?.date_of_birth ?? '',
+    gender: (draft.details?.gender ?? (profile?.gender === 'male' || profile?.gender === 'female' ? profile.gender : '')) as 'male',
+    phone: draft.details?.phone ?? profile?.phone ?? '',
   });
 
   if (!draft.provider) return null;
@@ -91,15 +109,11 @@ export function YourDetailsStep() {
             {...register('date_of_birth')}
           />
           <SelectField
-            label="Gender"
+            label="Sex Assigned at Birth"
             icon={<GenderIcon />}
-            placeholder="Enter gender"
-            options={[
-              { value: 'female', label: 'Female' },
-              { value: 'male', label: 'Male' },
-              { value: 'other', label: 'Other' },
-              { value: 'prefer_not_to_say', label: 'Prefer not to say' },
-            ]}
+            placeholder="Male or Female"
+            // The same field and values as the profile: the server takes these two only.
+            options={GENDERS.map((option) => ({ value: option.value, label: option.label }))}
             error={error('gender')}
             {...register('gender')}
           />

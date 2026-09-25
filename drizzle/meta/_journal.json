@@ -36,6 +36,48 @@
       "when": 1789464910943,
       "tag": "0004_warm_stardust",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790241986504,
+      "tag": "0005_saved_providers",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790244950470,
+      "tag": "0006_patient_profile_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790316553447,
+      "tag": "0007_provider_certificates",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790320142316,
+      "tag": "0008_pulse_campaign_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790323470331,
+      "tag": "0009_support_requests",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790329437148,
+      "tag": "0010_patient_profile_spec",
+      "breakpoints": true
     }
   ]
 }

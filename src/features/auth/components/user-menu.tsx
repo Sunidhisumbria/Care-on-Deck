@@ -1,9 +1,24 @@
 'use client';
 
+import type { Route } from 'next';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { BellIcon, DependentsIcon, LockIcon, LogoutIcon, PersonCardIcon, ShieldCheckIcon } from '@/components/ui/icons';
+import {
+  BellIcon,
+  ChatIcon,
+  ClipboardIcon,
+  DependentsIcon,
+  LockIcon,
+  LogoutIcon,
+  PersonCardIcon,
+  PhoneIcon,
+  ShieldCheckIcon,
+  StarOutlineIcon,
+  TrendIcon,
+} from '@/components/ui/icons';
 import { Spinner } from '@/components/ui/spinner';
+
+import { useNotifications } from '@/features/notifications/hooks';
 
 import { useSignOut } from '../hooks/use-sign-out';
 import type { CurrentUser } from '../types';
@@ -17,25 +32,21 @@ type Account = NonNullable<CurrentUser['user']>;
  * page stays exactly the same -- the home screen is the landing screen.
  */
 export function UserMenu({ user }: { user: Account }) {
+  const practice = user.type === 'provider' || user.type === 'staff';
   return (
     <div className="flex items-center gap-3 sm:gap-5">
-      <NotificationBell />
+      <NotificationBell href={practice ? '/provider/notifications' : '/account/notifications'} />
       <AccountMenu user={user} />
     </div>
   );
 }
 
-/**
- * The bell.
- *
- * No unread count yet: `GET /api/v1/notifications` still answers 501, and a
- * badge showing an invented number is worse than no badge. When that endpoint
- * lands, `count` comes from it and the dot below turns itself on.
- */
-function NotificationBell({ count = 0 }: { count?: number }) {
+/** The bell: opens Notifications, with the unread count from the list (refreshed each minute). */
+function NotificationBell({ href }: { href: Route }) {
+  const count = useNotifications().data?.unread ?? 0;
   return (
-    <button
-      type="button"
+    <Link
+      href={href}
       aria-label={count > 0 ? `Notifications, ${count} unread` : 'Notifications'}
       className="relative rounded-full p-1.5 text-ink-900 transition-colors hover:bg-brand-50"
     >
@@ -45,7 +56,7 @@ function NotificationBell({ count = 0 }: { count?: number }) {
           {count > 9 ? '9+' : count}
         </span>
       ) : null}
-    </button>
+    </Link>
   );
 }
 
@@ -73,6 +84,9 @@ function AccountMenu({ user }: { user: Account }) {
   }, [open]);
 
   const name = displayName(user);
+  // Providers and practice staff get the practice's menu; patients their own.
+  // Sending a provider to the patient screens only ever ends in "no patient record".
+  const practice = user.type === 'provider' || user.type === 'staff';
 
   return (
     <div ref={wrapper} className="relative">
@@ -103,22 +117,39 @@ function AccountMenu({ user }: { user: Account }) {
           role="menu"
           className="absolute right-0 z-10 mt-2 w-60 overflow-hidden rounded-field border border-line bg-white shadow-lg"
         >
-          <div className="border-b border-line px-4 py-3">
-            <p className="truncate text-sm font-semibold text-ink-900">{name}</p>
-            <p className="truncate text-xs text-ink-500">{user.email ?? user.phone ?? ''}</p>
-          </div>
+          {practice ? (
+            <div className="py-1.5">
+              <MenuItem href="/provider/profile" label="Personal information" icon={<PersonCardIcon />} />
+              <MenuItem href="/provider/campaigns" label="Campaigns & Analytics" icon={<TrendIcon />} />
+              <MenuItem href="/provider/notifications" label="Notification" icon={<ChatIcon />} />
+              <MenuItem href="/provider/contact" label="Contact Us" icon={<PhoneIcon />} />
+              <MenuItem href="/provider/password" label="Change password" icon={<LockIcon />} />
+              <MenuItem href="/provider/reviews" label="Reviews" icon={<StarOutlineIcon />} />
+              <MenuItem href="/provider/reports" label="Report" icon={<ClipboardIcon />} />
+            </div>
+          ) : (
+            <>
+              <div className="border-b border-line px-4 py-3">
+                <p className="truncate text-sm font-semibold text-ink-900">{name}</p>
+                <p className="truncate text-xs text-ink-500">{user.email ?? user.phone ?? ''}</p>
+              </div>
 
-          <MenuItem href="/account" label="Personal information" icon={<PersonCardIcon />} />
-          <MenuItem href="/account/dependents" label="Dependents" icon={<DependentsIcon />} />
-          <MenuItem href="/account/insurance" label="Insurance" icon={<ShieldCheckIcon />} />
-          <MenuItem href="/account/password" label="Change password" icon={<LockIcon />} />
+              <MenuItem href="/account" label="Personal information" icon={<PersonCardIcon />} />
+              <MenuItem href="/account/dependents" label="Dependents" icon={<DependentsIcon />} />
+              <MenuItem href="/account/insurance" label="Insurance" icon={<ShieldCheckIcon />} />
+              <MenuItem href="/account/contact" label="Contact Us" icon={<PhoneIcon />} />
+              <MenuItem href="/account/password" label="Change password" icon={<LockIcon />} />
+            </>
+          )}
 
           <button
             type="button"
             role="menuitem"
             onClick={() => signOut.mutate()}
             disabled={signOut.isPending}
-            className="flex w-full items-center gap-3 border-t border-line px-4 py-3 text-left text-sm font-medium text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand-700 disabled:opacity-60"
+            className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand-700 disabled:opacity-60 ${
+              practice ? '' : 'border-t border-line'
+            }`}
           >
             {signOut.isPending ? (
               <Spinner className="h-[1.125rem] w-[1.125rem] text-brand-600" />
@@ -138,7 +169,7 @@ function MenuItem({
   label,
   icon,
 }: {
-  href: '/account' | '/account/dependents' | '/account/insurance' | '/account/password';
+  href: Route;
   label: string;
   icon: React.ReactNode;
 }) {
@@ -154,8 +185,9 @@ function MenuItem({
   );
 }
 
-/** First name if we have one; otherwise something recognisable, never blank. */
+/** The name they asked to be called, else their first name; otherwise something recognisable, never blank. */
 function displayName(user: Account): string {
+  if (user.preferred_name) return user.preferred_name;
   if (user.first_name) return user.first_name;
   if (user.email) return user.email.split('@')[0] ?? user.email;
   return user.phone ?? 'Account';

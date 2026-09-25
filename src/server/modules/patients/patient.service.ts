@@ -29,6 +29,13 @@ import type { AppointmentListStatus } from './own-appointments.schemas';
 import type { Tx } from '@/server/db/tenant';
 import { ApiError } from '@/server/http/errors';
 import { notImplemented } from '@/server/http/response';
+import type { ProfileUpdateInput } from '@/lib/patient-profile';
+import { normalizeUsPhone } from '@/lib/practice';
+import { users } from '@/server/db/schema/identity';
+import { withElevated } from '@/server/db/tenant';
+import { ownedFile } from '@/server/modules/uploads/uploads.service';
+
+import { patientInsuranceService } from './insurance.service';
 
 /** One row of IA: 3. Patient Dashboard > Upcoming Visits. */
 export interface OwnAppointment {
@@ -116,9 +123,20 @@ export interface OwnProfile {
   last_name: string;
   preferred_name: string | null;
   date_of_birth: string | null;
+  /** Sex assigned at birth. */
   gender: string | null;
+  /** Optional; one of GENDER_IDENTITIES. */
+  gender_identity: string | null;
+  languages: string[];
+  /** A `patient_photo` upload; opened through `/uploads/{id}/view`. */
+  photo_media_id: string | null;
   email: string | null;
   phone: string | null;
+  phone_type: string | null;
+  secondary_phone: string | null;
+  secondary_phone_type: string | null;
+  /** The sign-in email has been verified: the profile marks it with a star. */
+  email_verified: boolean;
   /** The coarse "where I am looking for care" from signup, not a mailing address. */
   location_label: string | null;
   address: {
@@ -129,10 +147,14 @@ export interface OwnProfile {
     postal_code: string;
   } | null;
   insurance: {
+    /** For `GET /patients/insurance/{id}`, which the edit screen uses to show the full member ID. */
+    id: string;
     carrier: string | null;
     plan: string | null;
     member_id_last4: string | null;
   } | null;
+  /** A second card on file, shown in summary; it is managed on the Insurance screen. */
+  secondary_insurance: { id: string; carrier: string | null; member_id_last4: string | null } | null;
 }
 
 export interface DependentSummary {
@@ -210,8 +232,9 @@ export const patientService = {
       .orderBy(desc(patientAddresses.isDefault), desc(patientAddresses.createdAt))
       .limit(1);
 
-    const [insurance] = await tx
+    const cards = await tx
       .select({
+        id: patientInsurance.id,
         carrierName: insuranceCarriers.name,
         carrierNameRaw: patientInsurance.carrierNameRaw,
         planName: insurancePlans.name,
@@ -222,7 +245,13 @@ export const patientService = {
       .leftJoin(insurancePlans, eq(insurancePlans.id, patientInsurance.planId))
       .where(and(eq(patientInsurance.patientId, patient.id), isNull(patientInsurance.deletedAt)))
       .orderBy(desc(patientInsurance.isPrimary), desc(patientInsurance.createdAt))
-      .limit(1);
+      .limit(2);
+    const [insurance, secondary] = cards;
+
+    // `users` is the account, not the patient record; read elevated for this one flag.
+    const [account] = await withElevated(tx, () =>
+      tx.select({ emailVerifiedAt: users.emailVerifiedAt }).from(users).where(eq(users.id, userId)).limit(1),
+    );
 
     return {
       patient_id: patient.id,
@@ -232,8 +261,15 @@ export const patientService = {
       preferred_name: patient.preferredName,
       date_of_birth: patient.dateOfBirth,
       gender: patient.gender,
+      gender_identity: patient.genderIdentity,
+      languages: patient.languages ?? [],
+      photo_media_id: patient.photoMediaId,
       email: patient.email,
       phone: patient.phone,
+      phone_type: patient.phoneType,
+      secondary_phone: patient.secondaryPhone,
+      secondary_phone_type: patient.secondaryPhoneType,
+      email_verified: Boolean(account?.emailVerifiedAt),
       location_label: patient.locationLabel,
       address: address
         ? {
@@ -247,16 +283,95 @@ export const patientService = {
       insurance: insurance
         ? {
             // The directory name when it matched one, else what they typed.
+            id: insurance.id,
             carrier: insurance.carrierName ?? insurance.carrierNameRaw,
             plan: insurance.planName,
             member_id_last4: insurance.memberIdLast4,
           }
         : null,
+      secondary_insurance: secondary
+        ? { id: secondary.id, carrier: secondary.carrierName ?? secondary.carrierNameRaw, member_id_last4: secondary.memberIdLast4 }
+        : null,
     };
   },
 
-  async updateOwnProfile(tx: Tx, ctx: RequestContext, body: unknown): Promise<unknown> {
-    return notImplemented('patientService.updateOwnProfile');
+  /**
+   * IA: 3. Edit Profile. Personal details, the default address, and the primary
+   * insurance card, saved together -- one Update button, one transaction, so a
+   * rejected card number does not leave the name changed and the card not.
+   *
+   * Email and phone are not editable here; see lib/patient-profile.
+   */
+  async updateOwnProfile(tx: Tx, ctx: RequestContext, input: ProfileUpdateInput): Promise<OwnProfile> {
+    const userId = ctx.session?.userId;
+    if (!userId) throw ApiError.unauthenticated();
+
+    const [patient] = await tx
+      .select()
+      .from(patients)
+      .where(and(eq(patients.userId, userId), isNull(patients.deletedAt)))
+      .limit(1);
+    if (!patient) throw ApiError.notFound('No patient record for this account.');
+
+    // Only the caller's own profile photo uploads may be attached.
+    if (input.photo_media_id && input.photo_media_id !== patient.photoMediaId) {
+      const photo = await ownedFile(tx, userId, input.photo_media_id, 'patient_photo');
+      if (!photo) {
+        const message = 'That photo was not recognised. Upload it again.';
+        throw new ApiError('VALIDATION_FAILED', message, { details: [{ path: 'photo_media_id', message }] });
+      }
+    }
+
+    const next = {
+      preferredName: input.preferred_name || null,
+      dateOfBirth: input.date_of_birth,
+      gender: input.gender,
+      genderIdentity: input.gender_identity,
+      // One preferred language today; stored as a list so more can follow.
+      languages: [input.language],
+      phoneType: input.phone_type,
+      secondaryPhone: input.secondary_phone ? normalizeUsPhone(input.secondary_phone) : null,
+      secondaryPhoneType: input.secondary_phone ? input.secondary_phone_type : null,
+      photoMediaId: input.photo_media_id,
+    };
+
+    // Names of what changed, never the values: audit rows are not a PHI store.
+    const changed: string[] = (Object.keys(next) as Array<keyof typeof next>).filter(
+      (key) => JSON.stringify(next[key]) !== JSON.stringify(patient[key] ?? null),
+    );
+
+    // The spec records when and where gender identity was last set.
+    const identityChanged = changed.includes('genderIdentity');
+
+    if (changed.length > 0) {
+      await tx
+        .update(patients)
+        .set({
+          ...next,
+          ...(identityChanged ? { genderIdentityUpdatedAt: new Date(), genderIdentitySource: 'patient_profile' } : {}),
+          updatedAt: new Date(),
+        })
+        .where(eq(patients.id, patient.id));
+    }
+
+    if (input.address) {
+      if (await saveDefaultAddress(tx, patient.id, input.address)) changed.push('address');
+    }
+
+    if (input.insurance) {
+      await patientInsuranceService.editCard(tx, ctx, input.insurance);
+    }
+
+    if (changed.length > 0) {
+      await recordAudit(tx, ctx, {
+        action: 'patient.profile.updated',
+        resourceType: 'patient',
+        resourceId: patient.id,
+        metadata: { fields: changed },
+      });
+    }
+
+    return patientService.getOwnProfile(tx, ctx);
   },
 
   /** IA: 3. Patient Dashboard > Upcoming, Confirmed, Past Visits */
@@ -587,3 +702,42 @@ export const patientService = {
     return notImplemented('patientService.submitReview');
   },
 };
+
+/**
+ * Writes the address Edit Profile shows: the default one, else the most recent,
+ * else a new default. Returns whether anything changed.
+ */
+export async function saveDefaultAddress(
+  tx: Tx,
+  patientId: string,
+  address: NonNullable<ProfileUpdateInput['address']>,
+): Promise<boolean> {
+  const values = {
+    addressLine1: address.line1,
+    addressLine2: address.line2 || null,
+    city: address.city,
+    state: address.state,
+    postalCode: address.postal_code,
+  };
+
+  const [current] = await tx
+    .select()
+    .from(patientAddresses)
+    .where(and(eq(patientAddresses.patientId, patientId), isNull(patientAddresses.deletedAt)))
+    .orderBy(desc(patientAddresses.isDefault), desc(patientAddresses.createdAt))
+    .limit(1);
+
+  if (!current) {
+    await tx.insert(patientAddresses).values({ patientId, ...values, isDefault: true });
+    return true;
+  }
+
+  const same = (Object.keys(values) as Array<keyof typeof values>).every((key) => values[key] === current[key]);
+  if (same) return false;
+
+  await tx
+    .update(patientAddresses)
+    .set({ ...values, updatedAt: new Date() })
+    .where(eq(patientAddresses.id, current.id));
+  return true;
+}

@@ -101,7 +101,10 @@ export function DocumentUpload({
             </span>
             <span className="min-w-0">
               <span className="block truncate text-sm font-semibold text-ink-900">{value.file_name ?? label}</span>
-              <span className="block text-xs text-ink-500">{formatBytes(value.byte_size)} &middot; uploaded</span>
+              {/* A file already on record comes back without its size; say only that it is there. */}
+              <span className="block text-xs text-ink-500">
+                {value.byte_size > 0 ? <>{formatBytes(value.byte_size)} &middot; uploaded</> : 'Uploaded'}
+              </span>
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-3 text-xs font-semibold">

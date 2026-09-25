@@ -16,11 +16,13 @@
 import { and, desc, eq, isNull } from 'drizzle-orm';
 
 import type { InsuranceType, PatientInsuranceInput, Relationship } from '@/lib/patient-insurance';
+import type { ProfileUpdateInput } from '@/lib/patient-profile';
 import type { RequestContext } from '@/server/auth/context';
 import { insuranceCarriers } from '@/server/db/schema/insurance';
 import { patientInsurance, patients } from '@/server/db/schema/patients';
 import type { Tx } from '@/server/db/tenant';
 import { ApiError } from '@/server/http/errors';
+import { ownedFile } from '@/server/modules/uploads/uploads.service';
 import { recordAudit } from '@/server/observability/audit';
 import { decryptField, decryptOptional, encryptField, encryptOptional, last4 } from '@/server/security/phi';
 
@@ -35,6 +37,8 @@ export interface SavedInsurance {
   policyholder_name: string | null;
   relationship: Relationship | null;
   is_primary: boolean;
+  /** The photo of the card's front, when one was uploaded. */
+  card_media_id: string | null;
   updated_at: string;
 }
 
@@ -130,13 +134,59 @@ export const patientInsuranceService = {
     const carrier = await resolveCarrier(tx, input);
     return writeUpdate(tx, ctx, found.row.id, toValues(input, carrier), carrier);
   },
+
+  /**
+   * Edit Profile's insurance section: carrier, member ID, group ID and the card
+   * photo of a card already on file. The screen does not ask the card's type or
+   * who the policyholder is, so those are kept exactly as they were.
+   */
+  async editCard(
+    tx: Tx,
+    ctx: RequestContext,
+    input: NonNullable<ProfileUpdateInput['insurance']>,
+  ): Promise<SavedInsurance> {
+    const patientId = await ownPatientId(tx, ctx);
+    const found = await findOwn(tx, patientId, input.id);
+    if (!found) throw ApiError.notFound('That insurance was not found.');
+
+    const { row } = found;
+    const merged: PatientInsuranceInput = {
+      insurance_type: row.insuranceType,
+      carrier_id: input.carrier_id,
+      ...(input.carrier_name ? { carrier_name: input.carrier_name } : {}),
+      member_id: input.member_id,
+      ...(input.group_id ? { group_id: input.group_id } : {}),
+      ...(row.subscriberName ? { policyholder_name: row.subscriberName } : {}),
+      // The profile now asks this, per the spec; it is required there.
+      relationship: input.relationship,
+    };
+
+    // A photo id must be one of the caller's own insurance card uploads, so an
+    // id lifted from somebody else's request cannot be attached here.
+    if (input.card_media_id && input.card_media_id !== row.cardFrontMediaId) {
+      const photo = await ownedFile(tx, ctx.session!.userId, input.card_media_id, 'insurance_card');
+      if (!photo) {
+        const message = 'That card photo was not recognised. Upload it again.';
+        throw new ApiError('VALIDATION_FAILED', message, { details: [{ path: 'insurance.card_media_id', message }] });
+      }
+    }
+
+    const carrier = await resolveCarrier(tx, merged);
+    return writeUpdate(
+      tx,
+      ctx,
+      row.id,
+      { ...toValues(merged, carrier), cardFrontMediaId: input.card_media_id },
+      carrier,
+    );
+  },
 };
 
 async function writeUpdate(
   tx: Tx,
   ctx: RequestContext,
   id: string,
-  values: ReturnType<typeof toValues>,
+  values: ReturnType<typeof toValues> & { cardFrontMediaId?: string | null },
   carrier: Carrier,
 ): Promise<SavedInsurance> {
   const [row] = await tx
@@ -200,6 +250,7 @@ function toView(row: Row, directoryName: string | null): SavedInsurance {
     policyholder_name: row.subscriberName,
     relationship: row.subscriberRelationship as Relationship | null,
     is_primary: row.isPrimary,
+    card_media_id: row.cardFrontMediaId,
     updated_at: row.updatedAt.toISOString(),
   };
 }

@@ -31,6 +31,12 @@ export const authApi = {
   login: (input: LoginValues) => apiPost<LoginResponse>('/auth/login', input),
 
   sendOtp: (input: SendOtpValues) => apiPost<SendOtpResponse>('/auth/otp', input),
+  /** Change the email or phone you sign in with: a code goes to the new address. */
+  changeContact: (input: { channel: 'sms' | 'email'; destination: string }) =>
+    apiPost<SendOtpResponse>('/auth/contact', input),
+  /** ...and the code that arrived there. */
+  confirmContact: (input: { channel: 'sms' | 'email'; destination: string; code: string }) =>
+    apiPost<{ channel: 'sms' | 'email'; destination: string }>('/auth/contact/confirm', input),
 
   verifyOtp: (input: VerifyOtpValues) => apiPost<VerifyOtpResponse>('/auth/otp/verify', input),
 

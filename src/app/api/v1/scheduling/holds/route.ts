@@ -6,6 +6,7 @@
  */
 import { defineRoute } from '@/server/http/handler';
 import { ok } from '@/server/http/response';
+import { createHoldSchema } from '@/server/modules/scheduling/scheduling.schemas';
 import { schedulingService } from '@/server/modules/scheduling/scheduling.service';
 
 export const GET = defineRoute({
@@ -19,6 +20,7 @@ export const GET = defineRoute({
 export const POST = defineRoute({
   access: 'user',
   permissions: ['schedule.hold'],
+  body: createHoldSchema,
   handler: async ({ tx, ctx, body }) =>
     ok(await schedulingService.createHold(tx, ctx, body)),
 });

@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { AccountHero } from '@/features/patient/components/account-hero';
 import { DetailCard, DetailRow } from '@/features/patient/components/detail-list';
 import { usePatientProfile } from '@/features/patient/hooks';
@@ -11,9 +13,7 @@ import { LoadingPanel } from '@/components/ui/spinner';
 /**
  * IA: 3. Patient Account > Personal Information.
  *
- * Read-only. Editing is its own screen, and the API's `PATCH /patients/profile` is
- * still a stub, so the Edit Profile button is visibly disabled rather than
- * opening a form that cannot save.
+ * Read-only. Editing is its own screen, /account/edit.
  */
 export default function PersonalInformationPage() {
   const { data, isPending, error } = usePatientProfile();
@@ -35,13 +35,14 @@ export default function PersonalInformationPage() {
 }
 
 function Profile({ profile }: { profile: PatientProfile }) {
-  const name = fullName(profile.first_name, profile.last_name);
+  // The name they asked to be called leads; the legal name stays in the details below.
+  const name = profile.preferred_name || fullName(profile.first_name, profile.last_name);
 
   return (
     <div className="space-y-6">
       <section className="flex items-center gap-5 rounded-card border border-line bg-white px-6 py-6 sm:px-8">
         <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand-600 text-2xl font-bold text-white">
-          {(profile.first_name || '?').slice(0, 1).toUpperCase()}
+          {(name || '?').slice(0, 1).toUpperCase()}
         </span>
 
         <div className="min-w-0 flex-1">
@@ -49,19 +50,18 @@ function Profile({ profile }: { profile: PatientProfile }) {
           <p className="truncate text-sm text-ink-500">{profile.email ?? profile.phone ?? ''}</p>
         </div>
 
-        <button
-          type="button"
-          disabled
-          title="Editing arrives with PATCH /patients/profile"
-          className="shrink-0 rounded-field bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+        <Link
+          href="/account/edit"
+          className="shrink-0 rounded-field bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
         >
           Edit Profile
-        </button>
+        </Link>
       </section>
 
       <div className="overflow-hidden rounded-card border border-line bg-white">
         <DetailCard title="Personal Details">
-          <DetailRow label="Full name" value={profile.first_name} />
+          <DetailRow label="Preferred name" value={profile.preferred_name} />
+          <DetailRow label="First name" value={profile.first_name} />
           <DetailRow label="Last name" value={profile.last_name} />
           <DetailRow label="Date of birth" value={formatDate(profile.date_of_birth)} />
           <DetailRow label="Gender" value={titleCase(profile.gender)} />

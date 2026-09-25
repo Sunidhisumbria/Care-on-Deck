@@ -5,7 +5,7 @@ import { useMutation } from '@tanstack/react-query';
 import { deviceInfo } from '@/lib/device';
 
 import { authApi } from '../api/auth.api';
-import { toSignupPayload, type SignupFormValues } from '../schemas/signup.schema';
+import type { SignupFormValues } from '../schemas/signup.schema';
 
 /**
  * Creates the account.
@@ -19,6 +19,6 @@ import { toSignupPayload, type SignupFormValues } from '../schemas/signup.schema
 export function useSignup() {
   return useMutation({
     mutationFn: (values: SignupFormValues) =>
-      authApi.signup({ ...toSignupPayload(values), ...deviceInfo() }),
+      authApi.signup({ ...values, ...deviceInfo() }),
   });
 }

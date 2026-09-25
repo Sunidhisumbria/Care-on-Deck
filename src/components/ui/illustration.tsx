@@ -16,6 +16,11 @@ const ILLUSTRATIONS = {
   reasonChronic: '/images/icons/reason-chronic.png',
   reasonSkin: '/images/icons/reason-skin.png',
   reasonOther: '/images/icons/reason-other.png',
+  providerPhysician: '/images/icons/provider-physician.png',
+  providerDentist: '/images/icons/provider-dentist.png',
+  providerTherapist: '/images/icons/provider-therapist.png',
+  providerNurse: '/images/icons/provider-nurse.png',
+  providerOther: '/images/icons/provider-other.png',
 } as const;
 
 export type IllustrationName = keyof typeof ILLUSTRATIONS;

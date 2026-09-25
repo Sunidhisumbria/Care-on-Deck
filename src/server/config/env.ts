@@ -52,6 +52,8 @@ const schema = z.object({
 
   POSTMARK_SERVER_TOKEN: z.string().optional(),
   POSTMARK_FROM_EMAIL: z.string().email().optional(),
+  /** Where Contact Us messages are forwarded. Unset: they are only stored, for Control Center. */
+  SUPPORT_EMAIL: z.string().email().optional(),
   AWS_REGION: z.string().default('us-east-1'),
   AWS_ACCESS_KEY_ID: z.string().optional(),
   AWS_SECRET_ACCESS_KEY: z.string().optional(),

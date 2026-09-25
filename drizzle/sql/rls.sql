@@ -428,6 +428,41 @@ create policy patient_dependents_via_guardian on public.patient_dependents
     app.is_internal() or app.is_system() or guardian_user_id = app.current_user_id()
   );
 
+/*
+ * Saved providers are the patient's alone. Unlike addresses and insurance they
+ * do not follow the patient to an organization they have booked with: a
+ * practice has no business seeing which other doctors its patient shortlisted.
+ * So the check is ownership, not "can see the patient". Reading `patients`
+ * here is safe -- its policy never reads this table, so nothing recurses.
+ */
+alter table public.patient_saved_providers enable row level security;
+alter table public.patient_saved_providers force row level security;
+drop policy if exists patient_saved_providers_owner on public.patient_saved_providers;
+create policy patient_saved_providers_owner on public.patient_saved_providers
+  for all using (
+    app.is_internal() or app.is_system()
+    or exists (
+      select 1 from public.patients p
+      where p.id = patient_saved_providers.patient_id
+        and p.user_id = app.current_user_id()
+    )
+  ) with check (
+    app.is_system()
+    or exists (
+      select 1 from public.patients p
+      where p.id = patient_saved_providers.patient_id
+        and p.user_id = app.current_user_id()
+    )
+  );
+
+/* Contact Us messages: the sender may write and read their own; staff read all. */
+alter table public.support_requests enable row level security;
+alter table public.support_requests force row level security;
+drop policy if exists support_requests_owner on public.support_requests;
+create policy support_requests_owner on public.support_requests
+  for all using (app.is_internal() or app.is_system() or user_id = app.current_user_id())
+  with check (app.is_internal() or app.is_system() or user_id = app.current_user_id());
+
 -- 4c. Notifications and messages -------------------------------------------
 -- organization_id is nullable here (a patient's notifications belong to no
 -- tenant), so recipient identity is the fallback.

@@ -1,18 +1,20 @@
 'use client';
 
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useState, type FormEvent } from 'react';
 import { toast } from 'sonner';
 
 import { SubmitButton } from '@/components/ui/field';
+import { useCurrentUser } from '@/features/auth/hooks';
 import type { UploadedFile } from '@/features/uploads/types';
+import { Card, Detail, EditLink, FileThumb, formatDate, Headshot, Highlight } from '@/features/practice/components/profile-cards';
 import { toApiError } from '@/lib/http/errors';
 import type { NpiLookupAnswer } from '@/lib/npi';
-import { formatUsPhone, labelForOfficeType } from '@/lib/practice';
+import { formatUsPhone } from '@/lib/practice';
 import { WEEKDAYS, formatAppointmentLength, formatTime, type ScheduleValues } from '@/lib/schedule';
 import { pushSamePage } from '@/lib/same-page-navigation';
 
 import { useSubmitApplication } from '../hooks';
-import { providerTypeLabel } from '../provider-types';
+import { PROVIDER_TYPES } from '../provider-types';
 import type { StepperKey } from '../steps';
 import type { OnboardingSession, ProviderType } from '../types';
 
@@ -36,16 +38,23 @@ interface Answers {
 
 const ATTEST_REQUIRED = 'Confirm the information is accurate to submit.';
 
+/** Sunday first, as the design lists the week. */
+const WEEK = [...WEEKDAYS].sort((a, b) => a.weekday - b.weekday);
+
 /**
  * IA: 4. Provider Onboarding > Submit for Review.
  *
- * There is no design for this screen. It shows everything the reviewer will
- * see, with a way back to each step, then asks for an explicit confirmation --
- * the application is a set of claims about a licensed professional, and the
- * applicant should read them once as a whole before they are sent.
+ * Laid out from the design: the whole application as cards, each with an Edit
+ * that returns to its step, then an explicit confirmation -- the application is
+ * a set of claims about a licensed professional, and the applicant should read
+ * them once as a whole before they are sent.
+ *
+ * The design's "Days off" row is left out: onboarding does not ask for days off,
+ * and a row with nothing true to show is worse than no row.
  */
 export function ReviewSubmit({ session }: { session: OnboardingSession }) {
   const submit = useSubmitApplication(session.id);
+  const { user } = useCurrentUser();
   const [attested, setAttested] = useState(false);
   const [attestError, setAttestError] = useState<string>();
 
@@ -83,7 +92,15 @@ export function ReviewSubmit({ session }: { session: OnboardingSession }) {
   }
 
   const { role, npi, license, practice, schedule, insurance, profile } = answers;
-  const record = npi?.profile;
+  const record = npi?.profile ?? null;
+
+  // The registry's name is the one being verified; the account's stands in when the registry was unreachable.
+  const name =
+    [record?.first_name, record?.last_name].filter(Boolean).join(' ') ||
+    [user?.first_name, user?.last_name].filter(Boolean).join(' ') ||
+    'Your name';
+  const roleTitle = PROVIDER_TYPES.find((entry) => entry.value === role?.provider_type)?.title ?? null;
+  const specialties = [record?.primary_taxonomy?.desc ?? roleTitle].filter((value): value is string => Boolean(value));
 
   return (
     <>
@@ -93,105 +110,151 @@ export function ReviewSubmit({ session }: { session: OnboardingSession }) {
         reviewed.
       </p>
 
-      <div className="mt-6 space-y-3">
-        <Section title="Your Role" onEdit={() => edit('select_role')}>
-          <Row label="Role" value={providerTypeLabel(role?.provider_type)} />
-        </Section>
+      <div className="mt-6 grid items-start gap-5 lg:grid-cols-2">
+        {/* Left column */}
+        <div className="space-y-5">
+          <Card>
+            <div className="flex items-start gap-4">
+              <Headshot file={profile?.headshot ?? null} name={name} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-base font-bold text-ink-900">
+                  {name}
+                  {record?.credential ? <span className="font-semibold text-ink-500">, {record.credential}</span> : null}
+                </p>
+                <p className="truncate text-[0.8125rem] text-ink-500">{user?.email ?? ''}</p>
+                <p className="text-[0.8125rem] text-ink-500">{user?.phone ? formatUsPhone(user.phone) : ''}</p>
+              </div>
+              <EditLink label="profile photo" onClick={() => edit('photo_uploads')} />
+            </div>
+          </Card>
 
-        <Section title="NPI" onEdit={() => edit('npi_lookup')}>
-          <Row label="NPI" value={npi?.npi} />
-          <Row
-            label="Registry name"
-            value={
-              record
-                ? `${record.first_name ?? ''} ${record.last_name ?? ''}${record.credential ? `, ${record.credential}` : ''}`.trim()
-                : 'The registry could not be reached. Our team will match your NPI during review.'
-            }
-          />
-        </Section>
-
-        <Section title="License" onEdit={() => edit('license_verification')}>
-          <Row label="State" value={license?.state} />
-          <Row label="License number" value={license?.license_number} />
-          <Row label="Expires" value={license ? formatDate(license.expires_on) : undefined} />
-          <Row label="Document" value={license?.document ? 'Attached' : 'Not attached'} />
-        </Section>
-
-        <Section title="Your Practice" onEdit={() => edit('practice_setup')}>
-          <Row label="Name" value={practice?.name} />
-          <Row label="Type" value={practice ? labelForOfficeType(practice.office_type) : undefined} />
-          <Row
-            label="Address"
-            value={
-              practice
+          <Card title="Practice Details" onEdit={() => edit('practice_setup')}>
+            <Detail label="Practice name">{practice?.name}</Detail>
+            <Detail label="Practice or provider’s specialty">
+              {specialties.length > 0 ? (
+                <span className="mt-1 flex flex-wrap gap-2">
+                  {specialties.map((specialty) => (
+                    <span
+                      key={specialty}
+                      className="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700"
+                    >
+                      {specialty}
+                    </span>
+                  ))}
+                </span>
+              ) : null}
+            </Detail>
+            <Detail label="Location">
+              {practice
                 ? [
-                    [practice.address.line1, practice.address.line2].filter(Boolean).join(', '),
+                    practice.address.line1,
+                    practice.address.line2,
                     `${practice.address.city}, ${practice.address.state} ${practice.address.postal_code}`,
-                  ].join('\n')
-                : undefined
-            }
-          />
-          <Row label="Phone" value={practice ? formatUsPhone(practice.phone) : undefined} />
-          <Row label="Email" value={practice?.email} />
-          {practice?.website ? <Row label="Website" value={practice.website} /> : null}
-        </Section>
-
-        <Section title="Schedule" onEdit={() => edit('schedule_setup')}>
-          <Row
-            label="Appointments"
-            value={schedule ? formatAppointmentLength(Number(schedule.appointment_minutes)) : undefined}
-          />
-          <Row
-            label="Hours"
-            value={
-              schedule
-                ? WEEKDAYS.map(({ weekday, short }) => {
-                    const day = schedule.days.find((entry) => entry.weekday === weekday);
-                    return day?.enabled ? `${short}  ${formatTime(day.start)} – ${formatTime(day.end)}` : null;
-                  })
+                  ]
                     .filter(Boolean)
-                    .join('\n')
-                : undefined
-            }
-          />
-          {schedule && schedule.breaks.length > 0 ? (
-            <Row
-              label="Breaks"
-              value={schedule.breaks.map((pause) => `${formatTime(pause.start)} – ${formatTime(pause.end)}`).join('\n')}
-            />
-          ) : null}
-        </Section>
+                    .join(', ')
+                : null}
+            </Detail>
+            {practice ? (
+              <Detail label="Contact">
+                {[formatUsPhone(practice.phone), practice.email, practice.website].filter(Boolean).join(' · ')}
+              </Detail>
+            ) : null}
+          </Card>
 
-        <Section title="Accepted Insurance" onEdit={() => edit('insurance_setup')}>
-          <Row
-            label="Accepts"
-            value={
-              insurance
+          <Card title="Profile & Media" onEdit={() => edit('photo_uploads')}>
+            <Detail label="Bio">{profile?.bio}</Detail>
+            <Detail label="Degrees">{record?.credential}</Detail>
+            <Detail label="Experience">
+              {profile ? `${profile.years_experience} ${profile.years_experience === 1 ? 'year' : 'years'}` : null}
+            </Detail>
+            <Detail label="Certificate">
+              {profile && profile.certificates.length > 0 ? (
+                <span className="mt-1 flex flex-wrap gap-2">
+                  {profile.certificates.map((file) => (
+                    <FileThumb key={file.media_id} file={file} label="Certificate" size="small" />
+                  ))}
+                </span>
+              ) : (
+                'None added'
+              )}
+            </Detail>
+          </Card>
+        </div>
+
+        {/* Right column */}
+        <div className="space-y-5">
+          <Card title="Documents License" onEdit={() => edit('license_verification')}>
+            {license?.document ? (
+              <FileThumb file={license.document} label="License document" size="large" />
+            ) : (
+              <p className="text-[0.8125rem] text-ink-500">No document attached.</p>
+            )}
+            {license ? (
+              <p className="text-xs text-ink-500">
+                {license.state} license {license.license_number} &middot; expires {formatDate(license.expires_on)}
+              </p>
+            ) : null}
+          </Card>
+
+          <Card title="Availability" onEdit={() => edit('schedule_setup')}>
+            {schedule ? (
+              <>
+                <ul className="-mt-1 divide-y divide-line">
+                  {WEEK.map(({ weekday, label }) => {
+                    const day = schedule.days.find((entry) => entry.weekday === weekday);
+                    return (
+                      <li key={weekday} className="flex items-center justify-between py-3 text-sm">
+                        <span className="font-semibold text-ink-900">{label}</span>
+                        {day?.enabled ? (
+                          <span className="text-ink-700">
+                            {formatTime(day.start)} <span className="px-1.5 text-ink-300">&mdash;</span>{' '}
+                            {formatTime(day.end)}
+                          </span>
+                        ) : (
+                          <span className="text-ink-500">Unavailable</span>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+                {schedule.breaks.map((pause) => (
+                  <Highlight key={`${pause.start}-${pause.end}`} label="Break Hours">
+                    {formatTime(pause.start)} &ndash; {formatTime(pause.end)}
+                  </Highlight>
+                ))}
+                <p className="text-xs text-ink-500">
+                  Appointments are {formatAppointmentLength(Number(schedule.appointment_minutes))} long.
+                </p>
+              </>
+            ) : (
+              <p className="text-[0.8125rem] text-ink-500">Not set up yet.</p>
+            )}
+          </Card>
+
+          <Card title="Accepted Insurance" onEdit={() => edit('insurance_setup')}>
+            <p className="text-[0.8125rem] text-ink-700">
+              {insurance
                 ? insurance.self_pay_only
                   ? 'Self-pay only'
                   : insurance.carriers.map((carrier) => carrier.name).join(', ')
-                : undefined
-            }
-          />
-        </Section>
+                : '—'}
+            </p>
+          </Card>
 
-        <Section title="Profile" onEdit={() => edit('photo_uploads')}>
-          <Row label="Photo" value={profile?.headshot ? 'Added' : 'Not added'} />
-          <Row
-            label="Experience"
-            value={
-              profile ? `${profile.years_experience} ${profile.years_experience === 1 ? 'year' : 'years'}` : undefined
-            }
-          />
-          <Row label="Bio" value={profile?.bio} clamp />
-          <Row
-            label="Certificates"
-            value={profile ? (profile.certificates.length === 0 ? 'None' : `${profile.certificates.length} attached`) : undefined}
-          />
-        </Section>
+          <Card title="Role & NPI" onEdit={() => edit('npi_lookup')}>
+            <Detail label="Role">{roleTitle}</Detail>
+            <Detail label="NPI">{npi?.npi}</Detail>
+            {!record && npi ? (
+              <p className="text-xs text-ink-500">
+                The registry could not be reached. Our team will match your NPI during review.
+              </p>
+            ) : null}
+          </Card>
+        </div>
       </div>
 
-      <form noValidate onSubmit={onSubmit} className="mt-6">
+      <form noValidate onSubmit={onSubmit} className="mx-auto mt-8 max-w-xl">
         <label className="flex cursor-pointer items-start gap-3 text-sm text-ink-700">
           <input
             type="checkbox"
@@ -226,45 +289,4 @@ export function ReviewSubmit({ session }: { session: OnboardingSession }) {
       </form>
     </>
   );
-}
-
-function Section({ title, onEdit, children }: { title: string; onEdit: () => void; children: ReactNode }) {
-  return (
-    <section className="rounded-card border border-line bg-white p-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-ink-900">{title}</h2>
-        <button
-          type="button"
-          onClick={onEdit}
-          aria-label={`Edit ${title}`}
-          className="text-sm font-semibold text-brand-600 hover:underline"
-        >
-          Edit
-        </button>
-      </div>
-      <dl className="mt-3 space-y-2">{children}</dl>
-    </section>
-  );
-}
-
-function Row({ label, value, clamp }: { label: string; value: string | undefined; clamp?: boolean }) {
-  return (
-    <div className="grid grid-cols-[7.5rem_1fr] gap-3 text-[0.8125rem]">
-      <dt className="text-ink-500">{label}</dt>
-      <dd className={`whitespace-pre-line break-words text-ink-900 ${clamp ? 'line-clamp-3' : ''}`}>
-        {value || '—'}
-      </dd>
-    </div>
-  );
-}
-
-/** "2027-03-31" -> "Mar 31, 2027", read as a calendar date rather than midnight UTC. */
-function formatDate(value: string): string {
-  const [year, month, day] = value.split('-').map(Number);
-  if (!year || !month || !day) return value;
-  return new Date(year, month - 1, day).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
 }

@@ -234,8 +234,12 @@ export const onboardingService = {
     const row = await findOwn(tx, userId, id);
     if (!row) throw ApiError.notFound('No onboarding application found.');
 
+    // Submitting twice -- a retry after the first response was lost on a slow
+    // connection -- answers with where the application now stands rather than
+    // an error, so the applicant sees the outcome instead of a dead end.
+    if (row.status === 'submitted' || row.status === 'approved') return toView(row);
     if (!EDITABLE_STATUSES.includes(row.status)) {
-      throw ApiError.conflict('This application has already been submitted.');
+      throw ApiError.conflict('This application can no longer be submitted.');
     }
     if (nextStep(row.completedSteps) !== 'submit_for_review') {
       throw ApiError.conflict('Finish every step before submitting.');

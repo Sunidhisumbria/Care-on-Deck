@@ -11,6 +11,8 @@ export const providerSearchQuerySchema = z.object({
   /** Matches a provider, clinic, city or specialty. */
   q: z.string().trim().max(120).optional(),
   insurance_carrier_id: z.string().uuid('Choose an insurer from the list.').optional(),
+  /** One provider only: where a campaign's tracking link lands. */
+  provider_id: z.string().uuid().optional(),
   /** Narrows to providers with an open slot in that window. */
   availability: z.enum(['today', 'tomorrow', 'week']).optional(),
   accepting_new_patients: z

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { Suspense } from 'react';
 
 import { SocialButtons } from '@/components/auth/social-buttons';
 import { Logo } from '@/components/brand/logo';
@@ -12,17 +12,9 @@ import {
   PASSWORD_HINT,
   PasswordField,
   PhoneField,
-  SelectField,
   SubmitButton,
 } from '@/components/ui/field';
-import {
-  CalendarIcon,
-  GenderIcon,
-  MailIcon,
-  PinIcon,
-  UserIcon,
-} from '@/components/ui/icons';
-import { RoleTabs } from '@/features/auth/components/role-tabs';
+import { MailIcon, UserIcon } from '@/components/ui/icons';
 import { VerifyMethodDialog } from '@/features/auth/components/verify-method-dialog';
 import { useSignup } from '@/features/auth/hooks';
 import { signupSchema } from '@/features/auth/schemas/signup.schema';
@@ -41,27 +33,20 @@ export default function SignupPage() {
 
 function SignupScreen() {
   const params = useSearchParams();
-  const [role, setRole] = useState<InterfaceRole>(readRole(params.get('role')));
+  // Decided by the link that brought them here (?role=provider from For
+  // Providers); there is no switch on the page.
+  const role: InterfaceRole = readRole(params.get('role'));
 
   const signup = useSignup();
-  const { register, formState, submit, error, setValue, clearErrors } = useApiForm(signupSchema, {
+  const { register, formState, submit, error } = useApiForm(signupSchema, {
     role,
     first_name: '',
     last_name: '',
-    date_of_birth: '',
     phone: '',
     email: '',
-    location: '',
     password: '',
     confirm_password: '',
   });
-
- 
-  function changeRole(next: InterfaceRole) {
-    setRole(next);
-    setValue('role', next);
-    clearErrors(['date_of_birth', 'gender', 'location']);
-  }
 
   return (
     <div>
@@ -81,8 +66,6 @@ function SignupScreen() {
           up where you left off.
         </p>
       ) : null}
-
-      {params.has('role') ? <RoleTabs label="I am signing up as" value={role} onChange={changeRole} /> : null}
 
       <form
         onSubmit={submit((values) => signup.mutateAsync({ ...values, role }))}
@@ -108,31 +91,6 @@ function SignupScreen() {
           />
         </div>
 
-        {role === 'patient' ? (
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            label="Date of Birth"
-            type="date"
-            autoComplete="bday"
-            max={today()}
-            icon={<CalendarIcon />}
-            error={error('date_of_birth')}
-            {...register('date_of_birth')}
-          />
-          <SelectField
-            label="Gender"
-            placeholder="Enter gender"
-            icon={<GenderIcon />}
-            error={error('gender')}
-            options={[
-              { value: 'male', label: 'Male' },
-              { value: 'female', label: 'Female' },
-              { value: 'other', label: 'Other' },
-            ]}
-            {...register('gender')}
-          />
-        </div>
-        ) : null}
 
         <PhoneField
           label="Phone"
@@ -151,16 +109,6 @@ function SignupScreen() {
         />
 
         
-        {role === 'patient' ? (
-        <Field
-          label="Location"
-          autoComplete="address-level2"
-          placeholder="Enter Location"
-          icon={<PinIcon />}
-          error={error('location')}
-          {...register('location')}
-        />
-        ) : null}
 
         <PasswordField
           label="Password"
@@ -190,6 +138,8 @@ function SignupScreen() {
         <VerifyMethodDialog
           contacts={{ phone: signup.variables.phone, email: signup.variables.email }}
           role={role}
+          // A new patient goes on to Create Profile; a provider to their application.
+          next={role === 'patient' ? '/create-profile' : undefined}
         />
       ) : null}
 
@@ -209,7 +159,3 @@ function SignupScreen() {
   );
 }
 
-/** Stops the date picker offering a birthday in the future. */
-function today(): string {
-  return new Date().toISOString().slice(0, 10);
-}

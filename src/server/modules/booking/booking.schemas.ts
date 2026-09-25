@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { isValidDateOfBirth, profileAddressSchema } from '@/lib/patient-profile';
+
 /** Whose list of visit reasons to show. */
 export const visitReasonsQuerySchema = z.object({
   provider_id: z.string().uuid('Choose a provider first.'),
@@ -26,6 +28,19 @@ export const bookingRequestSchema = z
     visit_reason_id: z.string().uuid().nullish(),
     /** What the patient wants the practice to know. Not a medical record. */
     patient_note: z.string().trim().max(500, 'Keep this under 500 characters.').nullish(),
+    /**
+     * From the Your Details step. Saved to the patient's own record, which is
+     * how an account that skipped Create Profile gets them.
+     */
+    patient: z
+      .object({
+        date_of_birth: z.string().refine(isValidDateOfBirth, 'Enter a valid date of birth that is not in the future.'),
+        gender: z.enum(['male', 'female'], { errorMap: () => ({ message: 'Select your sex assigned at birth.' }) }),
+      })
+      .strict()
+      .nullish(),
+    /** From the Your Address step. Saved as the patient's default address, so it is asked once. */
+    address: profileAddressSchema.nullish(),
     payment: z.discriminatedUnion('kind', [
       z.object({ kind: z.literal('self_pay') }),
       z.object({ kind: z.literal('insurance'), patient_insurance_id: z.string().uuid() }),

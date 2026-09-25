@@ -146,7 +146,7 @@ export function SiteFooter() {
 function Column({ column }: { column: FooterColumn }) {
   return (
     <div>
-      <h2 className="text-[0.6875rem] font-bold uppercase tracking-wider text-brand-300">
+      <h2 className="text-[0.6875rem] font-bold uppercase tracking-wider text-brand-500">
         {column.title}
       </h2>
       <ul className="mt-4 space-y-2.5">
@@ -163,7 +163,7 @@ function Column({ column }: { column: FooterColumn }) {
         ))}
       </ul>
       {column.viewAll ? (
-        <p className="mt-4 text-[0.8125rem] font-medium text-brand-300">View All →</p>
+        <p className="mt-4 text-[0.8125rem] font-medium text-brand-500">View All →</p>
       ) : null}
     </div>
   );

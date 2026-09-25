@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { toApiError } from '@/lib/http/errors';
 import { onboardingKeys } from '@/lib/query/keys';
 
 import { onboardingApi } from '../api/onboarding.api';
@@ -52,7 +53,21 @@ export function useSubmitApplication(sessionId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => onboardingApi.submit(sessionId),
+    /*
+     * A dropped connection does not mean the submit failed: the server may
+     * have finished after the browser gave up. So before reporting an error,
+     * look at the application -- if it has gone through, that is the answer.
+     */
+    mutationFn: async () => {
+      try {
+        return await onboardingApi.submit(sessionId);
+      } catch (error) {
+        if (toApiError(error).code !== 'NETWORK') throw error;
+        const { session } = await onboardingApi.current();
+        if (session && (session.status === 'submitted' || session.status === 'approved')) return session;
+        throw error;
+      }
+    },
     onSuccess: (session) => {
       queryClient.setQueryData(onboardingKeys.current(), session);
     },

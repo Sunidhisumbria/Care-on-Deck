@@ -101,7 +101,11 @@ export function useVerifyCode(context: VerificationContext) {
         return;
       }
 
-      router.push((context.next as Route) ?? (result.signed_in ? destinationFor(result.user_type) : '/'));
+      // `next` arrives in the URL, so only a path on this site is honoured --
+      // otherwise a crafted link could hand a freshly signed-in user to
+      // another site. "//host" is a path to the browser but a host to the URL.
+      const next = context.next && context.next.startsWith('/') && !context.next.startsWith('//') ? context.next : null;
+      router.push((next as Route) ?? (result.signed_in ? destinationFor(result.user_type) : '/'));
     },
   });
 }

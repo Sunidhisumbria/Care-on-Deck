@@ -6,6 +6,7 @@
  */
 import { defineRoute } from '@/server/http/handler';
 import { ok } from '@/server/http/response';
+import { createCampaignSchema } from '@/lib/pulse';
 import { pulseService } from '@/server/modules/pulse/pulse.service';
 
 /** IA: 9. Campaigns > Campaign List */
@@ -20,6 +21,7 @@ export const GET = defineRoute({
 export const POST = defineRoute({
   access: 'user',
   permissions: ['pulse.manage'],
+  body: createCampaignSchema,
   handler: async ({ tx, ctx, body }) =>
     ok(await pulseService.createCampaign(tx, ctx, body)),
 });

@@ -233,6 +233,14 @@ export const ProgressIcon = ({ className }: IconProps) => (
   </Stroked>
 );
 
+/** A rising line on axes: Campaigns & Analytics. */
+export const TrendIcon = ({ className }: IconProps) => (
+  <Stroked className={className}>
+    <path d="M3 3.5v13h13.5" />
+    <path d="m6 12.5 3.2-3.6 2.6 2.3 4.2-5" />
+  </Stroked>
+);
+
 export const HeartIcon = ({ className = DEFAULT_SIZE, filled = false }: IconProps & { filled?: boolean }) => (
   <svg
     viewBox="0 0 20 20"

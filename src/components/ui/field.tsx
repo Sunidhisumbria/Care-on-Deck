@@ -299,6 +299,9 @@ export function SelectField({
           invalid={Boolean(error)}
           labelledBy={labelId}
           describedBy={error ? errorId : undefined}
+          // Fill the rest of the field: otherwise the control shrinks to its text,
+          // the chevron sits beside the words, and the open list is as narrow as "Male".
+          className="min-w-0 flex-1"
           triggerClassName="text-[0.9375rem]"
         />
       </div>

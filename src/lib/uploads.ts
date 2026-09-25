@@ -23,11 +23,21 @@ export const UPLOAD_PURPOSES = {
   /** A photo, not a document: images only, and smaller. */
   provider_headshot: { label: 'Profile Photo', formats: ['jpg', 'png'], maxBytes: 5 * MB },
   certificate: { label: 'Certificate', formats: ['pdf', 'jpg', 'png'], maxBytes: 10 * MB },
+  /** A patient's own avatar. Seen by nobody but them. */
+  patient_photo: { label: 'Profile Photo', formats: ['jpg', 'png'], maxBytes: 5 * MB },
+  /** A photo of the front of a patient's insurance card. */
+  insurance_card: { label: 'Insurance Card', formats: ['jpg', 'png'], maxBytes: 10 * MB },
 } as const satisfies Record<string, { label: string; formats: readonly FileFormat[]; maxBytes: number }>;
 
 export type UploadPurpose = keyof typeof UPLOAD_PURPOSES;
 
-export const uploadPurposeSchema = z.enum(['license_document', 'provider_headshot', 'certificate']);
+export const uploadPurposeSchema = z.enum([
+  'license_document',
+  'provider_headshot',
+  'certificate',
+  'patient_photo',
+  'insurance_card',
+]);
 
 const FORMATS = Object.keys(FILE_FORMATS) as FileFormat[];
 

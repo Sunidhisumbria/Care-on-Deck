@@ -188,7 +188,7 @@ export function SelectMenu({
           className={[
             'absolute z-30 max-h-60 overflow-y-auto rounded-card border border-line bg-white p-1 shadow-lg shadow-ink-900/5',
             dropUp ? 'bottom-full mb-1' : 'top-full mt-1',
-            align === 'end' ? 'right-0 min-w-[12rem]' : 'left-0 w-full',
+            align === 'end' ? 'right-0 min-w-[12rem]' : 'left-0 w-full min-w-[10rem]',
           ].join(' ')}
         >
           {options.map((option, index) => {

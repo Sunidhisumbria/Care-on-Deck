@@ -1,17 +1,16 @@
 /**
  * NOT REAL DATA.
  *
- * Care Progress and Saved Providers are both in the approved design, and
- * neither has anything behind it: there is no table, no endpoint, and no
- * agreed model for either. Rather than invent two schemas, the screen renders
- * these constants so the layout is real and reviewable while the data model is
- * still being decided.
+ * Care Progress is in the approved design and has nothing behind it: there is
+ * no table, no endpoint, and no agreed model. Rather than invent a schema, the
+ * screen renders these constants so the layout is real and reviewable while
+ * the data model is still being decided. (Saved Providers was here too, and is
+ * now real -- see patient_saved_providers.)
  *
  * Everything fake on this screen is in this file. When the endpoints land,
  * delete it -- whatever still imports from here is exactly what is left to
  * wire up.
  *
- * Care Progress is the harder of the two and the reason this file exists.
  * "50% completed", "Next due Mar 2027" and "Time for your annual checkup"
  * describe clinical recall: what is due, on what cadence, for whom. Guessing
  * at that means migrating patient data twice.
@@ -66,45 +65,5 @@ export const PLACEHOLDER_CARE_PROGRESS: CareProgressItem[] = [
     nextDue: 'Apr 2027',
     state: 'complete',
     note: "You're all set with your vision care.",
-  },
-];
-
-export interface SavedProvider {
-  id: string;
-  name: string;
-  specialty: string;
-  ratingAverage: number;
-  ratingCount: number;
-  facility: string;
-  address: string;
-}
-
-export const PLACEHOLDER_SAVED_PROVIDERS: SavedProvider[] = [
-  {
-    id: 'saved-1',
-    name: 'Dr. Sarah Johnson',
-    specialty: 'Dermatology',
-    ratingAverage: 4.95,
-    ratingCount: 90,
-    facility: 'CareOndeck Medical Center',
-    address: 'Sun City, Bandlaguda Jagir, Telangana 500086',
-  },
-  {
-    id: 'saved-2',
-    name: 'Dr. Sarah Johnson',
-    specialty: 'Dermatology',
-    ratingAverage: 4.95,
-    ratingCount: 90,
-    facility: 'CareOndeck Medical Center',
-    address: 'Sun City, Bandlaguda Jagir, Telangana 500086',
-  },
-  {
-    id: 'saved-3',
-    name: 'Dr. Sarah Johnson',
-    specialty: 'Dermatology',
-    ratingAverage: 4.95,
-    ratingCount: 90,
-    facility: 'CareOndeck Medical Center',
-    address: 'Sun City, Bandlaguda Jagir, Telangana 500086',
   },
 ];

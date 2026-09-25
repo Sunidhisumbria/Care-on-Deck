@@ -22,11 +22,14 @@ import type { Contacts, InterfaceRole } from '../types';
 export function VerifyMethodDialog({
   contacts,
   role,
+  next,
 }: {
   contacts: Contacts;
   role?: InterfaceRole;
+  /** Where to go once the code is accepted, instead of the role's home. */
+  next?: string;
 }) {
-  const request = useRequestVerification(role);
+  const request = useRequestVerification(role, next);
   const dialog = useRef<HTMLDivElement>(null);
 
   // Move focus into the dialog so a keyboard or screen-reader user is not left

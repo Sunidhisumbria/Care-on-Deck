@@ -95,6 +95,8 @@ export const marketplaceService = {
       );
     }
 
+    if (query.provider_id) conditions.push(eq(providers.id, query.provider_id));
+
     if (query.accepting_new_patients !== undefined) {
       conditions.push(eq(providers.acceptingNewPatients, query.accepting_new_patients));
     }

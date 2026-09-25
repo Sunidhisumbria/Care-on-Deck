@@ -20,6 +20,8 @@ export interface SavedInsurance {
   policyholder_name: string | null;
   relationship: Relationship | null;
   is_primary: boolean;
+  /** The photo of the card's front, when one was uploaded. */
+  card_media_id: string | null;
   updated_at: string;
 }
 

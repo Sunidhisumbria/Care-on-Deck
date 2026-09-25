@@ -16,10 +16,13 @@ import { and, eq, isNull } from 'drizzle-orm';
 
 import type { RequestContext } from '@/server/auth/context';
 import { appointments } from '@/server/db/schema/appointments';
+import { facilities } from '@/server/db/schema/organizations';
+import { patients } from '@/server/db/schema/patients';
 import type { Tx } from '@/server/db/tenant';
 import { ApiError } from '@/server/http/errors';
 import { recordAudit } from '@/server/observability/audit';
 import { newBookingReference } from '@/server/modules/booking/reference';
+import { clinicWhen, notifyProvider } from '@/server/modules/notifications/notify';
 import { openSlots } from '@/server/modules/scheduling/availability';
 
 import type {
@@ -78,6 +81,16 @@ export const ownAppointmentsService = {
       resourceId: current.id,
       organizationId: current.organizationId,
       metadata: { by: 'patient', had_reason: Boolean(body.reason) },
+    });
+
+    const who = await context(tx, current);
+    await notifyProvider(tx, {
+      providerId: current.providerId,
+      organizationId: current.organizationId,
+      appointmentId: current.id,
+      kind: 'cancelled',
+      title: 'Appointment Cancelled',
+      body: `${who.name} cancelled their appointment on ${clinicWhen(current.startsAt, who.timezone)}.`,
     });
 
     return { id: current.id, status: 'cancelled' };
@@ -177,6 +190,16 @@ export const ownAppointmentsService = {
       metadata: { by: 'patient', from_appointment_id: current.id },
     });
 
+    const who = await context(tx, current);
+    await notifyProvider(tx, {
+      providerId: current.providerId,
+      organizationId: current.organizationId,
+      appointmentId: created.id,
+      kind: 'rescheduled',
+      title: 'Appointment Rescheduled',
+      body: `${who.name} requested to move their appointment from ${clinicWhen(current.startsAt, who.timezone)} to ${clinicWhen(new Date(slot.starts_at), who.timezone)}.`,
+    });
+
     return {
       id: created.id,
       reference: created.reference,
@@ -229,4 +252,15 @@ function addDay(date: string): string {
   const next = new Date(`${date}T00:00:00Z`);
   next.setUTCDate(next.getUTCDate() + 1);
   return next.toISOString().slice(0, 10);
+}
+
+/** The patient's name and the clinic's zone, for the doctor's notification. */
+async function context(tx: Tx, row: { patientId: string; facilityId: string }): Promise<{ name: string; timezone: string }> {
+  const [patient] = await tx
+    .select({ first: patients.firstName, last: patients.lastName })
+    .from(patients)
+    .where(eq(patients.id, row.patientId))
+    .limit(1);
+  const [facility] = await tx.select({ timezone: facilities.timezone }).from(facilities).where(eq(facilities.id, row.facilityId)).limit(1);
+  return { name: patient ? `${patient.first} ${patient.last}`.trim() : 'A patient', timezone: facility?.timezone ?? 'UTC' };
 }

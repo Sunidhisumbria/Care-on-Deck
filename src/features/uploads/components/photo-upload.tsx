@@ -6,7 +6,7 @@ import { useRef, type ChangeEvent } from 'react';
 import { initials } from '@/components/ui/avatar';
 import { UploadIcon } from '@/components/ui/icons';
 import { uploadKeys } from '@/lib/query/keys';
-import { acceptAttribute, formatsHint } from '@/lib/uploads';
+import { acceptAttribute, formatsHint, type UploadPurpose } from '@/lib/uploads';
 
 import { uploadsApi } from '../api/uploads.api';
 import { useDocumentUpload } from '../hooks/use-document-upload';
@@ -16,23 +16,31 @@ import type { UploadedFile } from '../types';
  * The round profile photo from the Upload Profile design: initials until there
  * is a photo, and a small upload button on its edge.
  *
- * The photo is private until the application is approved, so the preview comes
- * through a short-lived link from the server rather than a public address. The
- * link is refetched before it expires if the screen stays open.
+ * The photo is private, so the preview comes through a short-lived link from
+ * the server rather than a public address. The link is refetched before it
+ * expires if the screen stays open.
+ *
+ * `variant="card"` draws the same control as the rectangular thumbnail Edit
+ * Profile uses for an insurance card photo.
  */
 export function PhotoUpload({
   name,
   value,
   onChange,
   error,
+  purpose = 'provider_headshot',
+  variant = 'avatar',
 }: {
   name: string;
   value: UploadedFile | null;
   onChange: (file: UploadedFile | null) => void;
   error?: string;
+  purpose?: UploadPurpose;
+  variant?: 'avatar' | 'card';
 }) {
   const picker = useRef<HTMLInputElement>(null);
-  const { state, upload } = useDocumentUpload('provider_headshot');
+  const { state, upload } = useDocumentUpload(purpose);
+  const card = variant === 'card';
 
   const preview = useQuery({
     queryKey: uploadKeys.view(value?.media_id ?? 'none'),
@@ -53,9 +61,25 @@ export function PhotoUpload({
   const busy = state.status === 'uploading';
 
   return (
-    <div className="flex flex-col items-center">
+    <div className={`flex flex-col ${card ? 'items-start' : 'items-center'}`}>
       <div className="relative">
-        {value && preview.data ? (
+        {card ? (
+          <button
+            type="button"
+            onClick={() => picker.current?.click()}
+            disabled={busy || state.status === 'unavailable'}
+            aria-label={value ? `Change ${name}` : `Upload ${name}`}
+            className="group relative flex h-[72px] w-[104px] items-center justify-center overflow-hidden rounded-field border border-dashed border-line bg-white text-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {value && preview.data ? (
+              // eslint-disable-next-line @next/next/no-img-element -- a signed, expiring link; next/image would cache it
+              <img src={preview.data.url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            ) : null}
+            <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow transition-colors group-hover:bg-brand-50">
+              <UploadIcon className="h-4 w-4" />
+            </span>
+          </button>
+        ) : value && preview.data ? (
           // eslint-disable-next-line @next/next/no-img-element -- a signed, expiring link; next/image would cache it
           <img src={preview.data.url} alt="" className="h-24 w-24 rounded-full object-cover" />
         ) : (
@@ -67,6 +91,7 @@ export function PhotoUpload({
           </span>
         )}
 
+        {card ? null : (
         <button
           type="button"
           onClick={() => picker.current?.click()}
@@ -76,12 +101,13 @@ export function PhotoUpload({
         >
           <UploadIcon className="h-4 w-4" />
         </button>
+        )}
       </div>
 
       <input
         ref={picker}
         type="file"
-        accept={acceptAttribute('provider_headshot')}
+        accept={acceptAttribute(purpose)}
         onChange={onPick}
         className="sr-only"
         tabIndex={-1}
@@ -89,7 +115,7 @@ export function PhotoUpload({
       />
 
       <p className="mt-2 text-xs text-ink-500" aria-live="polite">
-        {busy ? `Uploading… ${state.progress}%` : value ? 'Photo uploaded' : formatsHint('provider_headshot')}
+        {busy ? `Uploading… ${state.progress}%` : value ? 'Photo uploaded' : formatsHint(purpose)}
       </p>
 
       {value ? (

@@ -21,6 +21,7 @@ export const patientKeys = {
   appointmentList: (status: string) => [...patientKeys.all, 'appointments', 'list', status] as const,
   insurance: () => [...patientKeys.all, 'insurance'] as const,
   insuranceDetail: (id: string) => [...patientKeys.all, 'insurance', id] as const,
+  savedProviders: () => [...patientKeys.all, 'saved-providers'] as const,
 };
 
 export const onboardingKeys = {
@@ -47,4 +48,30 @@ export const marketplaceKeys = {
     [...marketplaceKeys.all, 'availability', providerId, from, to] as const,
   visitReasons: (providerId: string) =>
     [...marketplaceKeys.all, 'visit-reasons', providerId] as const,
+};
+
+export const practiceKeys = {
+  all: ['practice'] as const,
+  summary: () => [...practiceKeys.all, 'summary'] as const,
+  profile: () => [...practiceKeys.all, 'profile'] as const,
+  weeklySchedule: () => [...practiceKeys.all, 'weekly-schedule'] as const,
+  actionItems: () => [...practiceKeys.all, 'action-items'] as const,
+  appointments: () => [...practiceKeys.all, 'appointments'] as const,
+  appointmentList: (tab: string, q: string) => [...practiceKeys.all, 'appointments', 'list', tab, q] as const,
+  appointment: (id: string) => [...practiceKeys.all, 'appointments', id] as const,
+  calendar: (from: string, to: string) => [...practiceKeys.all, 'calendar', from, to] as const,
+};
+
+export const pulseKeys = {
+  all: ['pulse'] as const,
+  overview: () => [...pulseKeys.all, 'overview'] as const,
+  campaigns: () => [...pulseKeys.all, 'campaigns'] as const,
+  campaign: (id: string) => [...pulseKeys.all, 'campaigns', id] as const,
+  agencies: () => [...pulseKeys.all, 'agencies'] as const,
+  agency: (id: string) => [...pulseKeys.all, 'agencies', id] as const,
+};
+
+export const notificationKeys = {
+  all: ['notifications'] as const,
+  list: () => [...notificationKeys.all, 'list'] as const,
 };

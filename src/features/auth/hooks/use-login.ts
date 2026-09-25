@@ -1,6 +1,7 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { Route } from 'next';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -22,7 +23,8 @@ import type { LoginValues } from '../schemas/login.schema';
  * The device is attached here too, so a new sign-in surface cannot forget it
  * and silently lose push notifications.
  */
-export function useLogin() {
+/** `next`: where to return after signing in, e.g. a campaign's booking link. Only paths on this site. */
+export function useLogin(next?: string | null) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -39,7 +41,8 @@ export function useLogin() {
        */
       queryClient.clear();
       toast.success('Signed in.');
-      router.push(destinationFor(data.user_type));
+      const back = next && next.startsWith('/') && !next.startsWith('//') ? next : null;
+      router.push((back as Route | null) ?? destinationFor(data.user_type));
     },
 
     /*

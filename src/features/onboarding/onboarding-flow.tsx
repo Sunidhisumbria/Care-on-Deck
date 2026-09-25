@@ -1,7 +1,7 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import type { ComponentType } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, type ComponentType } from 'react';
 
 import { ApplicationStatus, isClosed } from './components/application-status';
 import { Stepper } from './components/stepper';
@@ -42,7 +42,14 @@ const SCREENS: Record<StepperKey, ComponentType<{ session: OnboardingSession }>>
  */
 export function OnboardingFlow() {
   const params = useSearchParams();
+  const router = useRouter();
   const { data: session, isPending, error } = useOnboardingSession();
+
+  // An approved provider's home is their dashboard; this screen has nothing left for them.
+  const approved = session?.status === 'approved';
+  useEffect(() => {
+    if (approved) router.replace('/provider');
+  }, [approved, router]);
 
   if (isPending) {
     return <LoadingPanel className="mx-auto max-w-md" label="Loading your application…" rows={5} />;
@@ -83,7 +90,8 @@ export function OnboardingFlow() {
         </div>
       ) : null}
 
-      <div className="mx-auto mt-10 w-full max-w-md">
+      {/* Each step is a narrow form; the review is a two-column summary and needs the width. */}
+      <div className={`mx-auto mt-10 w-full ${viewing ? 'max-w-md' : ''}`}>
         {/* Keyed by step, so a screen's local state never leaks into the next one. */}
         <Screen key={viewing?.key ?? 'submit_for_review'} session={session} />
       </div>

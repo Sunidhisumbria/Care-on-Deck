@@ -21,6 +21,9 @@ import {
   providers,
   visitReasons,
 } from '@/server/db/schema';
+import { saveDefaultAddress } from '@/server/modules/patients/patient.service';
+import { creditableCampaign } from '@/server/modules/pulse/attribution';
+import { clinicWhen, notifyProvider } from '@/server/modules/notifications/notify';
 import type { Tx } from '@/server/db/tenant';
 import { ApiError } from '@/server/http/errors';
 import { notImplemented } from '@/server/http/response';
@@ -92,6 +95,8 @@ export const bookingService = {
     tx: Tx,
     ctx: RequestContext,
     body: BookingRequestInput,
+    /** From a campaign tracking link; credited only if it belongs to this practice and is running. */
+    campaignCookie: string | null = null,
   ): Promise<BookingConfirmation> {
     const userId = ctx.session?.userId;
     if (!userId) throw ApiError.unauthenticated();
@@ -133,6 +138,27 @@ export const bookingService = {
       : null;
 
     const insurance = await insuranceFor(tx, patient.id, body);
+    const campaignId = await creditableCampaign(tx, campaignCookie, practice.organizationId);
+
+    // Your Details fills in what signup no longer asks. The appointment's
+    // snapshot below then carries the answers given for this booking.
+    if (body.patient) {
+      await tx
+        .update(patients)
+        .set({ dateOfBirth: body.patient.date_of_birth, gender: body.patient.gender, updatedAt: new Date() })
+        .where(eq(patients.id, patient.id));
+      patient.dateOfBirth = body.patient.date_of_birth;
+    }
+
+    // A practice cannot register a visit without it, and signup no longer asks.
+    if (!patient.dateOfBirth) {
+      const message = 'Add your date of birth to book.';
+      throw new ApiError('VALIDATION_FAILED', message, { details: [{ path: 'date_of_birth', message }] });
+    }
+
+    // The address from Your Address becomes the one on file, so the next
+    // booking and Edit Profile start from it instead of asking again.
+    if (body.address) await saveDefaultAddress(tx, patient.id, body.address);
 
     const row = {
       reference: newBookingReference(),
@@ -143,7 +169,8 @@ export const bookingService = {
       patientUserId: userId,
       visitReasonId: reason?.id ?? null,
       status: 'requested' as const,
-      source: 'marketplace' as const,
+      source: campaignId ? ('pulse' as const) : ('marketplace' as const),
+      campaignId,
       visitType: reason?.visitType ?? ('new_patient' as const),
       startsAt: new Date(slot.starts_at),
       endsAt: new Date(slot.ends_at),
@@ -157,7 +184,12 @@ export const bookingService = {
         dateOfBirth: patient.dateOfBirth,
         phone: patient.phone,
         email: patient.email,
-        address: null,
+        // One line, as the snapshot has always held it: what the address was at booking.
+        address: body.address
+          ? [body.address.line1, body.address.line2, body.address.city, `${body.address.state} ${body.address.postal_code}`]
+              .filter(Boolean)
+              .join(', ')
+          : null,
       },
     };
 
@@ -167,6 +199,15 @@ export const bookingService = {
       .returning({ id: appointments.id, reference: appointments.reference });
 
     if (!created) throw ApiError.internal('Could not book that appointment.');
+
+    await notifyProvider(tx, {
+      providerId: body.provider_id,
+      organizationId: practice.organizationId,
+      appointmentId: created.id,
+      kind: 'new_request',
+      title: 'New Appointment Request',
+      body: `${patient.firstName} ${patient.lastName} requested an appointment for ${clinicWhen(new Date(slot.starts_at), practice.timezone)}${reason ? ` — ${reason.name}` : ''}.`,
+    });
 
     await recordAudit(tx, ctx, {
       action: 'booking.requested',
@@ -238,6 +279,7 @@ async function visitReasonFor(tx: Tx, organizationId: string, visitReasonId: str
   const [reason] = await tx
     .select({
       id: visitReasons.id,
+      name: visitReasons.name,
       visitType: visitReasons.visitType,
     })
     .from(visitReasons)

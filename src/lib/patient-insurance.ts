@@ -30,7 +30,7 @@ export type InsuranceType = (typeof INSURANCE_TYPES)[number]['value'];
 export const RELATIONSHIPS = [
   { value: 'self', label: 'Self' },
   { value: 'spouse', label: 'Spouse' },
-  { value: 'child', label: 'Child' },
+  { value: 'parent_guardian', label: 'Parent or guardian' },
   { value: 'other', label: 'Other' },
 ] as const;
 
@@ -66,6 +66,13 @@ const fields = {
   relationship: z.enum(RELATIONSHIP_VALUES, {
     errorMap: () => ({ message: 'Select your relationship to the policyholder.' }),
   }),
+};
+
+/** The card's own fields, for the Edit Profile screen, which edits a card on file without re-asking its type. */
+export const insuranceCardFields = {
+  carrier_name: fields.carrier_name,
+  member_id: fields.member_id,
+  group_id: fields.group_id,
 };
 
 /** What the API accepts: a carrier from the directory or, when it is not listed, its name. */

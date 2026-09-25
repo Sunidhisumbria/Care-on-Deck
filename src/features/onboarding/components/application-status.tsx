@@ -15,7 +15,7 @@ const COPY: Record<ClosedStatus, { tone: StatusTone; badge: string; title: strin
     tone: 'success',
     badge: 'Approved',
     title: 'Your application has been approved',
-    body: 'Your provider dashboard is not available yet. We will let you know as soon as it is.',
+    body: 'Your practice is live. Taking you to your dashboard…',
   },
   rejected: {
     tone: 'danger',

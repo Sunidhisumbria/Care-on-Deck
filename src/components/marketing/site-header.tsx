@@ -11,7 +11,15 @@ import { UserMenu } from '@/features/auth/components/user-menu';
 import { useCurrentUser } from '@/features/auth/hooks';
 
 
-export function SiteHeader({ patientNavigation = false }: { patientNavigation?: boolean }) {
+export function SiteHeader({
+  patientNavigation = false,
+  providerNavigation = false,
+}: {
+  patientNavigation?: boolean;
+  /** The practice's links: Home and Appointments. */
+  providerNavigation?: boolean;
+}) {
+  const signedInNav = patientNavigation || providerNavigation;
   return (
     /*
       relative z-50 is load-bearing, not decoration. `backdrop-blur` makes this
@@ -20,7 +28,7 @@ export function SiteHeader({ patientNavigation = false }: { patientNavigation?: 
       everything inside it, including the open account menu. The menu's own
       z-10 cannot help: it only orders things within this header.
     */
-    <header className={`relative z-50 ${patientNavigation ? 'patient-header border-b border-[#f4e8ee] bg-[#fffdfd]' : 'border-b border-line bg-white/80 backdrop-blur'}`}>
+    <header className={`relative z-50 ${signedInNav ? 'patient-header border-b border-[#f4e8ee] bg-[#fffdfd]' : 'border-b border-line bg-white/80 backdrop-blur'}`}>
       {/*
         The patient header is three columns so the links sit in the true
         centre of the page, whatever the widths of the logo and the name
@@ -29,7 +37,7 @@ export function SiteHeader({ patientNavigation = false }: { patientNavigation?: 
       */}
       <div
         className={`mx-auto max-w-7xl gap-6 px-5 lg:px-8 ${
-          patientNavigation
+          signedInNav
             ? 'grid grid-cols-[1fr_auto_1fr] items-center py-4 sm:py-5'
             : 'flex items-center justify-between py-4'
         }`}
@@ -39,9 +47,10 @@ export function SiteHeader({ patientNavigation = false }: { patientNavigation?: 
         </Link>
 
         {patientNavigation && <PatientNav />}
+        {providerNavigation && <ProviderNav />}
 
         <div className="col-start-3 flex items-center gap-3 justify-self-end sm:gap-5">
-          {!patientNavigation && (
+          {!signedInNav && (
             <Link
               href="/signup?role=doctor"
               className="hidden text-sm font-medium text-ink-700 transition-colors hover:text-brand-600 sm:block"
@@ -59,18 +68,38 @@ export function SiteHeader({ patientNavigation = false }: { patientNavigation?: 
 
 
 function PatientNav() {
-  const pathname = usePathname();
+  return (
+    <NavLinks
+      label="Patient"
+      links={[
+        { href: '/home', label: 'Home' },
+        { href: '/appointments', label: 'Appointments' },
+        { href: '/saved-providers', label: 'Saved Providers' },
+      ]}
+    />
+  );
+}
 
-  const links = [
-    { href: '/home', label: 'Home' },
-    { href: '/appointments', label: 'Appointments' },
-    { href: '/saved-providers', label: 'Saved Providers' },
-  ] as const;
+function ProviderNav() {
+  return (
+    <NavLinks
+      label="Practice"
+      links={[
+        { href: '/provider', label: 'Home' },
+        { href: '/provider/appointments', label: 'Appointments' },
+        { href: '/provider/calendar', label: 'Calendar' },
+      ]}
+    />
+  );
+}
+
+function NavLinks({ label, links }: { label: string; links: Array<{ href: Route; label: string }> }) {
+  const pathname = usePathname();
 
   return (
     <nav
       className="col-start-2 hidden items-center gap-4 text-[0.75rem] font-medium sm:flex lg:gap-10 lg:text-[0.9375rem] [&_[aria-current]]:text-brand-600"
-      aria-label="Patient"
+      aria-label={label}
     >
       {links.map((link) => (
         <Link

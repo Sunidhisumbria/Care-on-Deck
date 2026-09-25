@@ -18,6 +18,7 @@ import { accountStatusEnum, insuranceTypeEnum } from './enums';
 import { users } from './identity';
 import { insuranceCarriers, insurancePlans } from './insurance';
 import { facilities, organizations } from './organizations';
+import { providers } from './providers';
 
 /**
  * PHI boundary.
@@ -44,11 +45,24 @@ export const patients = pgTable(
     preferredName: varchar('preferred_name', { length: 100 }),
     dateOfBirth: date('date_of_birth'),
     gender: varchar('gender', { length: 20 }),
+    /** Free text, in the patient's own words. Separate from `gender`, which forms and payers ask for. */
+    /** Optional; one of GENDER_IDENTITIES. `gender` holds sex assigned at birth. */
+    genderIdentity: varchar('gender_identity', { length: 60 }),
+    genderIdentityUpdatedAt: timestamp('gender_identity_updated_at', { withTimezone: true }),
+    /** Where it was collected: patient_profile, intake... */
+    genderIdentitySource: varchar('gender_identity_source', { length: 30 }),
     languages: jsonb('languages').$type<string[]>(),
+    /** IA: 3. Edit Profile > avatar. A `patient_photo` upload, private to the patient. */
+    photoMediaId: uuid('photo_media_id'),
 
     /** IA: 3. Patient Profile > Contact Details */
     email: varchar('email', { length: 320 }),
     phone: varchar('phone', { length: 20 }),
+    /** mobile | home | work -- whether texts can reach `phone`. */
+    phoneType: varchar('phone_type', { length: 10 }),
+    /** IA: 3. Patient Profile > Contact Details > + Add secondary phone. Not a sign-in. */
+    secondaryPhone: varchar('secondary_phone', { length: 20 }),
+    secondaryPhoneType: varchar('secondary_phone_type', { length: 10 }),
 
     /**
      * Where this person is looking for care -- the Location field on signup,
@@ -178,6 +192,35 @@ export const patientDependents = pgTable(
     uniqueIndex('patient_dependents_unique').on(t.guardianPatientId, t.dependentPatientId),
     index('patient_dependents_dependent_idx').on(t.dependentPatientId),
     index('patient_dependents_guardian_user_idx').on(t.guardianUserId),
+  ],
+);
+
+/**
+ * IA: 3. Patient Dashboard > Saved Providers.
+ *
+ * A patient's shortlist. Unsaving deletes the row rather than soft-deleting it:
+ * a heart toggled off is not history anyone needs, and a unique pair that
+ * outlives its deletion would block saving the same provider again.
+ *
+ * Deliberately NOT visible to the provider's organization, even one the
+ * patient has booked with -- which other doctors someone is considering is
+ * theirs alone. See policy `patient_saved_providers_owner` in rls.sql.
+ */
+export const patientSavedProviders = pgTable(
+  'patient_saved_providers',
+  {
+    id: pk(),
+    patientId: uuid('patient_id')
+      .notNull()
+      .references(() => patients.id, { onDelete: 'cascade' }),
+    providerId: uuid('provider_id')
+      .notNull()
+      .references(() => providers.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('patient_saved_providers_unique').on(t.patientId, t.providerId),
+    index('patient_saved_providers_provider_idx').on(t.providerId),
   ],
 );
 

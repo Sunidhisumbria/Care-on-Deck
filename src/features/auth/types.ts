@@ -87,6 +87,7 @@ export interface CurrentUser {
     phone_verified: boolean;
     first_name: string | null;
     last_name: string | null;
+    preferred_name: string | null;
     avatar_url: string | null;
     mfa_enabled: boolean;
   } | null;

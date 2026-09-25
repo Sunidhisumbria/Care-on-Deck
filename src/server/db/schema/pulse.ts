@@ -38,6 +38,8 @@ export const agencies = pgTable(
     name: varchar('name', { length: 200 }).notNull(),
     slug: varchar('slug', { length: 160 }).notNull().unique(),
     status: accountStatusEnum('status').notNull().default('pending_review'),
+    /** IA: 9. Add Agency > Agency Type -- see AGENCY_TYPES. */
+    agencyType: varchar('agency_type', { length: 40 }),
     contactName: varchar('contact_name', { length: 200 }),
     contactEmail: varchar('contact_email', { length: 320 }),
     contactPhone: varchar('contact_phone', { length: 20 }),
@@ -105,6 +107,9 @@ export const campaigns = pgTable(
     agencyId: uuid('agency_id').references(() => agencies.id, { onDelete: 'set null' }),
 
     name: varchar('name', { length: 200 }).notNull(),
+    /** IA: 9. Create Campaign > Campaign / Promotion Type -- see CAMPAIGN_TYPES. */
+    campaignType: varchar('campaign_type', { length: 40 }),
+    description: text('description'),
     status: campaignStatusEnum('status').notNull().default('draft'),
 
     /** Targeting. Geography is a radius around the facility unless overridden. */

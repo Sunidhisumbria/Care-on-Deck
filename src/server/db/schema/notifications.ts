@@ -179,3 +179,24 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
 
 export type Notification = typeof notifications.$inferSelect;
 export type OutboundMessage = typeof outboundMessages.$inferSelect;
+
+/**
+ * IA: 11. Notifications > Support Replies; the account menu's Contact Us.
+ * Every message is kept here, whether or not it could also be emailed, so
+ * none is lost. Only its sender and CareOndeck staff can read it.
+ */
+export const supportRequests = pgTable(
+  'support_requests',
+  {
+    id: pk(),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+    name: varchar('name', { length: 200 }).notNull(),
+    email: varchar('email', { length: 320 }).notNull(),
+    subject: varchar('subject', { length: 200 }).notNull(),
+    message: text('message').notNull(),
+    /** open | answered | closed -- worked by staff in Control Center. */
+    status: varchar('status', { length: 20 }).notNull().default('open'),
+    ...timestamps,
+  },
+  (t) => [index('support_requests_user_idx').on(t.userId), index('support_requests_status_idx').on(t.status, t.createdAt)],
+);

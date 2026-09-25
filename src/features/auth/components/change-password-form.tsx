@@ -33,9 +33,9 @@ export function ChangePasswordForm() {
       className="space-y-5"
     >
       <PasswordField
-        label="Current Password"
+        label="Old Password"
         autoComplete="current-password"
-        placeholder="Enter current password"
+        placeholder="Enter old password"
         error={error('current_password')}
         {...register('current_password')}
       />
@@ -50,9 +50,9 @@ export function ChangePasswordForm() {
       />
 
       <PasswordField
-        label="Confirm New Password"
+        label="Confirm Password"
         autoComplete="new-password"
-        placeholder="Re-enter new password"
+        placeholder="Enter confirm password"
         error={error('confirm_password')}
         {...register('confirm_password')}
       />
@@ -66,7 +66,7 @@ export function ChangePasswordForm() {
         Changing your password signs you out everywhere else. You will stay signed in here.
       </p>
 
-      <SubmitButton pending={formState.isSubmitting}>Update Password</SubmitButton>
+      <SubmitButton pending={formState.isSubmitting}>Send</SubmitButton>
     </form>
   );
 }

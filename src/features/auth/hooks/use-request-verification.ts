@@ -16,7 +16,7 @@ import { useSendOtp } from './use-otp';
  * belongs to whoever is holding it -- so the server accepts either. This hook
  * exists so the choosing screen stays two buttons.
  */
-export function useRequestVerification(role?: InterfaceRole) {
+export function useRequestVerification(role?: InterfaceRole, next?: string) {
   const router = useRouter();
   const sendOtp = useSendOtp();
 
@@ -35,6 +35,7 @@ export function useRequestVerification(role?: InterfaceRole) {
           destination,
           purpose: channel === 'sms' ? 'verify_mobile' : 'verify_email',
           role,
+          next,
         }),
       );
     },

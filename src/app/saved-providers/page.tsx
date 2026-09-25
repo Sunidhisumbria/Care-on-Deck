@@ -1,26 +1,31 @@
 'use client';
 
+import { SavedProviderGrid } from '@/features/patient/components/dashboard/saved-providers';
 import { AccountHero } from '@/features/patient/components/account-hero';
+import { useSavedProviders } from '@/features/patient/hooks';
 
 /**
  * IA: 3. Patient Dashboard > Saved Providers.
  *
- * A placeholder so the header link resolves. There is no favourites model yet
- * -- no table, no endpoint -- so this says so rather than rendering invented
- * providers as if they were saved.
+ * Every provider the patient has hearted, most recent first. Unsaving one here
+ * removes its card straight away.
  */
 export default function SavedProvidersPage() {
+  const { data, isPending, isError } = useSavedProviders();
+
   return (
     <>
       <AccountHero title="Saved Providers" subtitle="Your trusted care providers." />
 
-      <div className="mx-auto max-w-3xl px-5 py-10 lg:py-12">
-        <div className="rounded-card border border-line bg-white p-8 text-center">
-          <p className="text-sm font-semibold text-ink-900">This screen is being built.</p>
-          <p className="mt-2 text-sm text-ink-500">
-            Saving a provider needs somewhere to save it. That model has not been designed yet.
-          </p>
-        </div>
+      <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-10">
+        {isError ? (
+          <div className="rounded-card border border-line bg-white p-8 text-center">
+            <p className="text-sm font-semibold text-ink-900">Your saved providers could not be loaded.</p>
+            <p className="mt-1 text-sm text-ink-500">Refresh the page to try again.</p>
+          </div>
+        ) : (
+          <SavedProviderGrid providers={data ?? []} loading={isPending} />
+        )}
       </div>
     </>
   );

@@ -6,11 +6,13 @@
  */
 import { defineRoute } from '@/server/http/handler';
 import { ok } from '@/server/http/response';
+import { practiceAppointmentListSchema } from '@/server/modules/appointments/appointment.schemas';
 import { appointmentService } from '@/server/modules/appointments/appointment.service';
 
 export const GET = defineRoute({
   access: 'user',
   permissions: ['appointments.read'],
+  query: practiceAppointmentListSchema,
   handler: async ({ tx, ctx, query }) =>
     ok(await appointmentService.list(tx, ctx, query)),
 });

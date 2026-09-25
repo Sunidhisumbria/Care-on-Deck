@@ -9,6 +9,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { ChevronLeft, PinIcon, StarIcon, StethoscopeIcon } from '@/components/ui/icons';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { AccountHero } from '@/features/patient/components/account-hero';
+import { SaveProviderButton } from '@/features/patient/components/save-provider-button';
 import { useAppointmentDetail, useCancelAppointment } from '@/features/patient/hooks';
 import { appointmentStatusLabel, appointmentStatusTone } from '@/features/patient/lib/appointment-status';
 import type { AppointmentDetail } from '@/features/patient/types';
@@ -122,9 +123,14 @@ function Details({ appointment }: { appointment: AppointmentDetail }) {
           ) : null}
         </div>
 
-        <StatusBadge tone={appointmentStatusTone(appointment.status)}>
-          {appointmentStatusLabel(appointment.status)}
-        </StatusBadge>
+        <div className="flex items-center gap-2 self-start">
+          <StatusBadge tone={appointmentStatusTone(appointment.status)}>
+            {appointmentStatusLabel(appointment.status)}
+          </StatusBadge>
+          {provider ? (
+            <SaveProviderButton providerId={provider.id} providerName={provider.name} className="h-9 w-9" />
+          ) : null}
+        </div>
       </section>
 
       {/* Details */}

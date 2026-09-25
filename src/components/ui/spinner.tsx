@@ -88,19 +88,14 @@ export function Busy({ children }: { children: ReactNode }) {
 
 /**
  * In place of a section that is still loading: a list, a calendar, a filter group.
- * `className` positions the pill; it is centred unless told otherwise.
+ * The spinning mark alone, smaller; `label` is read to screen readers only.
+ * `className` positions it; it is centred unless told otherwise.
  */
 export function SectionLoader({ label = 'Loading…', className = '' }: { label?: string; className?: string }) {
   return (
-    <div className={`flex justify-center ${className}`}>
-      <p
-        role="status"
-        aria-live="polite"
-        className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700"
-      >
-        <BrandSpinner className="h-4 w-4" />
-        {label}
-      </p>
+    <div role="status" aria-live="polite" className={`flex justify-center py-2 ${className}`}>
+      <AppLoader className="h-10 w-10" />
+      <span className="sr-only">{label}</span>
     </div>
   );
 }
@@ -136,8 +131,9 @@ export function AppLoader({ className = 'h-16 w-16' }: { className?: string }) {
 }
 
 /**
- * In place of a screen's content while its data loads: the app loader and a
- * label saying what is on its way.
+ * In place of a screen's content while its data loads: the spinning mark
+ * alone, with no card around it. `label` says what is on its way to screen
+ * readers only.
  *
  * `rows` is roughly how many lines of content it stands in for. It sets the
  * height, so the page does not jump when the real content arrives.
@@ -156,10 +152,10 @@ export function LoadingPanel({
       role="status"
       aria-live="polite"
       style={{ minHeight: `${7 + rows * 1.75}rem` }}
-      className={`flex flex-col items-center justify-center gap-4 rounded-card border border-line bg-white p-8 text-center shadow-[0_1px_2px_rgba(28,17,25,.04)] ${className}`}
+      className={`flex items-center justify-center p-8 ${className}`}
     >
       <AppLoader className="h-16 w-16" />
-      <p className="text-sm font-semibold text-ink-700">{label}</p>
+      <span className="sr-only">{label}</span>
     </div>
   );
 }

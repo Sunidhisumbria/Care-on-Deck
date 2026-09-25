@@ -8,6 +8,7 @@ import { defineRoute } from '@/server/http/handler';
 import { ok } from '@/server/http/response';
 import { bookingRequestSchema } from '@/server/modules/booking/booking.schemas';
 import { bookingService } from '@/server/modules/booking/booking.service';
+import { CAMPAIGN_COOKIE } from '@/server/modules/pulse/attribution';
 
 /**
  * Creates the appointment. IA: 2. Almost There -> Appointment Created
@@ -19,5 +20,7 @@ import { bookingService } from '@/server/modules/booking/booking.service';
 export const POST = defineRoute({
   access: 'patient',
   body: bookingRequestSchema,
-  handler: async ({ tx, ctx, body }) => ok(await bookingService.requestAppointment(tx, ctx, body)),
+  // The campaign cookie from a tracking link, if any; the service decides whether it counts.
+  handler: async ({ tx, ctx, body, request }) =>
+    ok(await bookingService.requestAppointment(tx, ctx, body, request.cookies.get(CAMPAIGN_COOKIE)?.value ?? null)),
 });

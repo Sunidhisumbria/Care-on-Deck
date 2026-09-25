@@ -4,6 +4,9 @@ import { z } from 'zod';
 
 import { Field, SelectField } from '@/components/ui/field';
 import { ChevronRight, PinIcon } from '@/components/ui/icons';
+import { LoadingPanel } from '@/components/ui/spinner';
+import { usePatientProfile } from '@/features/patient/hooks';
+import type { PatientAddress } from '@/features/patient/types';
 import { useApiForm } from '@/lib/forms/use-api-form';
 import { stateOptions } from '@/lib/us-states';
 
@@ -18,18 +21,33 @@ const addressSchema = z.object({
   postal_code: z
     .string()
     .trim()
-    .regex(/^\d{5}(-\d{4})?$/, 'Enter a 5-digit ZIP code.'),
+    .min(1, 'Enter a postal code.')
+    .max(12, 'Keep the postal code to 12 characters.'),
 });
 
-/** Step five: where they are, used to rank nearby locations. */
+/**
+ * Step five: where they are, used to rank nearby locations. Starts from what
+ * this booking already has, else the address on file -- the one the last
+ * booking or Edit Profile saved -- so a returning patient only confirms it.
+ */
 export function YourAddressStep() {
+  const { draft } = useBooking();
+  const profile = usePatientProfile();
+
+  if (!draft.address && profile.isPending) return <LoadingPanel label="Loading your address…" rows={4} />;
+
+  return <AddressForm saved={profile.data?.address ?? null} />;
+}
+
+function AddressForm({ saved }: { saved: PatientAddress | null }) {
   const { draft, set, next } = useBooking();
+  const start = draft.address ?? saved;
   const { register, formState, submit, error } = useApiForm(addressSchema, {
-    line1: draft.address?.line1 ?? '',
-    line2: draft.address?.line2 ?? '',
-    city: draft.address?.city ?? '',
-    state: draft.address?.state ?? '',
-    postal_code: draft.address?.postal_code ?? '',
+    line1: start?.line1 ?? '',
+    line2: start?.line2 ?? '',
+    city: start?.city ?? '',
+    state: start?.state ?? '',
+    postal_code: start?.postal_code ?? '',
   });
 
   if (!draft.provider) return null;

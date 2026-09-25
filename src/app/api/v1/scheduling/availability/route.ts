@@ -4,6 +4,7 @@
  * Generated shape: validate, delegate, respond. All behaviour lives in the
  * module service so it can be unit-tested without an HTTP layer.
  */
+import { scheduleSchema } from '@/lib/schedule';
 import { defineRoute } from '@/server/http/handler';
 import { ok } from '@/server/http/response';
 import { schedulingService } from '@/server/modules/scheduling/scheduling.service';
@@ -19,6 +20,7 @@ export const GET = defineRoute({
 export const PUT = defineRoute({
   access: 'user',
   permissions: ['schedule.update'],
+  body: scheduleSchema,
   handler: async ({ tx, ctx, body }) =>
     ok(await schedulingService.replaceRules(tx, ctx, body)),
 });

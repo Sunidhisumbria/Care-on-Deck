@@ -12,13 +12,16 @@
  */
 import { DateTime } from 'luxon';
 
+import type { ScheduleValues } from '@/lib/schedule';
+
 import type { RequestContext } from '@/server/auth/context';
 import type { Tx } from '@/server/db/tenant';
 import { ApiError } from '@/server/http/errors';
 import { notImplemented } from '@/server/http/response';
 
 import { NEXT_AVAILABLE_DAYS, openSlots, type Slot } from './availability';
-import type { BookableSlotsQuery } from './scheduling.schemas';
+import * as practiceCalendar from './practice-calendar';
+import type { BookableSlotsQuery, CalendarQuery, CreateHoldInput } from './scheduling.schemas';
 
 export interface BookableDay {
   /** Calendar date in the clinic's zone. */
@@ -81,20 +84,24 @@ export const schedulingService = {
   },
 
   /** IA: 7. Calendar > Day View, Week View, Provider View, Facility View */
-  async getCalendar(tx: Tx, ctx: RequestContext, query: unknown): Promise<unknown> {
-    return notImplemented('schedulingService.getCalendar');
+  async getCalendar(tx: Tx, ctx: RequestContext, query: CalendarQuery): Promise<practiceCalendar.PracticeCalendar> {
+    return practiceCalendar.getCalendar(tx, ctx, query);
   },
 
-  async listRules(tx: Tx, ctx: RequestContext, query: unknown): Promise<unknown> {
-    return notImplemented('schedulingService.listRules');
+  async listRules(tx: Tx, ctx: RequestContext, _query: unknown): Promise<ScheduleValues> {
+    return practiceCalendar.getWeeklySchedule(tx, ctx);
   },
 
   /**
    * Replaces a provider's weekly pattern wholesale. Existing appointments
    * outside the new pattern are reported back, never silently dropped.
    */
-  async replaceRules(tx: Tx, ctx: RequestContext, body: unknown): Promise<unknown> {
-    return notImplemented('schedulingService.replaceRules');
+  async replaceRules(
+    tx: Tx,
+    ctx: RequestContext,
+    body: ScheduleValues,
+  ): Promise<{ schedule: ScheduleValues; conflicts: practiceCalendar.ScheduleConflict[] }> {
+    return practiceCalendar.replaceWeeklySchedule(tx, ctx, body);
   },
 
   /** IA: 7. Schedule Editing > Templates */
@@ -119,20 +126,20 @@ export const schedulingService = {
     return notImplemented('schedulingService.confirmChanges');
   },
 
-  async listHolds(tx: Tx, ctx: RequestContext, query: unknown): Promise<unknown> {
-    return notImplemented('schedulingService.listHolds');
+  async listHolds(tx: Tx, ctx: RequestContext, _query: unknown): Promise<practiceCalendar.BookingHold[]> {
+    return practiceCalendar.listHolds(tx, ctx);
   },
 
   /**
    * Pauses new bookings without touching existing ones.
    * IA: 7. Booking Holds > Today, This Week, This Month, Custom
    */
-  async createHold(tx: Tx, ctx: RequestContext, body: unknown): Promise<unknown> {
-    return notImplemented('schedulingService.createHold');
+  async createHold(tx: Tx, ctx: RequestContext, body: CreateHoldInput): Promise<practiceCalendar.BookingHold> {
+    return practiceCalendar.createHold(tx, ctx, body);
   },
 
   /** IA: 7. Booking Holds > Resume Bookings */
-  async releaseHold(tx: Tx, ctx: RequestContext, holdId: string): Promise<unknown> {
-    return notImplemented('schedulingService.releaseHold');
+  async releaseHold(tx: Tx, ctx: RequestContext, holdId: string): Promise<practiceCalendar.BookingHold> {
+    return practiceCalendar.releaseHold(tx, ctx, holdId);
   },
 };

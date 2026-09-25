@@ -60,6 +60,11 @@ export const providers = pgTable(
 
     bio: text('bio'),
     headshotMediaId: uuid('headshot_media_id'),
+    /**
+     * IA: 1. Provider Profile > Credentials. Up to two uploaded certificates,
+     * in the order the provider gave them. Media ids in the practice's store.
+     */
+    certificateMediaIds: jsonb('certificate_media_ids').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
     yearsExperience: integer('years_experience'),
 
     ratingAverage: doublePrecision('rating_average'),

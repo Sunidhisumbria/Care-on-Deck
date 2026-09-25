@@ -34,7 +34,9 @@ import { AUTOMATIC_STEPS } from '@/server/modules/onboarding/onboarding.schemas'
 import { nextStep } from '@/server/modules/onboarding/onboarding.service';
 
 import type {
+  ChangeContactInput,
   ChangePasswordInput,
+  ConfirmContactChangeInput,
   ForgotPasswordInput,
   LoginInput,
   OtpPurpose,
@@ -147,6 +149,8 @@ export interface CurrentUser {
     phone_verified: boolean;
     first_name: string | null;
     last_name: string | null;
+    /** A patient's chosen name from Edit Profile; what the header greets them by. Null for everyone else. */
+    preferred_name: string | null;
     avatar_url: string | null;
     mfa_enabled: boolean;
   } | null;
@@ -355,9 +359,18 @@ export const authService = {
      * session is issued once it checks out.
      */
     if (purpose === 'verify_mobile' || purpose === 'verify_email') {
-      const owner = ctx.session
-        ? await findUserById(tx, ctx.session.userId)
-        : await findUserByDestination(tx, channel, destination);
+      /*
+       * The code proves possession of the destination, so an account that
+       * already holds it is the one being verified -- even when a different
+       * account is signed in in this browser, as after signing up a second
+       * account without signing out. Resolving by the session first used to
+       * write the new account's number onto the signed-in one and leave the
+       * user in the wrong account. Only a destination nobody holds can be
+       * added to the signed-in account.
+       */
+      const holder = await findUserByDestination(tx, channel, destination);
+      const switching = Boolean(ctx.session && holder && holder.id !== ctx.session.userId);
+      const owner = holder ?? (ctx.session ? await findUserById(tx, ctx.session.userId) : null);
 
       if (!owner) throw ApiError.forbidden('No account is waiting on that code.');
       if (owner.status !== 'active') throw ApiError.forbidden('This account is not active.');
@@ -374,8 +387,14 @@ export const authService = {
           .where(eq(users.id, owner.id)),
       );
 
-      if (!ctx.session) {
+      if (!ctx.session || switching) {
         assertRoleMatches(input.role, owner.type, 'Could not sign in with that code.');
+        // The browser's previous account is signed out, not left alive behind the new one.
+        if (ctx.session) {
+          await withElevated(tx, () =>
+            tx.update(sessions).set({ revokedAt: new Date() }).where(eq(sessions.id, ctx.session!.sessionId)),
+          );
+        }
         await assumeUser(tx, owner.id);
         result.session = await issueSession(tx, {
           userId: owner.id,
@@ -394,7 +413,7 @@ export const authService = {
 
       await recordAudit(
         tx,
-        { ...ctx, session: ctx.session ?? emptySession(owner.id, owner.type) },
+        { ...ctx, session: ctx.session && !switching ? ctx.session : emptySession(owner.id, owner.type) },
         {
           action: purpose === 'verify_mobile' ? 'auth.phone_verified' : 'auth.email_verified',
           resourceType: 'user',
@@ -535,6 +554,15 @@ export const authService = {
 
     if (!user) throw ApiError.unauthenticated();
 
+    const [patient] =
+      user.type === 'patient'
+        ? await tx
+            .select({ preferredName: patients.preferredName })
+            .from(patients)
+            .where(and(eq(patients.userId, user.id), isNull(patients.deletedAt)))
+            .limit(1)
+        : [];
+
     return {
       user: {
         id: user.id,
@@ -545,6 +573,7 @@ export const authService = {
         phone_verified: user.phoneVerifiedAt !== null,
         first_name: user.firstName,
         last_name: user.lastName,
+        preferred_name: patient?.preferredName ?? null,
         avatar_url: user.avatarUrl,
         mfa_enabled: user.mfaEnabled,
       },
@@ -553,6 +582,61 @@ export const authService = {
       active_facility_id: ctx.session.activeFacilityId,
       permissions: [...ctx.permissions],
     };
+  },
+
+  /**
+   * Starts changing the email or phone the signed-in user signs in with: sends
+   * a code to the new address. An address another account already uses is
+   * refused here -- verifying a code for it would otherwise sign this browser
+   * into that account, which is right for signup and wrong for a change.
+   */
+  async requestContactChange(tx: Tx, ctx: RequestContext, input: ChangeContactInput): Promise<SendOtpResult> {
+    if (!ctx.session) throw ApiError.unauthenticated();
+    await assertContactFree(tx, ctx.session.userId, input.channel, input.destination);
+    return authService.sendOtp(tx, ctx, {
+      channel: input.channel,
+      destination: input.destination,
+      purpose: input.channel === 'sms' ? 'verify_mobile' : 'verify_email',
+    });
+  },
+
+  /**
+   * Finishes the change: the code proves the new address is theirs. Checked
+   * for ownership again in this transaction, so nobody can claim the address
+   * between the code being sent and entered. A patient's own record carries a
+   * copy of their contact details, and it follows.
+   */
+  async confirmContactChange(
+    tx: Tx,
+    ctx: RequestContext,
+    input: ConfirmContactChangeInput,
+  ): Promise<{ channel: 'sms' | 'email'; destination: string }> {
+    if (!ctx.session) throw ApiError.unauthenticated();
+    const userId = ctx.session.userId;
+    await assertContactFree(tx, userId, input.channel, input.destination);
+
+    await authService.verifyOtp(tx, ctx, {
+      channel: input.channel,
+      destination: input.destination,
+      purpose: input.channel === 'sms' ? 'verify_mobile' : 'verify_email',
+      code: input.code,
+    } as VerifyOtpInput);
+
+    await withElevated(tx, () =>
+      tx
+        .update(patients)
+        .set(input.channel === 'sms' ? { phone: input.destination, updatedAt: new Date() } : { email: input.destination, updatedAt: new Date() })
+        .where(eq(patients.userId, userId)),
+    );
+
+    await recordAudit(tx, ctx, {
+      action: 'auth.contact_changed',
+      resourceType: 'user',
+      resourceId: userId,
+      metadata: { channel: input.channel },
+    });
+
+    return { channel: input.channel, destination: input.destination };
   },
 
   /** IA: 6. Unified Dashboard > Facility Switcher */
@@ -840,8 +924,8 @@ export const authService = {
           userId: user.id,
           firstName: input.first_name,
           lastName: input.last_name,
-          dateOfBirth: input.date_of_birth,
-          gender: input.gender,
+          dateOfBirth: input.date_of_birth ?? null,
+          gender: input.gender ?? null,
           email: input.email,
           phone: input.phone,
           locationPlaceId: input.location?.place_id ?? null,
@@ -1433,4 +1517,17 @@ function emptySession(userId: string, userType: 'patient' | 'staff' | 'provider'
     activeOrganizationId: null,
     activeFacilityId: null,
   };
+}
+
+/** Refuses an address that is already this user's, or anyone else's. */
+async function assertContactFree(tx: Tx, userId: string, channel: 'sms' | 'email', destination: string): Promise<void> {
+  const holder = await findUserByDestination(tx, channel, destination);
+  const noun = channel === 'sms' ? 'mobile number' : 'email address';
+  const field = channel === 'sms' ? 'phone' : 'email';
+  if (holder?.id === userId) {
+    throw new ApiError('VALIDATION_FAILED', `That is already your ${noun}.`, { details: [{ path: 'destination', message: `That is already your ${noun}.` }] });
+  }
+  if (holder) {
+    throw ApiError.conflict(`Another account already uses that ${noun}.`, { field });
+  }
 }

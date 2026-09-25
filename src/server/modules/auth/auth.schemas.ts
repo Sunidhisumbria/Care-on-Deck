@@ -98,6 +98,14 @@ const otpTarget = z.discriminatedUnion('channel', [
 ]);
 
 export const sendOtpSchema = z.intersection(otpTarget, z.object({ purpose: otpPurposeSchema }));
+
+/** Change the email or phone you sign in with: where the code should go. */
+export const changeContactSchema = otpTarget;
+export type ChangeContactInput = z.infer<typeof changeContactSchema>;
+
+/** ...and the code that arrived there. */
+export const confirmContactChangeSchema = z.intersection(otpTarget, z.object({ code: otpCodeSchema }));
+export type ConfirmContactChangeInput = z.infer<typeof confirmContactChangeSchema>;
 export type SendOtpInput = z.infer<typeof sendOtpSchema>;
 
 export const verifyOtpSchema = z.intersection(
@@ -149,8 +157,10 @@ export type LocationInput = z.infer<typeof locationSchema>;
  * Sign-up, for both interfaces -- the fields on the sign-up screen.
  *
  * A discriminated union on `role`, because the two kinds of account do not share
- * a field list. A patient gives date of birth, gender and home location, which
- * the patient record needs. A provider gives none of those: their identity is
+ * a field list. A patient's date of birth, gender and address come afterwards,
+ * on Create Profile or at their first booking, so signup stays to the account
+ * itself; they are still accepted here, optionally, for older clients. A
+ * provider gives none of those: their identity is
  * established against the NPI registry during onboarding, and asking a doctor
  * for a birthday and a home town here would collect personal data with no use.
  *
@@ -176,8 +186,8 @@ const signupShared = {
 const patientSignupSchema = z.object({
   role: z.literal('patient'),
   ...signupShared,
-  date_of_birth: dateOfBirthSchema,
-  gender: genderSchema,
+  date_of_birth: dateOfBirthSchema.optional(),
+  gender: genderSchema.optional(),
   location: locationSchema.optional(),
 });
 
